@@ -2,9 +2,9 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches: [ main, develop, master ]  # Add your branch names here
+    branches: [ main ]  # Updated to your main branch
   pull_request:
-    branches: [ main, develop, master ]
+    branches: [ main ]
 
 env:
   DOCKER_HUB_USERNAME: abidhasan83  # Your Docker Hub username
@@ -69,34 +69,10 @@ jobs:
         labels: ${{ steps.meta-mobile.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-
-  # Optional: Update docker-compose.yml with new image tags
-  update-compose:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' # Only run on main branch
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Update docker-compose.yml
-      run: |
-        # Update image tags in docker-compose.yml to use SHA-based tags for production
-        SHA_SHORT=$(echo $GITHUB_SHA | cut -c1-7)
-        sed -i "s|abidhasan83/agrolink-backend:latest|abidhasan83/agrolink-backend:sha-$SHA_SHORT|g" docker-compose.yml
-        sed -i "s|abidhasan83/agrolink-mobile:latest|abidhasan83/agrolink-mobile:sha-$SHA_SHORT|g" docker-compose.yml
         
-    - name: Commit updated docker-compose.yml
+    - name: Print image information
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add docker-compose.yml
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "Update docker-compose.yml with new image tags [skip ci]"
-          git push
-        fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        echo "Backend images pushed:"
+        echo "${{ steps.meta-backend.outputs.tags }}"
+        echo "Mobile images pushed:"
+        echo "${{ steps.meta-mobile.outputs.tags }}"

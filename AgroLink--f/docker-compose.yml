@@ -7,12 +7,13 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - MONGO_URI=mongodb+srv://abidhasan7116:YpLEaZIAY0AmR4j0@cluster0.lx8cqwh.mongodb.net/AGROLINK?retryWrites=true&w=majority&appName=Cluster0
-      - PORT=3000
-      - JWT_SECRET=mysecret
-      - CLOUDINARY_CLOUD_NAME=dcvkttktl
-      - CLOUDINARY_API_KEY=931199518597945
-      - CLOUDINARY_API_SECRET=efPviLx3FH1b_NsMxPamZKS3_jo
+      - MONGO_URI=${MONGO_URI:-mongodb+srv://abidhasan7116:YpLEaZIAY0AmR4j0@cluster0.lx8cqwh.mongodb.net/AGROLINK?retryWrites=true&w=majority&appName=Cluster0}
+      - PORT=${PORT:-3000}
+      - JWT_SECRET=${JWT_SECRET:-mysecret}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-dcvkttktl}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-931199518597945}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-efPviLx3FH1b_NsMxPamZKS3_jo}
+      - NODE_ENV=${NODE_ENV:-development}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "--version"]
