@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: Build, Push and Deploy Docker Images
 
 on:
   push:
@@ -83,3 +83,93 @@ jobs:
         echo "${{ steps.meta-backend.outputs.tags }}"
         echo "Mobile images pushed:"
         echo "${{ steps.meta-mobile.outputs.tags }}"
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/abid_test1')
+    
+    steps:
+    - name: Deploy to Azure VM
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          echo "🚀 Starting deployment..."
+          
+          # Install Docker if not already installed
+          if ! command -v docker &> /dev/null; then
+            echo "Installing Docker..."
+            sudo apt-get update
+            sudo apt-get install -y docker.io docker-compose
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker $USER
+          fi
+          
+          # Create project directory
+          mkdir -p ~/agrolink-deployment
+          cd ~/agrolink-deployment
+          
+          # Create docker-compose.yml file for backend only
+          cat > docker-compose.yml << 'EOF'
+          services:
+            backend:
+              image: abidhasan83/agrolink-backend:latest
+              ports:
+                - "3000:3000"
+                - "80:3000"
+              environment:
+                - MONGO_URI=${{ secrets.MONGO_URI }}
+                - PORT=3000
+                - JWT_SECRET=${{ secrets.JWT_SECRET }}
+                - CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+                - CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+                - CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+                - NODE_ENV=production
+              restart: unless-stopped
+              healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:3000/api/health", "||", "exit", "1"]
+                interval: 30s
+                timeout: 10s
+                retries: 3
+                start_period: 40s
+          EOF
+          
+          # Stop existing containers
+          echo "Stopping existing containers..."
+          sudo docker-compose down --remove-orphans || true
+          
+          # Pull latest backend image only
+          echo "Pulling latest backend Docker image..."
+          sudo docker pull abidhasan83/agrolink-backend:latest
+          
+          # Remove old images to save space
+          sudo docker image prune -f
+          
+          # Start backend container
+          echo "Starting backend container..."
+          sudo docker-compose up -d
+          
+          # Wait for backend to be healthy
+          echo "Waiting for backend to be ready..."
+          sleep 30
+          
+          # Check container status
+          echo "Checking backend container status..."
+          sudo docker-compose ps
+          
+          # Show backend logs for debugging
+          echo "Backend logs:"
+          sudo docker-compose logs --tail=30 backend
+          
+          # Test backend health
+          echo "Testing backend health..."
+          curl -f http://localhost:3000/api/health || echo "Health check endpoint not available"
+          
+          echo "✅ Backend deployment completed successfully!"
+          echo "Backend API available at: http://${{ secrets.VM_HOST }}:3000"
+          echo "Backend also available on port 80: http://${{ secrets.VM_HOST }}"
+
