@@ -4,6 +4,7 @@
 Write-Host "Building Docker images..." -ForegroundColor Cyan
 docker-compose build
 
+
 # Step 2: Start the services
 Write-Host "Starting services..." -ForegroundColor Cyan
 docker-compose up -d
