@@ -2,9 +2,9 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches: [ main ]  # Updated to your main branch
+    branches: [ main, abid_test1 ]  # Updated to include your test branch
   pull_request:
-    branches: [ main ]
+    branches: [ main, abid_test1 ]
  
 env:
   DOCKER_HUB_USERNAME: abidhasan83  # Your Docker Hub username
@@ -58,6 +58,13 @@ jobs:
         labels: ${{ steps.meta-backend.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        build-args: |
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+          NODE_ENV=production
         
     - name: Build and push mobile image
       uses: docker/build-push-action@v5
