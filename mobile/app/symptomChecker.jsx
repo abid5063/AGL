@@ -82,6 +82,12 @@ export default function DiseaseDetection() {
           <Ionicons name="arrow-back" size={28} color="#4a89dc" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Disease Detection</Text>
+        <TouchableOpacity 
+          style={styles.proButton}
+          onPress={() => router.push('/pro_mode')}
+        >
+          <Text style={styles.proButtonText}>Go Pro</Text>
+        </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.label}>Describe the animal's symptoms (optional):</Text>
@@ -129,6 +135,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingTop: 50,
     paddingBottom: 16,
     paddingHorizontal: 16,
@@ -141,6 +148,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginLeft: 16,
+    flex: 1,
+  },
+  proButton: {
+    backgroundColor: '#27ae60',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  proButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   container: {
     padding: 20,
