@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import DiseaseDetection from '../../app/symptomChecker';
 import * as ImagePicker from 'expo-image-picker';
+import { Alert } from 'react-native';
 
 // Mock ImagePicker
 jest.mock('expo-image-picker', () => ({
@@ -203,10 +204,13 @@ describe('DiseaseDetection Component', () => {
     const imagePickerButton = getByTestId('image-picker-button');
     fireEvent.press(imagePickerButton);
     
-    // Verify that the image picker wasn't launched
+    // Wait for ImagePicker permissions to be requested
     await waitFor(() => {
-      expect(ImagePicker.launchImageLibraryAsync).not.toHaveBeenCalled();
+      expect(ImagePicker.requestMediaLibraryPermissionsAsync).toHaveBeenCalled();
     });
+    
+    // Verify that the image picker wasn't launched
+    expect(ImagePicker.launchImageLibraryAsync).not.toHaveBeenCalled();
   });
 
   it('handles canceled image picking', async () => {

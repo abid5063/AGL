@@ -5,6 +5,15 @@ import { mockExpoRouter } from './mocks/expoRouterMock';
 // Mock the fetch API
 global.fetch = jest.fn();
 
+// Mock React Native Alert
+jest.mock('react-native', () => {
+  const rn = jest.requireActual('react-native');
+  rn.Alert = {
+    alert: jest.fn()
+  };
+  return rn;
+});
+
 // Mock Ionicons from expo vector icons
 jest.mock('@expo/vector-icons', () => {
   const { View } = require('react-native');
