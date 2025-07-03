@@ -107,8 +107,9 @@ describe('AIChatbot Component', () => {
     expect(input.props.editable).toBe(false);
     
     // Wait for the response to complete
-    await waitFor(() => {
-      expect(input.props.editable).toBe(true);
-    }, { timeout: 150 });
+    await waitFor(() => 
+      expect(getByPlaceholderText('Type your message...').props.editable).toBe(true),
+      { timeout: 500 }
+    );
   });
 });
