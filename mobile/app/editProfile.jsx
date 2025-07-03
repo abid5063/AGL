@@ -92,7 +92,7 @@ export default function EditProfile() {
     return (
       <View style={styles.container}>
         <Text>No farmer data found.</Text>
-        <TouchableOpacity onPress={() => router.replace('/')}>
+        <TouchableOpacity onPress={() => router.replace('/')} testID="go-to-login">
           <Text style={styles.linkText}>Go to login</Text>
         </TouchableOpacity>
       </View>
@@ -107,6 +107,7 @@ export default function EditProfile() {
         placeholder="Name"
         value={formData.name}
         onChangeText={text => handleInputChange('name', text)}
+        testID="name-input"
       />
       <TextInput
         style={styles.input}
@@ -115,6 +116,7 @@ export default function EditProfile() {
         onChangeText={text => handleInputChange('email', text)}
         keyboardType="email-address"
         autoCapitalize="none"
+        testID="email-input"
       />
       <TextInput
         style={styles.input}
@@ -122,28 +124,31 @@ export default function EditProfile() {
         value={formData.phoneNo}
         onChangeText={text => handleInputChange('phoneNo', text)}
         keyboardType="phone-pad"
+        testID="phone-input"
       />
       <TextInput
         style={styles.input}
         placeholder="Location"
         value={formData.location}
         onChangeText={text => handleInputChange('location', text)}
+        testID="location-input"
       />
       <TextInput
         style={styles.input}
         placeholder="Profile Image URL"
         value={formData.profileImage}
         onChangeText={text => handleInputChange('profileImage', text)}
+        testID="image-input"
       />
 
       {loading ? (
-        <ActivityIndicator size="large" color="#4a89dc" style={{ marginVertical: 20 }} />
+        <ActivityIndicator size="large" color="#4a89dc" style={{ marginVertical: 20 }} testID="loading-indicator" />
       ) : (
         <>
-          <TouchableOpacity style={styles.saveButton} onPress={handleEditProfile}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleEditProfile} testID="save-button">
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile}>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile} testID="delete-button">
             <Text style={styles.deleteButtonText}>Delete Profile</Text>
           </TouchableOpacity>
         </>
