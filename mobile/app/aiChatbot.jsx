@@ -87,6 +87,7 @@ AI:
           style={styles.sendButton}
           onPress={sendMessage}
           disabled={loading || !input.trim()}
+          testID="send-button"
         >
           {loading ? <ActivityIndicator color="#fff" /> : <Ionicons name="send" size={24} color="#fff" />}
         </TouchableOpacity>
