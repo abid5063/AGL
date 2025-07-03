@@ -85,6 +85,7 @@ export default function DiseaseDetection() {
         <TouchableOpacity 
           style={styles.proButton}
           onPress={() => router.push('/pro_mode')}
+          testID="pro-button"
         >
           <Text style={styles.proButtonText}>Go Pro</Text>
         </TouchableOpacity>
@@ -98,8 +99,9 @@ export default function DiseaseDetection() {
           onChangeText={setSymptoms}
           multiline
           editable={!loading}
+          testID="symptoms-input"
         />
-        <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage} disabled={loading}>
+        <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage} disabled={loading} testID="image-picker-button">
           <Text style={styles.imagePickerText}>{image ? "Change Photo" : "Select Photo (optional)"}</Text>
         </TouchableOpacity>
         {image && (
@@ -109,6 +111,7 @@ export default function DiseaseDetection() {
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleAnalyze}
           disabled={loading}
+          testID="analyze-button"
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
@@ -117,12 +120,12 @@ export default function DiseaseDetection() {
           )}
         </TouchableOpacity>
         {result && (
-          <View style={styles.resultContainer}>
+          <View style={styles.resultContainer} testID="result-container">
             <Text style={styles.resultTitle}>Analysis Result</Text>
             {result.text ? (
-              <Text style={styles.resultText}>{result.text}</Text>
+              <Text style={styles.resultText} testID="result-text">{result.text}</Text>
             ) : (
-              <Text style={[styles.resultText, styles.errorText]}>{result.error}</Text>
+              <Text style={[styles.resultText, styles.errorText]} testID="error-text">{result.error}</Text>
             )}
           </View>
         )}

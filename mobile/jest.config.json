@@ -16,6 +16,11 @@
     "js",
     "jsx"
   ],
+  "testPathIgnorePatterns": [
+    "<rootDir>/node_modules/",
+    "<rootDir>/__tests__/setup.js",
+    "<rootDir>/__tests__/mocks/"
+  ],
   "collectCoverage": true,
   "collectCoverageFrom": [
     "**/*.{js,jsx,ts,tsx}",
