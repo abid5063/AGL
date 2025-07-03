@@ -96,6 +96,7 @@ export default function AuthScreen() {
           value={formData.name}
           onChangeText={(text) => handleChange("name", text)}
           autoCapitalize="words"
+          testID="name-input"
         />
       )}
       
@@ -106,6 +107,7 @@ export default function AuthScreen() {
         autoCapitalize="none"
         value={formData.email}
         onChangeText={(text) => handleChange("email", text)}
+        testID="email-input"
       />
       
       <TextInput
@@ -114,12 +116,14 @@ export default function AuthScreen() {
         secureTextEntry
         value={formData.password}
         onChangeText={(text) => handleChange("password", text)}
+        testID="password-input"
       />
       
       <TouchableOpacity
         style={[styles.button, isLoading && styles.buttonDisabled]}
         onPress={handleSubmit}
         disabled={isLoading}
+        testID="submit-button"
       >
         <Text style={styles.buttonText}>
           {isLoading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
@@ -129,6 +133,7 @@ export default function AuthScreen() {
       <TouchableOpacity 
         style={styles.switchButton}
         onPress={() => setIsLogin(!isLogin)}
+        testID="toggle-auth-mode-button"
       >
         <Text style={styles.switchText}>
           {isLogin
