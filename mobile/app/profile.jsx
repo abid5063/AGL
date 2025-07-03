@@ -269,6 +269,7 @@ export default function Profile() {
     pathname: '/editProfile',
     params: { farmer: JSON.stringify(farmer) }
   })}
+  testID="edit-profile-button"
 >
   <Text style={styles.editProfileButtonText}>Edit Profile</Text>
 </TouchableOpacity>
@@ -276,6 +277,7 @@ export default function Profile() {
 <TouchableOpacity
   style={[styles.editProfileButton, { backgroundColor: '#27ae60', marginBottom: 10 }]}
   onPress={() => router.push('/aiChatbot')}
+  testID="ai-chatbot-button"
 >
   <Text style={styles.editProfileButtonText}>AI Chatbot</Text>
 </TouchableOpacity>
@@ -283,6 +285,7 @@ export default function Profile() {
 <TouchableOpacity
   style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 25 }]}
   onPress={() => router.push('/symptomChecker')}
+  testID="disease-detection-button"
 >
   <Text style={styles.editProfileButtonText}>Disease Detection</Text>
 </TouchableOpacity>
@@ -310,6 +313,7 @@ export default function Profile() {
           <TouchableOpacity 
             style={styles.addButton}
             onPress={() => setModalVisible(true)}
+            testID="add-animal-button"
           >
             <Feather name="plus" size={20} color="white" />
           </TouchableOpacity>
@@ -334,7 +338,10 @@ export default function Profile() {
                 <Text style={styles.animalName}>{animal.name}</Text>
               </View>
               <View style={styles.animalActions}>
-                <TouchableOpacity onPress={() => handleViewAnimal(animal)}>
+                <TouchableOpacity 
+                  onPress={() => handleViewAnimal(animal)}
+                  testID={`view-animal-${animal._id}`}
+                >
                   <Text style={styles.viewButtonText}>View</Text>
                 </TouchableOpacity>
               </View>
@@ -346,6 +353,7 @@ export default function Profile() {
         <TouchableOpacity 
           style={styles.logoutButton}
           onPress={handleLogout}
+          testID="logout-button"
         >
           <Text style={styles.logoutButtonText}>Log Out</Text>
         </TouchableOpacity>
@@ -366,6 +374,7 @@ export default function Profile() {
                 placeholder="Name"
                 value={formData.name}
                 onChangeText={(text) => handleInputChange('name', text)}
+                testID="animal-name-input"
               />
               
               <TextInput
@@ -373,6 +382,7 @@ export default function Profile() {
                 placeholder="Type (e.g., Cow, Chicken)"
                 value={formData.type}
                 onChangeText={(text) => handleInputChange('type', text)}
+                testID="animal-type-input"
               />
               
               <TextInput
@@ -380,6 +390,7 @@ export default function Profile() {
                 placeholder="Breed"
                 value={formData.breed}
                 onChangeText={(text) => handleInputChange('breed', text)}
+                testID="animal-breed-input"
               />
               
               <TextInput
@@ -388,6 +399,7 @@ export default function Profile() {
                 value={formData.age}
                 onChangeText={(text) => handleInputChange('age', text)}
                 keyboardType="numeric"
+                testID="animal-age-input"
               />
               
               <TextInput
@@ -395,6 +407,7 @@ export default function Profile() {
                 placeholder="Gender"
                 value={formData.gender}
                 onChangeText={(text) => handleInputChange('gender', text)}
+                testID="animal-gender-input"
               />
               
               <TextInput
@@ -403,11 +416,13 @@ export default function Profile() {
                 value={formData.details}
                 onChangeText={(text) => handleInputChange('details', text)}
                 multiline
+                testID="animal-details-input"
               />
 
               <TouchableOpacity 
                 style={styles.imagePickerButton}
                 onPress={pickImage}
+                testID="image-picker-button"
               >
                 <Text style={styles.imagePickerText}>
                   {image ? "Image Selected" : "Select Image (Optional)"}
@@ -428,12 +443,14 @@ export default function Profile() {
                     setModalVisible(false);
                     setImage(null);
                   }}
+                  testID="modal-cancel-button"
                 >
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </Pressable>
                 <Pressable
                   style={[styles.modalButton, styles.saveButton]}
                   onPress={handleAddAnimal}
+                  testID="modal-save-button"
                 >
                   <Text style={styles.saveButtonText}>Save</Text>
                 </Pressable>
