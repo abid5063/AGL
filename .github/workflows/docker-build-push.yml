@@ -2,7 +2,7 @@ name: Build, Push and Deploy Docker Images
 
 on:
   push:
-    branches: [ main, abid_test1 ]  # Updated to include your test branch
+    branches: [ main, abid_test1, unit-testing-branch ]  # Updated to include your test branch
   pull_request:
     branches: [ main, abid_test1 ]
  
