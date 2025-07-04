@@ -1,0 +1,1 @@
+cd "c:\Users\h\Music\AGL"; npx playwright test --reporter=line
