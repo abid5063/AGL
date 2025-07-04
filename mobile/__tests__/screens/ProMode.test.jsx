@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import ProMode from '../../app/pro_mode';
