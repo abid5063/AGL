@@ -15,6 +15,11 @@ jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
   })),
+  useFocusEffect: jest.fn((callback) => {
+    // Don't execute the callback to avoid infinite re-renders in tests
+    // Just mock the behavior
+    return;
+  }),
 }));
 
 describe('AuthScreen Component', () => {
@@ -47,11 +52,11 @@ describe('AuthScreen Component', () => {
     expect(getByText('Login')).toBeTruthy();
     
     // Should not show name input in login mode
-    expect(queryByTestId('name-input')).toBeNull();
+    expect(queryByTestId('auth-name-input')).toBeNull();
     
     // Should show email and password inputs
-    expect(getByTestId('email-input')).toBeTruthy();
-    expect(getByTestId('password-input')).toBeTruthy();
+    expect(getByTestId('auth-email-input')).toBeTruthy();
+    expect(getByTestId('auth-password-input')).toBeTruthy();
     
     // Should show login button
     expect(getByText('Sign In')).toBeTruthy();
@@ -64,13 +69,13 @@ describe('AuthScreen Component', () => {
     const { getByText, getByTestId } = render(<AuthScreen />);
     
     // Press the toggle button
-    fireEvent.press(getByTestId('toggle-auth-mode-button'));
+    fireEvent.press(getByTestId('auth-toggle-mode-button'));
     
     // Should now show signup title
     expect(getByText('Create Account')).toBeTruthy();
     
     // Should now show name input
-    expect(getByTestId('name-input')).toBeTruthy();
+    expect(getByTestId('auth-name-input')).toBeTruthy();
     
     // Should show signup button
     expect(getByText('Sign Up')).toBeTruthy();
@@ -83,19 +88,19 @@ describe('AuthScreen Component', () => {
     const { getByTestId } = render(<AuthScreen />);
     
     // Input test data
-    fireEvent.changeText(getByTestId('email-input'), 'test@example.com');
-    fireEvent.changeText(getByTestId('password-input'), 'password123');
+    fireEvent.changeText(getByTestId('auth-email-input'), 'test@example.com');
+    fireEvent.changeText(getByTestId('auth-password-input'), 'password123');
     
     // Check that inputs reflect the changes
-    expect(getByTestId('email-input').props.value).toBe('test@example.com');
-    expect(getByTestId('password-input').props.value).toBe('password123');
+    expect(getByTestId('auth-email-input').props.value).toBe('test@example.com');
+    expect(getByTestId('auth-password-input').props.value).toBe('password123');
   });
   
   it('validates required fields for login', async () => {
     const { getByTestId } = render(<AuthScreen />);
     
     // Try to submit without filling fields
-    fireEvent.press(getByTestId('submit-button'));
+    fireEvent.press(getByTestId('auth-submit-button'));
     
     // Axios should not be called if validation fails
     expect(axios.post).not.toHaveBeenCalled();
@@ -105,10 +110,10 @@ describe('AuthScreen Component', () => {
     const { getByTestId } = render(<AuthScreen />);
     
     // Switch to signup mode
-    fireEvent.press(getByTestId('toggle-auth-mode-button'));
+    fireEvent.press(getByTestId('auth-toggle-mode-button'));
     
     // Try to submit without filling fields
-    fireEvent.press(getByTestId('submit-button'));
+    fireEvent.press(getByTestId('auth-submit-button'));
     
     // Axios should not be called if validation fails
     expect(axios.post).not.toHaveBeenCalled();
@@ -128,11 +133,11 @@ describe('AuthScreen Component', () => {
     const { getByTestId, getByText } = render(<AuthScreen />);
     
     // Fill login form
-    fireEvent.changeText(getByTestId('email-input'), 'test@example.com');
-    fireEvent.changeText(getByTestId('password-input'), 'password123');
+    fireEvent.changeText(getByTestId('auth-email-input'), 'test@example.com');
+    fireEvent.changeText(getByTestId('auth-password-input'), 'password123');
     
     // Submit the form
-    fireEvent.press(getByTestId('submit-button'));
+    fireEvent.press(getByTestId('auth-submit-button'));
     
     // Should show loading state
     expect(getByText('Please wait...')).toBeTruthy();
@@ -142,11 +147,11 @@ describe('AuthScreen Component', () => {
     const { getByTestId } = render(<AuthScreen />);
     
     // Fill login form
-    fireEvent.changeText(getByTestId('email-input'), 'test@example.com');
-    fireEvent.changeText(getByTestId('password-input'), 'password123');
+    fireEvent.changeText(getByTestId('auth-email-input'), 'test@example.com');
+    fireEvent.changeText(getByTestId('auth-password-input'), 'password123');
     
     // Submit the form
-    fireEvent.press(getByTestId('submit-button'));
+    fireEvent.press(getByTestId('auth-submit-button'));
     
     // Wait for the async operations to complete
     await waitFor(() => {
@@ -177,15 +182,15 @@ describe('AuthScreen Component', () => {
     const { getByTestId } = render(<AuthScreen />);
     
     // Switch to signup mode
-    fireEvent.press(getByTestId('toggle-auth-mode-button'));
+    fireEvent.press(getByTestId('auth-toggle-mode-button'));
     
     // Fill signup form
-    fireEvent.changeText(getByTestId('name-input'), 'New Farmer');
-    fireEvent.changeText(getByTestId('email-input'), 'new@example.com');
-    fireEvent.changeText(getByTestId('password-input'), 'password123');
+    fireEvent.changeText(getByTestId('auth-name-input'), 'New Farmer');
+    fireEvent.changeText(getByTestId('auth-email-input'), 'new@example.com');
+    fireEvent.changeText(getByTestId('auth-password-input'), 'password123');
     
     // Submit the form
-    fireEvent.press(getByTestId('submit-button'));
+    fireEvent.press(getByTestId('auth-submit-button'));
     
     // Wait for the async operations to complete
     await waitFor(() => {
@@ -217,11 +222,11 @@ describe('AuthScreen Component', () => {
     const { getByTestId } = render(<AuthScreen />);
     
     // Fill login form
-    fireEvent.changeText(getByTestId('email-input'), 'test@example.com');
-    fireEvent.changeText(getByTestId('password-input'), 'wrong-password');
+    fireEvent.changeText(getByTestId('auth-email-input'), 'test@example.com');
+    fireEvent.changeText(getByTestId('auth-password-input'), 'wrong-password');
     
     // Submit the form
-    fireEvent.press(getByTestId('submit-button'));
+    fireEvent.press(getByTestId('auth-submit-button'));
     
     // Wait for the async operations to complete
     await waitFor(() => {
@@ -237,15 +242,15 @@ describe('AuthScreen Component', () => {
     const { getByTestId } = render(<AuthScreen />);
     
     // Switch to signup mode
-    fireEvent.press(getByTestId('toggle-auth-mode-button'));
+    fireEvent.press(getByTestId('auth-toggle-mode-button'));
     
     // Fill signup form with short password
-    fireEvent.changeText(getByTestId('name-input'), 'New Farmer');
-    fireEvent.changeText(getByTestId('email-input'), 'new@example.com');
-    fireEvent.changeText(getByTestId('password-input'), '12345'); // Too short
+    fireEvent.changeText(getByTestId('auth-name-input'), 'New Farmer');
+    fireEvent.changeText(getByTestId('auth-email-input'), 'new@example.com');
+    fireEvent.changeText(getByTestId('auth-password-input'), '12345'); // Too short
     
     // Submit the form
-    fireEvent.press(getByTestId('submit-button'));
+    fireEvent.press(getByTestId('auth-submit-button'));
     
     // Axios should not be called if validation fails
     expect(axios.post).not.toHaveBeenCalled();
@@ -255,15 +260,15 @@ describe('AuthScreen Component', () => {
     const { getByTestId } = render(<AuthScreen />);
     
     // Switch to signup mode
-    fireEvent.press(getByTestId('toggle-auth-mode-button'));
+    fireEvent.press(getByTestId('auth-toggle-mode-button'));
     
     // Fill signup form with short name
-    fireEvent.changeText(getByTestId('name-input'), 'Jo'); // Too short
-    fireEvent.changeText(getByTestId('email-input'), 'new@example.com');
-    fireEvent.changeText(getByTestId('password-input'), 'password123');
+    fireEvent.changeText(getByTestId('auth-name-input'), 'Jo'); // Too short
+    fireEvent.changeText(getByTestId('auth-email-input'), 'new@example.com');
+    fireEvent.changeText(getByTestId('auth-password-input'), 'password123');
     
     // Submit the form
-    fireEvent.press(getByTestId('submit-button'));
+    fireEvent.press(getByTestId('auth-submit-button'));
     
     // Axios should not be called if validation fails
     expect(axios.post).not.toHaveBeenCalled();

@@ -53,11 +53,11 @@ describe('EditProfile Component', () => {
     const { getByTestId, getByText } = render(<EditProfile />);
     
     expect(getByText('Edit Profile')).toBeTruthy();
-    expect(getByTestId('name-input').props.value).toBe(mockFarmer.name);
-    expect(getByTestId('email-input').props.value).toBe(mockFarmer.email);
-    expect(getByTestId('phone-input').props.value).toBe(mockFarmer.phoneNo);
-    expect(getByTestId('location-input').props.value).toBe(mockFarmer.location);
-    expect(getByTestId('image-input').props.value).toBe(mockFarmer.profileImage);
+    expect(getByTestId('profile-name-input').props.value).toBe(mockFarmer.name);
+    expect(getByTestId('profile-email-input').props.value).toBe(mockFarmer.email);
+    expect(getByTestId('profile-phone-input').props.value).toBe(mockFarmer.phoneNo);
+    expect(getByTestId('profile-location-input').props.value).toBe(mockFarmer.location);
+    expect(getByTestId('profile-image-input').props.value).toBe(mockFarmer.profileImage);
   });
 
   it('renders the no farmer data view when farmer data is missing', () => {
@@ -82,7 +82,7 @@ describe('EditProfile Component', () => {
   it('updates form data when input changes', () => {
     const { getByTestId } = render(<EditProfile />);
     
-    const nameInput = getByTestId('name-input');
+    const nameInput = getByTestId('profile-name-input');
     fireEvent.changeText(nameInput, 'New Name');
     
     expect(nameInput.props.value).toBe('New Name');
@@ -92,11 +92,11 @@ describe('EditProfile Component', () => {
     const { getByTestId } = render(<EditProfile />);
     
     // Clear required fields
-    fireEvent.changeText(getByTestId('name-input'), '');
-    fireEvent.changeText(getByTestId('email-input'), '');
+    fireEvent.changeText(getByTestId('profile-name-input'), '');
+    fireEvent.changeText(getByTestId('profile-email-input'), '');
     
     // Try to save
-    fireEvent.press(getByTestId('save-button'));
+    fireEvent.press(getByTestId('profile-save-button'));
     
     // We don't test the Alert directly to avoid teardown issues
     // Instead, verify that the API call wasn't made
@@ -112,11 +112,11 @@ describe('EditProfile Component', () => {
     const { getByTestId } = render(<EditProfile />);
     
     // Try to save
-    fireEvent.press(getByTestId('save-button'));
+    fireEvent.press(getByTestId('profile-save-button'));
     
     // Loading indicator should be visible
     await waitFor(() => {
-      expect(getByTestId('loading-indicator')).toBeTruthy();
+      expect(getByTestId('profile-loading-indicator')).toBeTruthy();
     });
   });
 
@@ -124,10 +124,10 @@ describe('EditProfile Component', () => {
     const { getByTestId } = render(<EditProfile />);
     
     // Change data
-    fireEvent.changeText(getByTestId('name-input'), 'Updated Name');
+    fireEvent.changeText(getByTestId('profile-name-input'), 'Updated Name');
     
     // Save changes
-    fireEvent.press(getByTestId('save-button'));
+    fireEvent.press(getByTestId('profile-save-button'));
     
     // Wait for the API call to complete
     await waitFor(() => {
@@ -163,12 +163,12 @@ describe('EditProfile Component', () => {
     const { getByTestId } = render(<EditProfile />);
     
     // Try to save
-    fireEvent.press(getByTestId('save-button'));
+    fireEvent.press(getByTestId('profile-save-button'));
     
     // Wait for the API call to fail and check that we're no longer loading
     await waitFor(() => {
       expect(axios.put).toHaveBeenCalled();
-      expect(getByTestId('save-button')).toBeTruthy(); // Button should be visible again
+      expect(getByTestId('profile-save-button')).toBeTruthy(); // Button should be visible again
     });
   });
 
@@ -177,7 +177,7 @@ describe('EditProfile Component', () => {
     
     // Press delete button - we're just testing that clicking doesn't crash
     // and that deletion doesn't happen without confirmation
-    fireEvent.press(getByTestId('delete-button'));
+    fireEvent.press(getByTestId('profile-delete-button'));
     
     // Verify deletion API was not called
     expect(axios.delete).not.toHaveBeenCalled();
@@ -191,7 +191,7 @@ describe('EditProfile Component', () => {
     // calling the delete API function
     
     // First press the delete button to trigger the alert
-    fireEvent.press(getByTestId('delete-button'));
+    fireEvent.press(getByTestId('profile-delete-button'));
     
     // Now manually trigger the API call and checks
     await waitFor(() => {
@@ -225,13 +225,13 @@ describe('EditProfile Component', () => {
     const { getByTestId } = render(<EditProfile />);
     
     // Press delete button
-    fireEvent.press(getByTestId('delete-button'));
+    fireEvent.press(getByTestId('profile-delete-button'));
     
     // Verify that we get back to a non-loading state
     // This is an indirect way to test error handling without
     // having to interact with Alert directly
     await waitFor(() => {
-      expect(getByTestId('delete-button')).toBeTruthy();
+      expect(getByTestId('profile-delete-button')).toBeTruthy();
     });
   });
 });
