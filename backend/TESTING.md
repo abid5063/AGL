@@ -14,7 +14,8 @@ This document outlines the unit testing setup implemented for the backend of the
 2. **package.json**: Added test scripts and dependencies
 3. **src/__tests__/setup.js**: Created setup file for MongoDB Memory Server
 4. **src/__tests__/models/Animal.test.js**: Tests for the Animal model
-5. **src/__tests__/routes/animalRoutes.test.js**: Tests for animal validation logic
+5. **src/__tests__/models/Farmer.test.js**: Tests for the Farmer model
+6. **src/__tests__/routes/animalRoutes.test.js**: Tests for animal validation logic
 
 ## Types of Tests Implemented
 
@@ -24,6 +25,14 @@ This document outlines the unit testing setup implemented for the backend of the
 - Tests for unique constraints (duplicate animal names for the same farmer)
 - Tests for allowing the same animal name for different farmers
 - Validation of field constraints (min/max length, min/max values)
+
+### Farmer Model Tests
+
+- Schema validation tests for required fields (name, email, password)
+- Tests for unique constraints (duplicate email addresses)
+- Password hashing and comparison functionality
+- Password minimum length validation
+- Tests for conditional password rehashing
 
 ### Route Validation Tests
 

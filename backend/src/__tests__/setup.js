@@ -8,7 +8,12 @@ let mongoServer;
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
-  await mongoose.connect(uri);
+  
+  // Connect with settings appropriate for testing
+  await mongoose.connect(uri, {
+    // These options are no longer needed in newer mongoose versions
+    // but added here for compatibility
+  });
 });
 
 // Clear all test data after each test
@@ -28,3 +33,10 @@ afterAll(async () => {
 
 // Mock the environment variables
 process.env.JWT_SECRET = 'test-jwt-secret';
+
+// This is a dummy test to prevent the "Your test suite must contain at least one test" error
+describe('Setup', () => {
+  test('MongoDB Memory Server setup successful', () => {
+    expect(mongoServer).toBeDefined();
+  });
+});
