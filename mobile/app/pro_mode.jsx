@@ -93,7 +93,7 @@ export default function ProMode() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.back()} testID="back-button">
           <Ionicons name="arrow-back" size={28} color="#4a89dc" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Pro Mode - Disease Prediction</Text>
@@ -113,6 +113,7 @@ export default function ProMode() {
                 selectedSymptoms[symptom] === 1 && styles.selectedSymptom
               ]}
               onPress={() => toggleSymptom(symptom)}
+              testID={`symptom-${symptom}`}
             >
               <View style={styles.checkbox}>
                 {selectedSymptoms[symptom] === 1 && (
@@ -133,6 +134,7 @@ export default function ProMode() {
           <TouchableOpacity
             style={styles.clearButton}
             onPress={clearSelection}
+            testID="clear-button"
           >
             <Text style={styles.clearButtonText}>Clear All</Text>
           </TouchableOpacity>
@@ -141,6 +143,7 @@ export default function ProMode() {
             style={[styles.predictButton, loading && styles.disabledButton]}
             onPress={predictDisease}
             disabled={loading}
+            testID="predict-button"
           >
             {loading ? (
               <ActivityIndicator color="#fff" size="small" />

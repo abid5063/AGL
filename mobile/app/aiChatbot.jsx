@@ -40,7 +40,7 @@ AI:
       const data = await response.json();
       const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
       setMessages(prev => [...prev, { from: 'bot', text: aiText }]);
-    } catch (err) {
+    } catch (_err) {
       setMessages(prev => [...prev, { from: 'bot', text: 'Sorry, I could not get a response. Please try again.' }]);
     } finally {
       setLoading(false);
@@ -82,11 +82,13 @@ AI:
           value={input}
           onChangeText={setInput}
           editable={!loading}
+          testID="message-input"
         />
         <TouchableOpacity
           style={styles.sendButton}
           onPress={sendMessage}
           disabled={loading || !input.trim()}
+          testID="send-button"
         >
           {loading ? <ActivityIndicator color="#fff" /> : <Ionicons name="send" size={24} color="#fff" />}
         </TouchableOpacity>

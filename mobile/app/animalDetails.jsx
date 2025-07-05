@@ -277,7 +277,7 @@ const actuallyDeleteAnimal = async () => {
       <View style={styles.container}>
         <Text style={styles.errorText}>No animal data found.</Text>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backText}>Go Back</Text>
+          <Text style={styles.backText} testID="error-back-button">Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -287,7 +287,7 @@ const actuallyDeleteAnimal = async () => {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText} testID="back-button">← Back</Text>
         </TouchableOpacity>
         <View style={styles.imageContainer}>
           {animal.photo_url ? (
@@ -308,16 +308,10 @@ const actuallyDeleteAnimal = async () => {
         ) : null}
 
         <View style={{ flexDirection: "row", marginTop: 24, gap: 16 }}>
-          <TouchableOpacity style={styles.foodButton} onPress={showDietOptions}>
-            <Text style={styles.foodButtonText}>Food</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.marketButton} onPress={() => router.push('/marketAnalysis')}>
-            <Text style={styles.marketButtonText}>Market</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={actuallyDeleteAnimal}>
+          <TouchableOpacity style={styles.deleteButton} onPress={actuallyDeleteAnimal} testID="animal-delete-button">
             <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -337,6 +331,7 @@ const actuallyDeleteAnimal = async () => {
                 placeholder="Name"
                 value={formData.name}
                 onChangeText={text => handleInputChange('name', text)}
+                testID="animal-name-input"
               />
               <TextInput
                 style={styles.input}
@@ -371,13 +366,13 @@ const actuallyDeleteAnimal = async () => {
                 multiline
               />
               {loading ? (
-                <ActivityIndicator size="large" color="#4a89dc" style={{ marginVertical: 20 }} />
+                <ActivityIndicator size="large" color="#4a89dc" style={{ marginVertical: 20 }} testID="animal-loading-indicator" />
               ) : (
                 <View style={styles.modalButtons}>
-                  <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setEditModalVisible(false)}>
+                  <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setEditModalVisible(false)} testID="animal-cancel-button">
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.modalButton, styles.saveButton]} onPress={handleEditAnimal}>
+                  <TouchableOpacity style={[styles.modalButton, styles.saveButton]} onPress={handleEditAnimal} testID="animal-save-button">
                     <Text style={styles.saveButtonText}>Save</Text>
                   </TouchableOpacity>
                 </View>

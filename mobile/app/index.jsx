@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Text, View, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -16,6 +16,19 @@ export default function AuthScreen() {
 
   //  const API_BASE_URL = "http://localhost:3000/api/auth";
  const API_BASE_URL = "http://localhost:3000/api/auth";
+
+  // Reset form when screen is focused (e.g., after logout)
+  useFocusEffect(
+    useCallback(() => {
+      setIsLogin(true);
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+      });
+      setIsLoading(false);
+    }, [])
+  );
 
   const handleChange = (name, value) => {
     setFormData({
@@ -96,6 +109,7 @@ export default function AuthScreen() {
           value={formData.name}
           onChangeText={(text) => handleChange("name", text)}
           autoCapitalize="words"
+          testID="auth-name-input"
         />
       )}
       
@@ -106,6 +120,7 @@ export default function AuthScreen() {
         autoCapitalize="none"
         value={formData.email}
         onChangeText={(text) => handleChange("email", text)}
+        testID="auth-email-input"
       />
       
       <TextInput
@@ -114,12 +129,14 @@ export default function AuthScreen() {
         secureTextEntry
         value={formData.password}
         onChangeText={(text) => handleChange("password", text)}
+        testID="auth-password-input"
       />
       
       <TouchableOpacity
         style={[styles.button, isLoading && styles.buttonDisabled]}
         onPress={handleSubmit}
         disabled={isLoading}
+        testID="auth-submit-button"
       >
         <Text style={styles.buttonText}>
           {isLoading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
@@ -129,6 +146,7 @@ export default function AuthScreen() {
       <TouchableOpacity 
         style={styles.switchButton}
         onPress={() => setIsLogin(!isLogin)}
+        testID="auth-toggle-mode-button"
       >
         <Text style={styles.switchText}>
           {isLogin
