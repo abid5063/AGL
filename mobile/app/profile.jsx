@@ -307,12 +307,28 @@ export default function Profile() {
         {/* Animals Section */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>My Animals</Text>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Feather name="plus" size={20} color="white" />
-          </TouchableOpacity>
+          <View style={styles.sectionButtons}>
+            <TouchableOpacity 
+              style={styles.foodSuggestionButton}
+              onPress={() => router.push('/foodSuggestions')}
+            >
+              <Feather name="coffee" size={16} color="white" />
+              <Text style={styles.foodSuggestionButtonText}>Food</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.marketButton}
+              onPress={() => router.push('/marketAnalysis')}
+            >
+              <Feather name="trending-up" size={16} color="white" />
+              <Text style={styles.marketButtonText}>Market</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <Feather name="plus" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {animals.length === 0 ? (
@@ -618,6 +634,39 @@ editProfileButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+  },
+  sectionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  foodSuggestionButton: {
+    backgroundColor: '#27ae60',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
+  },
+  foodSuggestionButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  marketButton: {
+    backgroundColor: '#f39c12',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
+  },
+  marketButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   addButton: {
     backgroundColor: '#4a89dc',
