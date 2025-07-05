@@ -295,6 +295,14 @@ export default function Profile() {
 >
   <Text style={styles.editProfileButtonText}>Find Nearest Vet</Text>
 </TouchableOpacity>
+<TouchableOpacity
+  style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 25 }]}
+  onPress={() => router.push('/marketAnalysis')}
+  
+>
+  <Text style={styles.editProfileButtonText}>Market Analysis</Text>
+</TouchableOpacity>
+
         {/* Farm Details */}
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
@@ -318,7 +326,6 @@ export default function Profile() {
           <TouchableOpacity 
             style={styles.addButton}
             onPress={() => setModalVisible(true)}
-            testID="add-animal-button"
           >
             <Feather name="plus" size={20} color="white" />
           </TouchableOpacity>
@@ -640,6 +647,39 @@ editProfileButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+  },
+  sectionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  foodSuggestionButton: {
+    backgroundColor: '#27ae60',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
+  },
+  foodSuggestionButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  marketButton: {
+    backgroundColor: '#f39c12',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
+  },
+  marketButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   addButton: {
     backgroundColor: '#4a89dc',

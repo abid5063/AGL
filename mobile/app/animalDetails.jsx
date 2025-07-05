@@ -4,12 +4,19 @@ import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 
+const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
 export default function AnimalDetails() {
   const params = useLocalSearchParams();
   const animal = params.animal ? JSON.parse(params.animal) : null;
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [foodSuggestionModalVisible, setFoodSuggestionModalVisible] = useState(false);
+  const [foodSuggestionLoading, setFoodSuggestionLoading] = useState(false);
+  const [foodSuggestion, setFoodSuggestion] = useState(null);
+  const [showDietOptionsModal, setShowDietOptionsModal] = useState(false);
   const [formData, setFormData] = useState({
     name: animal?.name || "",
     type: animal?.type || "",
@@ -21,6 +28,173 @@ export default function AnimalDetails() {
 
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
+  };
+
+  const getFoodSuggestion = async (animal, dietType = 'comprehensive') => {
+    setFoodSuggestionLoading(true);
+    setFoodSuggestion(null);
+    setFoodSuggestionModalVisible(true);
+
+    try {
+      const currentDate = new Date().toLocaleDateString();
+      const currentTime = new Date().toLocaleTimeString();
+      
+      let prompt = '';
+      
+      switch(dietType) {
+        case 'dietChart':
+          prompt = `Create a detailed daily diet chart table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
+
+Format as a clean table with these columns:
+| Meal Time | Food Items | Portion Size | Calories | Protein (g) | Fat (g) | Carbs (g) |
+|-----------|------------|--------------|----------|-------------|---------|-----------|
+
+Include: Breakfast, Lunch, Dinner, 2 snacks. Add a TOTAL row at bottom. Use only table format, no other text.`;
+          break;
+          
+        case 'weightGain':
+          prompt = `Create a weight gain diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
+
+Format as tables only:
+
+**DAILY MEAL PLAN:**
+| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
+|------|------------|---------|----------|---------|-----|-------|
+
+**SUPPLEMENTS TABLE:**
+| Supplement | Dosage | Frequency | Purpose |
+|------------|--------|-----------|---------|
+
+**WEEKLY TARGETS:**
+| Week | Target Weight Gain | Calorie Increase | Notes |
+|------|-------------------|------------------|-------|
+
+Use only table format, no other text.`;
+          break;
+          
+        case 'weightLoss':
+          prompt = `Create a weight loss diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
+
+Format as tables only:
+
+**DAILY MEAL PLAN:**
+| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
+|------|------------|---------|----------|---------|-----|-------|
+
+**LOW-CALORIE ALTERNATIVES:**
+| Regular Food | Alternative | Calories Saved | Notes |
+|--------------|-------------|----------------|-------|
+
+**WEEKLY TARGETS:**
+| Week | Target Weight Loss | Calorie Deficit | Notes |
+|------|-------------------|-----------------|-------|
+
+Use only table format, no other text.`;
+          break;
+          
+        case 'pregnancy':
+          prompt = `Create a pregnancy diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
+
+Format as tables only:
+
+**DAILY PREGNANCY MEAL PLAN:**
+| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
+|------|------------|---------|----------|---------|-----|-------|
+
+**ESSENTIAL NUTRIENTS:**
+| Nutrient | Food Sources | Daily Requirement | Importance |
+|----------|--------------|-------------------|------------|
+
+**SUPPLEMENTS:**
+| Supplement | Dosage | Frequency | Purpose |
+|------------|--------|-----------|---------|
+
+**FOODS TO AVOID:**
+| Food Item | Reason | Alternative |
+|-----------|--------|-------------|
+
+Use only table format, no other text.`;
+          break;
+          
+        case 'senior':
+          prompt = `Create a senior diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
+
+Format as tables only:
+
+**DAILY SENIOR MEAL PLAN:**
+| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
+|------|------------|---------|----------|---------|-----|-------|
+
+**JOINT HEALTH SUPPLEMENTS:**
+| Supplement | Dosage | Frequency | Benefits |
+|------------|--------|-----------|----------|
+
+**EASY-TO-DIGEST FOODS:**
+| Food Category | Examples | Benefits | Avoid |
+|---------------|----------|----------|-------|
+
+**FEEDING SCHEDULE:**
+| Time | Meal Type | Special Instructions |
+|------|-----------|---------------------|
+
+Use only table format, no other text.`;
+          break;
+          
+        default: // comprehensive
+          prompt = `Create a comprehensive diet plan for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
+
+Format as tables only:
+
+**DAILY DIET CHART:**
+| Meal Time | Food Items | Portion Size | Calories | Protein (g) | Fat (g) | Carbs (g) |
+|-----------|------------|--------------|----------|-------------|---------|-----------|
+
+**BREED-SPECIFIC FOODS:**
+| Food Category | Recommended | Avoid | Reason |
+|---------------|--------------|-------|--------|
+
+**AGE-APPROPRIATE NUTRITION:**
+| Nutrient | Requirement | Food Sources | Notes |
+|----------|-------------|--------------|-------|
+
+**SEASONAL ADJUSTMENTS:**
+| Season | Food Changes | Portion Adjustments | Special Notes |
+|--------|--------------|---------------------|---------------|
+
+**WATER REQUIREMENTS:**
+| Time | Amount | Temperature | Notes |
+|------|--------|-------------|-------|
+
+Use only table format, no other text.`;
+      }
+
+      const response = await fetch(GEMINI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          contents: [{ 
+            parts: [{ text: prompt }] 
+          }] 
+        }),
+      });
+
+      const data = await response.json();
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (aiText) {
+        setFoodSuggestion(aiText);
+      } else {
+        setFoodSuggestion('Failed to get food suggestions. Please try again.');
+      }
+    } catch (err) {
+      setFoodSuggestion('An error occurred while getting food suggestions. Please check your connection and try again.');
+    } finally {
+      setFoodSuggestionLoading(false);
+    }
+  };
+
+  const showDietOptions = () => {
+    setShowDietOptionsModal(true);
   };
 
   const handleEditAnimal = async () => {
@@ -134,13 +308,19 @@ const actuallyDeleteAnimal = async () => {
         ) : null}
 
         <View style={{ flexDirection: "row", marginTop: 24, gap: 16 }}>
-          <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)} testID="animal-edit-button">
+          <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteButton} onPress={actuallyDeleteAnimal} testID="animal-delete-button">
             <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </View>
+        <View>
+          <TouchableOpacity style={styles.foodButton} onPress={() => router.push('/foodSuggestions')} >
+            <Text style={styles.foodButtonText}>Get Food Suggession</Text>
+          </TouchableOpacity>
+        </View>
+
 
         {/* Edit Modal */}
         <Modal
@@ -206,10 +386,139 @@ const actuallyDeleteAnimal = async () => {
             </View>
           </View>
         </Modal>
-      </View>
-    </ScrollView>
-  );
-}
+
+        {/* Food Suggestion Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={foodSuggestionModalVisible}
+          onRequestClose={() => setFoodSuggestionModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  Food Suggestions for {animal?.name}
+                </Text>
+                <TouchableOpacity 
+                  onPress={() => setFoodSuggestionModalVisible(false)}
+                  style={styles.closeButton}
+                >
+                  <Text style={styles.closeButtonText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.suggestionContainer}>
+                {foodSuggestionLoading ? (
+                  <View style={styles.loadingSuggestion}>
+                    <ActivityIndicator size="large" color="#4a89dc" />
+                    <Text style={styles.loadingSuggestionText}>
+                      Getting personalized food suggestions...
+                    </Text>
+                  </View>
+                ) : foodSuggestion ? (
+                  <Text style={styles.suggestionText}>{foodSuggestion}</Text>
+                ) : null}
+              </ScrollView>
+            </View>
+          </View>
+                 </Modal>
+
+         {/* Diet Options Modal */}
+         <Modal
+           animationType="slide"
+           transparent={true}
+           visible={showDietOptionsModal}
+           onRequestClose={() => setShowDietOptionsModal(false)}
+         >
+           <View style={styles.modalContainer}>
+             <View style={styles.modalContent}>
+               <View style={styles.modalHeader}>
+                 <Text style={styles.modalTitle}>
+                   Diet Options for {animal?.name}
+                 </Text>
+                 <TouchableOpacity 
+                   onPress={() => setShowDietOptionsModal(false)}
+                   style={styles.closeButton}
+                 >
+                   <Text style={styles.closeButtonText}>✕</Text>
+                 </TouchableOpacity>
+               </View>
+
+               <View style={styles.optionsContainer}>
+                 <TouchableOpacity 
+                   style={styles.optionButton}
+                   onPress={() => {
+                     setShowDietOptionsModal(false);
+                     getFoodSuggestion(animal, 'comprehensive');
+                   }}
+                 >
+                   <Text style={styles.optionButtonText}>🍽️ Comprehensive Diet Plan</Text>
+                   <Text style={styles.optionButtonSubtext}>Complete nutrition guide with diet chart</Text>
+                 </TouchableOpacity>
+
+                 <TouchableOpacity 
+                   style={styles.optionButton}
+                   onPress={() => {
+                     setShowDietOptionsModal(false);
+                     getFoodSuggestion(animal, 'dietChart');
+                   }}
+                 >
+                   <Text style={styles.optionButtonText}>📊 Daily Diet Chart</Text>
+                   <Text style={styles.optionButtonSubtext}>Detailed meal table with calories</Text>
+                 </TouchableOpacity>
+
+                 <TouchableOpacity 
+                   style={styles.optionButton}
+                   onPress={() => {
+                     setShowDietOptionsModal(false);
+                     getFoodSuggestion(animal, 'weightGain');
+                   }}
+                 >
+                   <Text style={styles.optionButtonText}>📈 Weight Gain Diet</Text>
+                   <Text style={styles.optionButtonSubtext}>High-calorie meal plan</Text>
+                 </TouchableOpacity>
+
+                 <TouchableOpacity 
+                   style={styles.optionButton}
+                   onPress={() => {
+                     setShowDietOptionsModal(false);
+                     getFoodSuggestion(animal, 'weightLoss');
+                   }}
+                 >
+                   <Text style={styles.optionButtonText}>📉 Weight Loss Diet</Text>
+                   <Text style={styles.optionButtonSubtext}>Calorie-controlled meal plan</Text>
+                 </TouchableOpacity>
+
+                 <TouchableOpacity 
+                   style={styles.optionButton}
+                   onPress={() => {
+                     setShowDietOptionsModal(false);
+                     getFoodSuggestion(animal, 'pregnancy');
+                   }}
+                 >
+                   <Text style={styles.optionButtonText}>❤️ Pregnancy Diet</Text>
+                   <Text style={styles.optionButtonSubtext}>Special nutrition for pregnant animals</Text>
+                 </TouchableOpacity>
+
+                 <TouchableOpacity 
+                   style={styles.optionButton}
+                   onPress={() => {
+                     setShowDietOptionsModal(false);
+                     getFoodSuggestion(animal, 'senior');
+                   }}
+                 >
+                   <Text style={styles.optionButtonText}>⏰ Senior Diet</Text>
+                   <Text style={styles.optionButtonSubtext}>Age-appropriate nutrition</Text>
+                 </TouchableOpacity>
+               </View>
+             </View>
+           </View>
+         </Modal>
+       </View>
+     </ScrollView>
+   );
+ }
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -263,6 +572,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     textAlign: "left",
+  },
+  foodButton: {
+    backgroundColor: "#27ae60",
+     marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  foodButtonText: {
+   
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  marketButton: {
+    backgroundColor: "#f39c12",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  marketButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
   },
   editButton: {
     backgroundColor: "#4a89dc",
@@ -339,5 +674,63 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#333',
     fontWeight: 'bold',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  suggestionContainer: {
+    maxHeight: 400,
+  },
+  loadingSuggestion: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingSuggestionText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+  },
+  suggestionText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+  },
+  optionsContainer: {
+    padding: 20,
+    gap: 12,
+  },
+  optionButton: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  optionButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  optionButtonSubtext: {
+    fontSize: 12,
+    color: '#666',
   },
 });
