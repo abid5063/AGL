@@ -85,94 +85,22 @@ export default function FoodSuggestions() {
       let prompt = '';
       switch(dietType) {
         case 'dietChart':
-          prompt = `Create a daily diet chart for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
+          prompt = `Create a daily diet chart for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
           break;
         case 'weightGain':
-          prompt = `Create a weight gain diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
-
-Format as tables only:
-
-**DAILY MEAL PLAN:**
-| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
-|------|------------|---------|----------|---------|-----|-------|
-
-**SUPPLEMENTS TABLE:**
-| Supplement | Dosage | Frequency | Purpose |
-|------------|--------|-----------|---------|
-
-**WEEKLY TARGETS:**
-| Week | Target Weight Gain | Calorie Increase | Notes |
-|------|-------------------|------------------|-------|
-
-Use only table format, no other text.`;
+          prompt = `Create a weight gain diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nFormat as tables only:\n\n**DAILY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**SUPPLEMENTS TABLE:**\n| Supplement | Dosage | Frequency | Purpose |\n|------------|--------|-----------|---------|\n\n**WEEKLY TARGETS:**\n| Week | Target Weight Gain | Calorie Increase | Notes |\n|------|-------------------|------------------|-------|\n\nUse only table format, no other text.`;
           break;
         case 'weightLoss':
-          prompt = `Create a weight loss diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
-
-Format as tables only:
-
-**DAILY MEAL PLAN:**
-| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
-|------|------------|---------|----------|---------|-----|-------|
-
-**LOW-CALORIE ALTERNATIVES:**
-| Regular Food | Alternative | Calories Saved | Notes |
-|--------------|-------------|----------------|-------|
-
-**WEEKLY TARGETS:**
-| Week | Target Weight Loss | Calorie Deficit | Notes |
-|------|-------------------|-----------------|-------|
-
-Use only table format, no other text.`;
+          prompt = `Create a weight loss diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nFormat as tables only:\n\n**DAILY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**LOW-CALORIE ALTERNATIVES:**\n| Regular Food | Alternative | Calories Saved | Notes |\n|--------------|-------------|----------------|-------|\n\n**WEEKLY TARGETS:**\n| Week | Target Weight Loss | Calorie Deficit | Notes |\n|------|-------------------|-----------------|-------|\n\nUse only table format, no other text.`;
           break;
         case 'pregnancy':
-          prompt = `Create a pregnancy diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
-
-Format as tables only:
-
-**DAILY PREGNANCY MEAL PLAN:**
-| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
-|------|------------|---------|----------|---------|-----|-------|
-
-**ESSENTIAL NUTRIENTS:**
-| Nutrient | Food Sources | Daily Requirement | Importance |
-|----------|--------------|-------------------|------------|
-
-**SUPPLEMENTS:**
-| Supplement | Dosage | Frequency | Purpose |
-|------------|--------|-----------|---------|
-
-**FOODS TO AVOID:**
-| Food Item | Reason | Alternative |
-|-----------|--------|-------------|
-
-Use only table format, no other text.`;
+          prompt = `Create a pregnancy diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nFormat as tables only:\n\n**DAILY PREGNANCY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**ESSENTIAL NUTRIENTS:**\n| Nutrient | Food Sources | Daily Requirement | Importance |\n|----------|--------------|-------------------|------------|\n\n**SUPPLEMENTS:**\n| Supplement | Dosage | Frequency | Purpose |\n|------------|--------|-----------|---------|\n\n**FOODS TO AVOID:**\n| Food Item | Reason | Alternative |\n|-----------|--------|-------------|\n\nUse only table format, no other text.`;
           break;
         case 'senior':
-          prompt = `Create a senior diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
-
-Format as tables only:
-
-**DAILY SENIOR MEAL PLAN:**
-| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
-|------|------------|---------|----------|---------|-----|-------|
-
-**JOINT HEALTH SUPPLEMENTS:**
-| Supplement | Dosage | Frequency | Benefits |
-|------------|--------|-----------|----------|
-
-**EASY-TO-DIGEST FOODS:**
-| Food Category | Examples | Benefits | Avoid |
-|---------------|----------|----------|-------|
-
-**FEEDING SCHEDULE:**
-| Time | Meal Type | Special Instructions |
-|------|-----------|---------------------|
-
-Use only table format, no other text.`;
+          prompt = `Create a senior diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nFormat as tables only:\n\n**DAILY SENIOR MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**JOINT HEALTH SUPPLEMENTS:**\n| Supplement | Dosage | Frequency | Benefits |\n|------------|--------|-----------|----------|\n\n**EASY-TO-DIGEST FOODS:**\n| Food Category | Examples | Benefits | Avoid |\n|---------------|----------|----------|-------|\n\n**FEEDING SCHEDULE:**\n| Time | Meal Type | Special Instructions |\n|------|-----------|---------------------|\n\nUse only table format, no other text.`;
           break;
         default:
-          prompt = `Create a comprehensive diet plan for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
+          prompt = `Create a comprehensive diet plan for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
       }
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
@@ -223,7 +151,7 @@ Use only table format, no other text.`;
 
     try {
       let prompt = '';
-      prompt = `Create a diet plan for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}) for ${selectedDietType} (${varietyType}).\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
+      prompt = `Create a diet plan for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}) for ${selectedDietType} (${varietyType}).\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

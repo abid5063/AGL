@@ -263,45 +263,44 @@ export default function Profile() {
   <Text style={styles.email}>{farmer.email}</Text>
 </View>
 
-<TouchableOpacity
-  style={styles.editProfileButton}
-  onPress={() => router.push({
-    pathname: '/editProfile',
-    params: { farmer: JSON.stringify(farmer) }
-  })}
-  testID="edit-profile-button"
->
-  <Text style={styles.editProfileButtonText}>Edit Profile</Text>
-</TouchableOpacity>
-
-<TouchableOpacity
-  style={[styles.editProfileButton, { backgroundColor: '#27ae60', marginBottom: 10 }]}
-  onPress={() => router.push('/aiChatbot')}
-  testID="ai-chatbot-button"
->
-  <Text style={styles.editProfileButtonText}>AI Chatbot</Text>
-</TouchableOpacity>
-
-<TouchableOpacity
-  style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 25 }]}
-  onPress={() => router.push('/symptomChecker')}
-  testID="disease-detection-button"
->
-  <Text style={styles.editProfileButtonText}>Disease Detection</Text>
-</TouchableOpacity>
-<TouchableOpacity
-  style={[styles.editProfileButton, { backgroundColor: '#8e44ad', marginBottom: 25 }]}
-  onPress={() => router.push('/vetLocation')}
->
-  <Text style={styles.editProfileButtonText}>Find Nearest Vet</Text>
-</TouchableOpacity>
-<TouchableOpacity
-  style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 25 }]}
-  onPress={() => router.push('/marketAnalysis')}
-  
->
-  <Text style={styles.editProfileButtonText}>Market Analysis</Text>
-</TouchableOpacity>
+<View style={styles.actionButtonRow}>
+  <TouchableOpacity
+    style={[styles.editProfileButton, { marginBottom: 12 }]}
+    onPress={() => router.push({
+      pathname: '/editProfile',
+      params: { farmer: JSON.stringify(farmer) }
+    })}
+    testID="edit-profile-button"
+  >
+    <Text style={styles.editProfileButtonText}>Edit Profile</Text>
+  </TouchableOpacity>
+  <TouchableOpacity
+    style={[styles.editProfileButton, { backgroundColor: '#27ae60', marginBottom: 12 }]}
+    onPress={() => router.push('/aiChatbot')}
+    testID="ai-chatbot-button"
+  >
+    <Text style={styles.editProfileButtonText}>AI Chatbot</Text>
+  </TouchableOpacity>
+  <TouchableOpacity
+    style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 12 }]}
+    onPress={() => router.push('/symptomChecker')}
+    testID="disease-detection-button"
+  >
+    <Text style={styles.editProfileButtonText}>Disease Detection</Text>
+  </TouchableOpacity>
+  <TouchableOpacity
+    style={[styles.editProfileButton, { backgroundColor: '#2980b9', marginBottom: 12 }]}
+    onPress={() => router.push('/marketAnalysis')}
+  >
+    <Text style={styles.editProfileButtonText}>Market Analysis</Text>
+  </TouchableOpacity>
+  <TouchableOpacity
+    style={[styles.editProfileButton, { backgroundColor: '#8e44ad', marginBottom: 12 }]}
+    onPress={() => router.push('/vetLocation')}
+  >
+    <Text style={styles.editProfileButtonText}>Find Nearest Vet</Text>
+  </TouchableOpacity>
+</View>
 
         {/* Farm Details */}
         <View style={styles.detailsContainer}>
@@ -592,20 +591,6 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     marginTop: 10,
   },
-editProfileButton: {
-  backgroundColor: '#4a89dc',
-  paddingVertical: 10,
-  paddingHorizontal: 20,
-  borderRadius: 8,
-  alignItems: 'center',
-  alignSelf: 'center',
-  marginBottom: 18,
-},
-editProfileButtonText: {
-  color: 'white',
-  fontWeight: 'bold',
-  fontSize: 16,
-},
   profileImage: {
     width: 90,
     height: 90,
@@ -821,5 +806,28 @@ editProfileButtonText: {
     height: 150,
     borderRadius: 8,
     marginBottom: 12,
+  },
+  actionButtonRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  editProfileButton: {
+    backgroundColor: '#4a89dc',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+    width: '48%',
+    minWidth: 150,
+    marginRight: 0,
+    marginLeft: 0,
+  },
+  editProfileButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
