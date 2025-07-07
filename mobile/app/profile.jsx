@@ -303,14 +303,14 @@ export default function Profile() {
   style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 25 }]}
   onPress={() => router.push('/marketAnalysis')}
 >
-  <Text style={styles.editProfileButtonText}>Find Nearest Vet</Text>
+  <Text style={styles.editProfileButtonText}>Analyze Market</Text>
 </TouchableOpacity>
 
 <TouchableOpacity
   style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 25 }]}
   onPress={() => router.push('/foodSuggestion')}
 >
-  <Text style={styles.editProfileButtonText}>Find Nearest Vet</Text>
+  <Text style={styles.editProfileButtonText}>Feeding suggestion</Text>
 </TouchableOpacity>
 
         {/* Farm Details */}
