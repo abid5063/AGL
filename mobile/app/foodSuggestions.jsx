@@ -18,6 +18,26 @@ import axios from 'axios';
 const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
+function DietTable({ tableData }) {
+  if (!tableData || !tableData.headers || !tableData.rows) return null;
+  return (
+    <View style={{ marginBottom: 20 }}>
+      <View style={{ flexDirection: 'row', backgroundColor: '#eaf1fb', borderRadius: 8 }}>
+        {tableData.headers.map((header, idx) => (
+          <Text key={idx} style={{ flex: 1, fontWeight: 'bold', padding: 8, color: '#2d3a4a', textAlign: 'center' }}>{header}</Text>
+        ))}
+      </View>
+      {tableData.rows.map((row, rIdx) => (
+        <View key={rIdx} style={{ flexDirection: 'row', backgroundColor: rIdx % 2 === 0 ? '#fff' : '#f7f9fa' }}>
+          {row.map((cell, cIdx) => (
+            <Text key={cIdx} style={{ flex: 1, padding: 8, color: '#333', textAlign: 'center' }}>{cell}</Text>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function FoodSuggestions() {
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,22 +82,11 @@ export default function FoodSuggestions() {
     setShowSuggestionModal(true);
 
     try {
-      const currentDate = new Date().toLocaleDateString();
-      const currentTime = new Date().toLocaleTimeString();
-      
       let prompt = '';
-      
       switch(dietType) {
         case 'dietChart':
-          prompt = `Create a detailed daily diet chart table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
-
-Format as a clean table with these columns:
-| Meal Time | Food Items | Portion Size | Calories | Protein (g) | Fat (g) | Carbs (g) |
-|-----------|------------|--------------|----------|-------------|---------|-----------|
-
-Include: Breakfast, Lunch, Dinner, 2 snacks. Add a TOTAL row at bottom. Use only table format, no other text.`;
+          prompt = `Create a daily diet chart for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
           break;
-          
         case 'weightGain':
           prompt = `Create a weight gain diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
 
@@ -97,7 +106,6 @@ Format as tables only:
 
 Use only table format, no other text.`;
           break;
-          
         case 'weightLoss':
           prompt = `Create a weight loss diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
 
@@ -117,7 +125,6 @@ Format as tables only:
 
 Use only table format, no other text.`;
           break;
-          
         case 'pregnancy':
           prompt = `Create a pregnancy diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
 
@@ -141,7 +148,6 @@ Format as tables only:
 
 Use only table format, no other text.`;
           break;
-          
         case 'senior':
           prompt = `Create a senior diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
 
@@ -165,35 +171,9 @@ Format as tables only:
 
 Use only table format, no other text.`;
           break;
-          
-        default: // comprehensive
-          prompt = `Create a comprehensive diet plan for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
-
-Format as tables only:
-
-**DAILY DIET CHART:**
-| Meal Time | Food Items | Portion Size | Calories | Protein (g) | Fat (g) | Carbs (g) |
-|-----------|------------|--------------|----------|-------------|---------|-----------|
-
-**BREED-SPECIFIC FOODS:**
-| Food Category | Recommended | Avoid | Reason |
-|---------------|--------------|-------|--------|
-
-**AGE-APPROPRIATE NUTRITION:**
-| Nutrient | Requirement | Food Sources | Notes |
-|----------|-------------|--------------|-------|
-
-**SEASONAL ADJUSTMENTS:**
-| Season | Food Changes | Portion Adjustments | Special Notes |
-|--------|--------------|---------------------|---------------|
-
-**WATER REQUIREMENTS:**
-| Time | Amount | Temperature | Notes |
-|------|--------|-------------|-------|
-
-Use only table format, no other text.`;
+        default:
+          prompt = `Create a comprehensive diet plan for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
       }
-
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -203,19 +183,25 @@ Use only table format, no other text.`;
           }] 
         }),
       });
-
       const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (aiText) {
-        setSuggestion(aiText);
-      } else {
-        setSuggestion('Failed to get food suggestions. Please try again.');
+      let aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+      try {
+        let jsonString = aiText.trim();
+        // Remove markdown code blocks if present
+        if (jsonString.startsWith('```json')) {
+          jsonString = jsonString.replace(/^```json\n/, '').replace(/\n```$/, '');
+        } else if (jsonString.startsWith('```')) {
+          jsonString = jsonString.replace(/^```\n/, '').replace(/\n```$/, '');
+        }
+        const aiJson = JSON.parse(jsonString);
+        setSuggestion(aiJson);
+      } catch (e) {
+        setSuggestion('Failed to parse AI response. Try again.');
+      } finally {
+        setSuggestionLoading(false);
       }
     } catch (err) {
       setSuggestion('An error occurred while getting food suggestions. Please check your connection and try again.');
-    } finally {
-      setSuggestionLoading(false);
     }
   };
 
@@ -237,103 +223,7 @@ Use only table format, no other text.`;
 
     try {
       let prompt = '';
-      
-      switch(selectedDietType) {
-        case 'dietChart':
-          switch(varietyType) {
-            case 'vegetarian':
-              prompt = `Create a vegetarian diet chart table for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}):
-
-**VEGETARIAN DIET CHART:**
-| Meal Time | Food Items | Portion Size | Calories | Protein (g) | Fat (g) | Carbs (g) |
-|-----------|------------|--------------|----------|-------------|---------|-----------|
-
-Include plant-based proteins, vegetables, grains. Add TOTAL row. Use only table format.`;
-              break;
-            case 'highProtein':
-              prompt = `Create a high-protein diet chart table for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}):
-
-**HIGH-PROTEIN DIET CHART:**
-| Meal Time | Food Items | Portion Size | Calories | Protein (g) | Fat (g) | Carbs (g) |
-|-----------|------------|--------------|----------|-------------|---------|-----------|
-
-Focus on protein-rich foods. Add TOTAL row. Use only table format.`;
-              break;
-            case 'grainFree':
-              prompt = `Create a grain-free diet chart table for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}):
-
-**GRAIN-FREE DIET CHART:**
-| Meal Time | Food Items | Portion Size | Calories | Protein (g) | Fat (g) | Carbs (g) |
-|-----------|------------|--------------|----------|-------------|---------|-----------|
-
-No grains, focus on meat, vegetables, fruits. Add TOTAL row. Use only table format.`;
-              break;
-          }
-          break;
-          
-        case 'weightGain':
-          switch(varietyType) {
-            case 'highCalorie':
-              prompt = `Create a high-calorie weight gain table for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}):
-
-**HIGH-CALORIE WEIGHT GAIN PLAN:**
-| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
-|------|------------|---------|----------|---------|-----|-------|
-
-**SUPPLEMENTS:**
-| Supplement | Dosage | Frequency | Purpose |
-|------------|--------|-----------|---------|
-
-Use only table format.`;
-              break;
-            case 'muscleBuilding':
-              prompt = `Create a muscle-building weight gain table for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}):
-
-**MUSCLE-BUILDING DIET:**
-| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
-|------|------------|---------|----------|---------|-----|-------|
-
-**PROTEIN SUPPLEMENTS:**
-| Supplement | Dosage | Frequency | Purpose |
-|------------|--------|-----------|---------|
-
-Use only table format.`;
-              break;
-          }
-          break;
-          
-        case 'weightLoss':
-          switch(varietyType) {
-            case 'lowCarb':
-              prompt = `Create a low-carb weight loss table for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}):
-
-**LOW-CARB WEIGHT LOSS PLAN:**
-| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |
-|------|------------|---------|----------|---------|-----|-------|
-
-**CARB ALTERNATIVES:**
-| Regular Food | Low-Carb Alternative | Calories Saved |
-|--------------|---------------------|----------------|
-
-Use only table format.`;
-              break;
-            case 'intermittent':
-              prompt = `Create an intermittent fasting weight loss table for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}):
-
-**INTERMITTENT FASTING PLAN:**
-| Time Window | Food Items | Portion | Calories | Protein | Fat | Carbs |
-|-------------|------------|---------|----------|---------|-----|-------|
-
-**FASTING SCHEDULE:**
-| Period | Duration | Allowed | Restricted |
-|--------|----------|---------|------------|
-
-Use only table format.`;
-              break;
-          }
-          break;
-      }
-
+      prompt = `Create a diet plan for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}) for ${selectedDietType} (${varietyType}).\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -343,19 +233,34 @@ Use only table format.`;
           }] 
         }),
       });
-
       const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (aiText) {
-        setSuggestion(aiText);
-      } else {
-        setSuggestion('Failed to get food variety suggestions. Please try again.');
+      let aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+      try {
+        let jsonString = aiText.trim();
+        // Remove markdown code blocks if present
+        if (jsonString.startsWith('```json')) {
+          jsonString = jsonString.replace(/^```json\n/, '').replace(/\n```$/, '');
+        } else if (jsonString.startsWith('```')) {
+          jsonString = jsonString.replace(/^```\n/, '').replace(/\n```$/, '');
+        }
+        const aiJson = JSON.parse(jsonString);
+        setSuggestion(aiJson);
+      } catch (e) {
+        setSuggestion('Failed to parse AI response. Try again.');
+      } finally {
+        setSuggestionLoading(false);
       }
     } catch (err) {
       setSuggestion('An error occurred while getting food variety suggestions. Please check your connection and try again.');
-    } finally {
-      setSuggestionLoading(false);
+    }
+  };
+
+  const handleBackPress = () => {
+    try {
+      router.back();
+    } catch (error) {
+      // If back navigation fails, go to a safe default page
+      router.replace('/'); // or router.push('/profile') or your desired route
     }
   };
 
@@ -371,7 +276,7 @@ Use only table format.`;
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={handleBackPress}>
           <Ionicons name="arrow-back" size={28} color="#4a89dc" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Food Suggestions</Text>
@@ -456,8 +361,14 @@ Use only table format.`;
                     Getting personalized food suggestions...
                   </Text>
                 </View>
+              ) : suggestion && suggestion.table ? (
+                <>
+                  <DietTable tableData={suggestion.table} />
+                  <Text style={{ fontWeight: 'bold', color: '#4a89dc', fontSize: 16, marginBottom: 8 }}>Rating: {suggestion.rating} / 5</Text>
+                  <Text style={{ color: '#333', marginBottom: 8 }}>{suggestion.summary}</Text>
+                </>
               ) : suggestion ? (
-                <Text style={styles.suggestionText}>{suggestion}</Text>
+                <Text style={styles.suggestionText}>{typeof suggestion === 'string' ? suggestion : JSON.stringify(suggestion)}</Text>
               ) : null}
             </ScrollView>
           </View>

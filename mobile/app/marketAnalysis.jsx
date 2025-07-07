@@ -37,6 +37,7 @@ export default function MarketAnalysis() {
     age: '',
     location: ''
   });
+  const [analysisError, setAnalysisError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -69,36 +70,10 @@ export default function MarketAnalysis() {
     setAnalysisLoading(true);
     setAnalysis(null);
     setShowAnalysisModal(true);
+    setAnalysisError(null);
 
     try {
-      const currentDate = new Date().toLocaleDateString();
-      const currentTime = new Date().toLocaleTimeString();
-      
-      const prompt = `Create a market analysis for selling ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):
-
-Format as tables only. All prices must be in Bangladeshi Taka (BDT):
-
-**CURRENT MARKET PRICE:**
-| Factor | Value | Price Impact (BDT) |
-|--------|-------|-------------------|
-
-**SELLING LOCATIONS:**
-| Market Name | Distance | Best Price (BDT) | Peak Time |
-|-------------|----------|------------------|-----------|
-
-**MARKET TRENDS:**
-| Trend | Current Status | Price Direction | Duration |
-|-------|---------------|----------------|----------|
-
-**1-YEAR PREDICTION:**
-| Metric | Current (BDT) | Predicted (BDT) | Growth |
-|--------|---------------|-----------------|--------|
-
-**SELLING RECOMMENDATIONS:**
-| Factor | Recommendation | Reason |
-|--------|----------------|--------|
-
-Use only table format, no other text. All prices in BDT.`;
+      const prompt = `Create a market analysis for selling ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"currentMarketPrice\": [\n    {\"factor\": \"string\", \"value\": \"string\", \"priceImpact\": \"number\"}\n  ],\n  \"sellingLocations\": [\n    {\"marketName\": \"string\", \"distance\": \"string\", \"bestPrice\": \"number\", \"peakTime\": \"string\"}\n  ],\n  \"marketTrends\": [\n    {\"trend\": \"string\", \"currentStatus\": \"string\", \"priceDirection\": \"string\", \"duration\": \"string\"}\n  ],\n  \"oneYearPrediction\": [\n    {\"metric\": \"string\", \"current\": \"number\", \"predicted\": \"number\", \"growth\": \"string\"}\n  ],\n  \"sellingRecommendations\": [\n    {\"factor\": \"string\", \"recommendation\": \"string\", \"reason\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
 
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
@@ -111,15 +86,27 @@ Use only table format, no other text. All prices in BDT.`;
       });
 
       const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (aiText) {
-        setAnalysis(aiText);
-      } else {
-        setAnalysis('Failed to get market analysis. Please try again.');
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+      let parsed;
+      let jsonString = aiText.trim();
+      // Remove markdown code blocks if present
+      if (jsonString.startsWith('```json')) {
+        jsonString = jsonString.replace(/^```json\n/, '').replace(/\n```$/, '');
+      } else if (jsonString.startsWith('```')) {
+        jsonString = jsonString.replace(/^```\n/, '').replace(/\n```$/, '');
+      }
+      try {
+        parsed = JSON.parse(jsonString);
+        setAnalysis(parsed);
+      } catch (e) {
+        console.error('Parse error:', e);
+        console.error('Response text:', aiText);
+        setAnalysisError('Failed to parse AI response.\n' + e.message + '\nRaw response:\n' + aiText);
+        setAnalysis(null);
       }
     } catch (err) {
-      setAnalysis('An error occurred while getting market analysis. Please check your connection and try again.');
+      setAnalysisError('An error occurred while getting market analysis. Please check your connection and try again.\n' + err.message);
+      setAnalysis(null);
     } finally {
       setAnalysisLoading(false);
     }
@@ -134,33 +121,10 @@ Use only table format, no other text. All prices in BDT.`;
     setAnalysisLoading(true);
     setAnalysis(null);
     setShowAnalysisModal(true);
+    setAnalysisError(null);
 
     try {
-      const prompt = `Create a market analysis for buying ${buyFormData.animalType} (${buyFormData.breed}, ${buyFormData.age} years, ${buyFormData.gender}, ${buyFormData.weight}kg):
-
-Format as tables only. All prices must be in Bangladeshi Taka (BDT):
-
-**MARKET PRICE RANGE:**
-| Quality | Price Range (BDT) | Availability | Best Time |
-|---------|-------------------|--------------|-----------|
-
-**TOP 3 BUYING OPTIONS:**
-| Rank | Breed | Age | Weight | Price (BDT) | Location | Rating |
-|------|-------|-----|--------|-------------|----------|--------|
-
-**PRICE COMPARISON:**
-| Market | Average Price (BDT) | Quality | Distance | Recommendation |
-|--------|---------------------|---------|----------|----------------|
-
-**BUYING TIPS:**
-| Factor | Tip | Impact |
-|--------|-----|--------|
-
-**MARKET FORECAST:**
-| Time Period | Price Trend | Supply | Demand | Recommendation |
-|-------------|-------------|--------|--------|----------------|
-
-Use only table format, no other text. All prices in BDT.`;
+      const prompt = `Create a market analysis for buying ${buyFormData.animalType} (${buyFormData.breed}, ${buyFormData.age} years, ${buyFormData.gender}, ${buyFormData.weight}kg):\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"marketPriceRange\": [\n    {\"quality\": \"string\", \"priceRange\": \"string\", \"availability\": \"string\", \"bestTime\": \"string\"}\n  ],\n  \"topBuyingOptions\": [\n    {\"rank\": \"number\", \"breed\": \"string\", \"age\": \"string\", \"weight\": \"string\", \"price\": \"number\", \"location\": \"string\", \"rating\": \"string\"}\n  ],\n  \"priceComparison\": [\n    {\"market\": \"string\", \"averagePrice\": \"number\", \"quality\": \"string\", \"distance\": \"string\", \"recommendation\": \"string\"}\n  ],\n  \"buyingTips\": [\n    {\"factor\": \"string\", \"tip\": \"string\", \"impact\": \"string\"}\n  ],\n  \"marketForecast\": [\n    {\"timePeriod\": \"string\", \"priceTrend\": \"string\", \"supply\": \"string\", \"demand\": \"string\", \"recommendation\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
 
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
@@ -173,15 +137,27 @@ Use only table format, no other text. All prices in BDT.`;
       });
 
       const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (aiText) {
-        setAnalysis(aiText);
-      } else {
-        setAnalysis('Failed to get market analysis. Please try again.');
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+      let parsed;
+      let jsonString = aiText.trim();
+      // Remove markdown code blocks if present
+      if (jsonString.startsWith('```json')) {
+        jsonString = jsonString.replace(/^```json\n/, '').replace(/\n```$/, '');
+      } else if (jsonString.startsWith('```')) {
+        jsonString = jsonString.replace(/^```\n/, '').replace(/\n```$/, '');
+      }
+      try {
+        parsed = JSON.parse(jsonString);
+        setAnalysis(parsed);
+      } catch (e) {
+        console.error('Parse error:', e);
+        console.error('Response text:', aiText);
+        setAnalysisError('Failed to parse AI response.\n' + e.message + '\nRaw response:\n' + aiText);
+        setAnalysis(null);
       }
     } catch (err) {
-      setAnalysis('An error occurred while getting market analysis. Please check your connection and try again.');
+      setAnalysisError('An error occurred while getting market analysis. Please check your connection and try again.\n' + err.message);
+      setAnalysis(null);
     } finally {
       setAnalysisLoading(false);
     }
@@ -190,6 +166,27 @@ Use only table format, no other text. All prices in BDT.`;
   const handleInputChange = (key, value) => {
     setBuyFormData({ ...buyFormData, [key]: value });
   };
+
+  // Helper to render a table from JSON array
+  // columns: Array<{ key: string, label: string }>, data: Array<Object>
+  const renderTable = (columns, data) => (
+    <View style={{ marginBottom: 24 }}>
+      {/* Header */}
+      <View style={{ flexDirection: 'row', backgroundColor: '#e6f0fa', borderTopLeftRadius: 8, borderTopRightRadius: 8 }}>
+        {columns.map((col) => (
+          <Text key={col.key} style={{ flex: 1, fontWeight: 'bold', padding: 8, color: '#333' }}>{col.label}</Text>
+        ))}
+      </View>
+      {/* Rows */}
+      {data.map((row, idx) => (
+        <View key={idx} style={{ flexDirection: 'row', backgroundColor: idx % 2 === 0 ? '#fff' : '#f7f9fa' }}>
+          {columns.map((col) => (
+            <Text key={col.key} style={{ flex: 1, padding: 8, color: '#333' }}>{row[col.key]?.toString()}</Text>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
 
   if (loading) {
     return (
@@ -443,6 +440,86 @@ Use only table format, no other text. All prices in BDT.`;
                   <Text style={styles.loadingAnalysisText}>
                     Analyzing market data...
                   </Text>
+                </View>
+              ) : analysisError ? (
+                <View style={{ alignItems: 'center', padding: 20 }}>
+                  <Text style={{ color: 'red', marginBottom: 10, fontWeight: 'bold' }}>Error</Text>
+                  <Text style={{ color: '#333', marginBottom: 10 }}>{analysisError}</Text>
+                  <TouchableOpacity style={{ backgroundColor: '#4a89dc', padding: 10, borderRadius: 6 }} onPress={() => {
+                    setAnalysisError(null);
+                    if (selectedAnimal) getSellAnalysis(selectedAnimal);
+                    else getBuyAnalysis();
+                  }}>
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Retry</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : analysis && typeof analysis === 'object' ? (
+                // Render tables for each section
+                <View>
+                  {/* Sell Analysis Tables */}
+                  {analysis.currentMarketPrice && renderTable([
+                    { key: 'factor', label: 'Factor' },
+                    { key: 'value', label: 'Value' },
+                    { key: 'priceImpact', label: 'Price Impact (BDT)' },
+                  ], analysis.currentMarketPrice)}
+                  {analysis.sellingLocations && renderTable([
+                    { key: 'marketName', label: 'Market Name' },
+                    { key: 'distance', label: 'Distance' },
+                    { key: 'bestPrice', label: 'Best Price (BDT)' },
+                    { key: 'peakTime', label: 'Peak Time' },
+                  ], analysis.sellingLocations)}
+                  {analysis.marketTrends && renderTable([
+                    { key: 'trend', label: 'Trend' },
+                    { key: 'currentStatus', label: 'Current Status' },
+                    { key: 'priceDirection', label: 'Price Direction' },
+                    { key: 'duration', label: 'Duration' },
+                  ], analysis.marketTrends)}
+                  {analysis.oneYearPrediction && renderTable([
+                    { key: 'metric', label: 'Metric' },
+                    { key: 'current', label: 'Current (BDT)' },
+                    { key: 'predicted', label: 'Predicted (BDT)' },
+                    { key: 'growth', label: 'Growth' },
+                  ], analysis.oneYearPrediction)}
+                  {analysis.sellingRecommendations && renderTable([
+                    { key: 'factor', label: 'Factor' },
+                    { key: 'recommendation', label: 'Recommendation' },
+                    { key: 'reason', label: 'Reason' },
+                  ], analysis.sellingRecommendations)}
+                  {/* Buy Analysis Tables */}
+                  {analysis.marketPriceRange && renderTable([
+                    { key: 'quality', label: 'Quality' },
+                    { key: 'priceRange', label: 'Price Range (BDT)' },
+                    { key: 'availability', label: 'Availability' },
+                    { key: 'bestTime', label: 'Best Time' },
+                  ], analysis.marketPriceRange)}
+                  {analysis.topBuyingOptions && renderTable([
+                    { key: 'rank', label: 'Rank' },
+                    { key: 'breed', label: 'Breed' },
+                    { key: 'age', label: 'Age' },
+                    { key: 'weight', label: 'Weight' },
+                    { key: 'price', label: 'Price (BDT)' },
+                    { key: 'location', label: 'Location' },
+                    { key: 'rating', label: 'Rating' },
+                  ], analysis.topBuyingOptions)}
+                  {analysis.priceComparison && renderTable([
+                    { key: 'market', label: 'Market' },
+                    { key: 'averagePrice', label: 'Average Price (BDT)' },
+                    { key: 'quality', label: 'Quality' },
+                    { key: 'distance', label: 'Distance' },
+                    { key: 'recommendation', label: 'Recommendation' },
+                  ], analysis.priceComparison)}
+                  {analysis.buyingTips && renderTable([
+                    { key: 'factor', label: 'Factor' },
+                    { key: 'tip', label: 'Tip' },
+                    { key: 'impact', label: 'Impact' },
+                  ], analysis.buyingTips)}
+                  {analysis.marketForecast && renderTable([
+                    { key: 'timePeriod', label: 'Time Period' },
+                    { key: 'priceTrend', label: 'Price Trend' },
+                    { key: 'supply', label: 'Supply' },
+                    { key: 'demand', label: 'Demand' },
+                    { key: 'recommendation', label: 'Recommendation' },
+                  ], analysis.marketForecast)}
                 </View>
               ) : analysis ? (
                 <Text style={styles.analysisText}>{analysis}</Text>
