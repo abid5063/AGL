@@ -92,7 +92,7 @@ describe('AnimalDetails Component', () => {
   it('opens edit modal when edit button is pressed', () => {
     const { getByText, getByTestId } = render(<AnimalDetails />);
     
-    fireEvent.press(getByTestId('edit-button'));
+    fireEvent.press(getByTestId('animal-edit-button'));
     
     // Modal should be visible with title
     expect(getByText('Edit Animal')).toBeTruthy();
@@ -102,10 +102,10 @@ describe('AnimalDetails Component', () => {
     const { getByTestId } = render(<AnimalDetails />);
     
     // Open edit modal
-    fireEvent.press(getByTestId('edit-button'));
+    fireEvent.press(getByTestId('animal-edit-button'));
     
     // Change name input
-    const nameInput = getByTestId('name-input');
+    const nameInput = getByTestId('animal-name-input');
     fireEvent.changeText(nameInput, 'Max');
     
     // Verify input was updated
@@ -116,11 +116,11 @@ describe('AnimalDetails Component', () => {
     const { getByText, queryByText, getByTestId } = render(<AnimalDetails />);
     
     // Open edit modal
-    fireEvent.press(getByTestId('edit-button'));
+    fireEvent.press(getByTestId('animal-edit-button'));
     expect(getByText('Edit Animal')).toBeTruthy();
     
     // Cancel
-    fireEvent.press(getByTestId('cancel-button'));
+    fireEvent.press(getByTestId('animal-cancel-button'));
     
     // Modal title should no longer be visible
     await waitFor(() => {
@@ -132,10 +132,10 @@ describe('AnimalDetails Component', () => {
     const { getByTestId, getByPlaceholderText } = render(<AnimalDetails />);
     
     // Open edit modal
-    fireEvent.press(getByTestId('edit-button'));
+    fireEvent.press(getByTestId('animal-edit-button'));
     
     // Verify form fields are displayed
-    expect(getByTestId('name-input')).toBeTruthy();
+    expect(getByTestId('animal-name-input')).toBeTruthy();
     expect(getByPlaceholderText('Type')).toBeTruthy();
     expect(getByPlaceholderText('Breed')).toBeTruthy();
     expect(getByPlaceholderText('Age')).toBeTruthy();
@@ -152,20 +152,20 @@ describe('AnimalDetails Component', () => {
     const { getByTestId } = render(<AnimalDetails />);
     
     // Open edit modal
-    fireEvent.press(getByTestId('edit-button'));
+    fireEvent.press(getByTestId('animal-edit-button'));
     
     // Submit form
-    fireEvent.press(getByTestId('save-button'));
+    fireEvent.press(getByTestId('animal-save-button'));
     
     // Loading indicator should be visible
-    expect(getByTestId('loading-indicator')).toBeTruthy();
+    expect(getByTestId('animal-loading-indicator')).toBeTruthy();
   });
 
   it('renders edit and delete buttons', () => {
     const { getByTestId } = render(<AnimalDetails />);
     
     // Verify the buttons exist
-    expect(getByTestId('edit-button')).toBeTruthy();
-    expect(getByTestId('delete-button')).toBeTruthy();
+    expect(getByTestId('animal-edit-button')).toBeTruthy();
+    expect(getByTestId('animal-delete-button')).toBeTruthy();
   });
 });

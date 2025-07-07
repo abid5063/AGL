@@ -134,10 +134,10 @@ const actuallyDeleteAnimal = async () => {
         ) : null}
 
         <View style={{ flexDirection: "row", marginTop: 24, gap: 16 }}>
-          <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)} testID="edit-button">
+          <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)} testID="animal-edit-button">
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAnimal} testID="delete-button">
+          <TouchableOpacity style={styles.deleteButton} onPress={actuallyDeleteAnimal} testID="animal-delete-button">
             <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -157,7 +157,7 @@ const actuallyDeleteAnimal = async () => {
                 placeholder="Name"
                 value={formData.name}
                 onChangeText={text => handleInputChange('name', text)}
-                testID="name-input"
+                testID="animal-name-input"
               />
               <TextInput
                 style={styles.input}
@@ -192,13 +192,13 @@ const actuallyDeleteAnimal = async () => {
                 multiline
               />
               {loading ? (
-                <ActivityIndicator size="large" color="#4a89dc" style={{ marginVertical: 20 }} testID="loading-indicator" />
+                <ActivityIndicator size="large" color="#4a89dc" style={{ marginVertical: 20 }} testID="animal-loading-indicator" />
               ) : (
                 <View style={styles.modalButtons}>
-                  <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setEditModalVisible(false)} testID="cancel-button">
+                  <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setEditModalVisible(false)} testID="animal-cancel-button">
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.modalButton, styles.saveButton]} onPress={handleEditAnimal} testID="save-button">
+                  <TouchableOpacity style={[styles.modalButton, styles.saveButton]} onPress={handleEditAnimal} testID="animal-save-button">
                     <Text style={styles.saveButtonText}>Save</Text>
                   </TouchableOpacity>
                 </View>

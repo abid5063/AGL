@@ -290,6 +290,14 @@ export default function Profile() {
   <Text style={styles.editProfileButtonText}>Disease Detection</Text>
 </TouchableOpacity>
 
+
+<TouchableOpacity
+  style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 25 }]}
+  onPress={() => router.push('/vetLocation')}
+>
+  <Text style={styles.editProfileButtonText}>Find Nearest Vet</Text>
+</TouchableOpacity>
+
         {/* Farm Details */}
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
