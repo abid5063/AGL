@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  ActivityIndicator, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
   Alert,
   Modal,
   Image,
@@ -73,15 +73,15 @@ export default function MarketAnalysis() {
     setAnalysisError(null);
 
     try {
-      const prompt = `Create a market analysis for selling ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"currentMarketPrice\": [\n    {\"factor\": \"string\", \"value\": \"string\", \"priceImpact\": \"number\"}\n  ],\n  \"sellingLocations\": [\n    {\"marketName\": \"string\", \"distance\": \"string\", \"bestPrice\": \"number\", \"peakTime\": \"string\"}\n  ],\n  \"marketTrends\": [\n    {\"trend\": \"string\", \"currentStatus\": \"string\", \"priceDirection\": \"string\", \"duration\": \"string\"}\n  ],\n  \"oneYearPrediction\": [\n    {\"metric\": \"string\", \"current\": \"number\", \"predicted\": \"number\", \"growth\": \"string\"}\n  ],\n  \"sellingRecommendations\": [\n    {\"factor\": \"string\", \"recommendation\": \"string\", \"reason\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
+      const prompt = `Create a market analysis for selling ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language.\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"currentMarketPrice\": [\n    {\"factor\": \"string\", \"value\": \"string\", \"priceImpact\": \"number\"}\n  ],\n  \"sellingLocations\": [\n    {\"marketName\": \"string\", \"distance\": \"string\", \"bestPrice\": \"number\", \"peakTime\": \"string\"}\n  ],\n  \"marketTrends\": [\n    {\"trend\": \"string\", \"currentStatus\": \"string\", \"priceDirection\": \"string\", \"duration\": \"string\"}\n  ],\n  \"oneYearPrediction\": [\n    {\"metric\": \"string\", \"current\": \"number\", \"predicted\": \"number\", \"growth\": \"string\"}\n  ],\n  \"sellingRecommendations\": [\n    {\"factor\": \"string\", \"recommendation\": \"string\", \"reason\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
 
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contents: [{ 
-            parts: [{ text: prompt }] 
-          }] 
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
         }),
       });
 
@@ -124,15 +124,15 @@ export default function MarketAnalysis() {
     setAnalysisError(null);
 
     try {
-      const prompt = `Create a market analysis for buying ${buyFormData.animalType} (${buyFormData.breed}, ${buyFormData.age} years, ${buyFormData.gender}, ${buyFormData.weight}kg):\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"marketPriceRange\": [\n    {\"quality\": \"string\", \"priceRange\": \"string\", \"availability\": \"string\", \"bestTime\": \"string\"}\n  ],\n  \"topBuyingOptions\": [\n    {\"rank\": \"number\", \"breed\": \"string\", \"age\": \"string\", \"weight\": \"string\", \"price\": \"number\", \"location\": \"string\", \"rating\": \"string\"}\n  ],\n  \"priceComparison\": [\n    {\"market\": \"string\", \"averagePrice\": \"number\", \"quality\": \"string\", \"distance\": \"string\", \"recommendation\": \"string\"}\n  ],\n  \"buyingTips\": [\n    {\"factor\": \"string\", \"tip\": \"string\", \"impact\": \"string\"}\n  ],\n  \"marketForecast\": [\n    {\"timePeriod\": \"string\", \"priceTrend\": \"string\", \"supply\": \"string\", \"demand\": \"string\", \"recommendation\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
+      const prompt = `Create a market analysis for buying ${buyFormData.animalType} (${buyFormData.breed}, ${buyFormData.age} years, ${buyFormData.gender}, ${buyFormData.weight}kg):\n\nRespond ONLY in Bangla (Bengali) language.\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"marketPriceRange\": [\n    {\"quality\": \"string\", \"priceRange\": \"string\", \"availability\": \"string\", \"bestTime\": \"string\"}\n  ],\n  \"topBuyingOptions\": [\n    {\"rank\": \"number\", \"breed\": \"string\", \"age\": \"string\", \"weight\": \"string\", \"price\": \"number\", \"location\": \"string\", \"rating\": \"string\"}\n  ],\n  \"priceComparison\": [\n    {\"market\": \"string\", \"averagePrice\": \"number\", \"quality\": \"string\", \"distance\": \"string\", \"recommendation\": \"string\"}\n  ],\n  \"buyingTips\": [\n    {\"factor\": \"string\", \"tip\": \"string\", \"impact\": \"string\"}\n  ],\n  \"marketForecast\": [\n    {\"timePeriod\": \"string\", \"priceTrend\": \"string\", \"supply\": \"string\", \"demand\": \"string\", \"recommendation\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
 
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contents: [{ 
-            parts: [{ text: prompt }] 
-          }] 
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
         }),
       });
 
@@ -213,7 +213,7 @@ export default function MarketAnalysis() {
         </Text>
 
         <View style={styles.mainButtons}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.mainButton}
             onPress={() => setShowMainOptions(true)}
           >
@@ -235,7 +235,7 @@ export default function MarketAnalysis() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Market Analysis Options</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowMainOptions(false)}
                 style={styles.closeButton}
               >
@@ -244,7 +244,7 @@ export default function MarketAnalysis() {
             </View>
 
             <View style={styles.optionsContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.optionButton}
                 onPress={() => {
                   setShowMainOptions(false);
@@ -256,7 +256,7 @@ export default function MarketAnalysis() {
                 <Text style={styles.optionButtonSubtext}>Analyze your animals for selling</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.optionButton}
                 onPress={() => {
                   setShowMainOptions(false);
@@ -283,7 +283,7 @@ export default function MarketAnalysis() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Animal to Sell</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowSellOptions(false)}
                 style={styles.closeButton}
               >
@@ -306,8 +306,8 @@ export default function MarketAnalysis() {
                   >
                     <View style={styles.animalImageContainer}>
                       {animal.photo_url ? (
-                        <Image 
-                          source={{ uri: animal.photo_url }} 
+                        <Image
+                          source={{ uri: animal.photo_url }}
                           style={styles.animalImage}
                         />
                       ) : (
@@ -345,7 +345,7 @@ export default function MarketAnalysis() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Buy Analysis</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowBuyOptions(false)}
                 style={styles.closeButton}
               >
@@ -360,21 +360,21 @@ export default function MarketAnalysis() {
                 value={buyFormData.animalType}
                 onChangeText={(text) => handleInputChange('animalType', text)}
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Breed"
                 value={buyFormData.breed}
                 onChangeText={(text) => handleInputChange('breed', text)}
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Gender"
                 value={buyFormData.gender}
                 onChangeText={(text) => handleInputChange('gender', text)}
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Weight (kg)"
@@ -382,7 +382,7 @@ export default function MarketAnalysis() {
                 onChangeText={(text) => handleInputChange('weight', text)}
                 keyboardType="numeric"
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Age (years)"
@@ -390,7 +390,7 @@ export default function MarketAnalysis() {
                 onChangeText={(text) => handleInputChange('age', text)}
                 keyboardType="numeric"
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Location (optional)"
@@ -398,7 +398,7 @@ export default function MarketAnalysis() {
                 onChangeText={(text) => handleInputChange('location', text)}
               />
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.analyzeButton}
                 onPress={() => {
                   setShowBuyOptions(false);
@@ -425,7 +425,7 @@ export default function MarketAnalysis() {
               <Text style={styles.modalTitle}>
                 Market Analysis {selectedAnimal ? `for ${selectedAnimal.name}` : ''}
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowAnalysisModal(false)}
                 style={styles.closeButton}
               >
@@ -458,67 +458,67 @@ export default function MarketAnalysis() {
                 <View>
                   {/* Sell Analysis Tables */}
                   {analysis.currentMarketPrice && renderTable([
-                    { key: 'factor', label: 'Factor' },
-                    { key: 'value', label: 'Value' },
-                    { key: 'priceImpact', label: 'Price Impact (BDT)' },
+                    { key: 'factor', label: 'কারণ' },
+                    { key: 'value', label: 'মান' },
+                    { key: 'priceImpact', label: 'মূল্য প্রভাব (৳)' },
                   ], analysis.currentMarketPrice)}
                   {analysis.sellingLocations && renderTable([
-                    { key: 'marketName', label: 'Market Name' },
-                    { key: 'distance', label: 'Distance' },
-                    { key: 'bestPrice', label: 'Best Price (BDT)' },
-                    { key: 'peakTime', label: 'Peak Time' },
+                    { key: 'marketName', label: 'বাজারের নাম' },
+                    { key: 'distance', label: 'দূরত্ব' },
+                    { key: 'bestPrice', label: 'সেরা মূল্য (৳)' },
+                    { key: 'peakTime', label: 'শীর্ষ সময়' },
                   ], analysis.sellingLocations)}
                   {analysis.marketTrends && renderTable([
-                    { key: 'trend', label: 'Trend' },
-                    { key: 'currentStatus', label: 'Current Status' },
-                    { key: 'priceDirection', label: 'Price Direction' },
-                    { key: 'duration', label: 'Duration' },
+                    { key: 'trend', label: 'প্রবণতা' },
+                    { key: 'currentStatus', label: 'বর্তমান অবস্থা' },
+                    { key: 'priceDirection', label: 'মূল্য প্রবাহ' },
+                    { key: 'duration', label: 'সময়কাল' },
                   ], analysis.marketTrends)}
                   {analysis.oneYearPrediction && renderTable([
-                    { key: 'metric', label: 'Metric' },
-                    { key: 'current', label: 'Current (BDT)' },
-                    { key: 'predicted', label: 'Predicted (BDT)' },
-                    { key: 'growth', label: 'Growth' },
+                    { key: 'metric', label: 'মেট্রিক' },
+                    { key: 'current', label: 'বর্তমান (৳)' },
+                    { key: 'predicted', label: 'পূর্বাভাস (৳)' },
+                    { key: 'growth', label: 'বৃদ্ধি' },
                   ], analysis.oneYearPrediction)}
                   {analysis.sellingRecommendations && renderTable([
-                    { key: 'factor', label: 'Factor' },
-                    { key: 'recommendation', label: 'Recommendation' },
-                    { key: 'reason', label: 'Reason' },
+                    { key: 'factor', label: 'কারণ' },
+                    { key: 'recommendation', label: 'সুপারিশ' },
+                    { key: 'reason', label: 'কারণ' },
                   ], analysis.sellingRecommendations)}
                   {/* Buy Analysis Tables */}
                   {analysis.marketPriceRange && renderTable([
-                    { key: 'quality', label: 'Quality' },
-                    { key: 'priceRange', label: 'Price Range (BDT)' },
-                    { key: 'availability', label: 'Availability' },
-                    { key: 'bestTime', label: 'Best Time' },
+                    { key: 'quality', label: 'গুণমান' },
+                    { key: 'priceRange', label: 'মূল্য সীমা (৳)' },
+                    { key: 'availability', label: 'উপলব্ধতা' },
+                    { key: 'bestTime', label: 'সেরা সময়' },
                   ], analysis.marketPriceRange)}
                   {analysis.topBuyingOptions && renderTable([
-                    { key: 'rank', label: 'Rank' },
-                    { key: 'breed', label: 'Breed' },
-                    { key: 'age', label: 'Age' },
-                    { key: 'weight', label: 'Weight' },
-                    { key: 'price', label: 'Price (BDT)' },
-                    { key: 'location', label: 'Location' },
-                    { key: 'rating', label: 'Rating' },
+                    { key: 'rank', label: 'ক্রম' },
+                    { key: 'breed', label: 'বংশ' },
+                    { key: 'age', label: 'বয়স' },
+                    { key: 'weight', label: 'ওজন' },
+                    { key: 'price', label: 'মূল্য (৳)' },
+                    { key: 'location', label: 'অবস্থান' },
+                    { key: 'rating', label: 'রেটিং' },
                   ], analysis.topBuyingOptions)}
                   {analysis.priceComparison && renderTable([
-                    { key: 'market', label: 'Market' },
-                    { key: 'averagePrice', label: 'Average Price (BDT)' },
-                    { key: 'quality', label: 'Quality' },
-                    { key: 'distance', label: 'Distance' },
-                    { key: 'recommendation', label: 'Recommendation' },
+                    { key: 'market', label: 'বাজার' },
+                    { key: 'averagePrice', label: 'গড় মূল্য (৳)' },
+                    { key: 'quality', label: 'গুণমান' },
+                    { key: 'distance', label: 'দূরত্ব' },
+                    { key: 'recommendation', label: 'সুপারিশ' },
                   ], analysis.priceComparison)}
                   {analysis.buyingTips && renderTable([
-                    { key: 'factor', label: 'Factor' },
-                    { key: 'tip', label: 'Tip' },
-                    { key: 'impact', label: 'Impact' },
+                    { key: 'factor', label: 'কারণ' },
+                    { key: 'tip', label: 'পরামর্শ' },
+                    { key: 'impact', label: 'প্রভাব' },
                   ], analysis.buyingTips)}
                   {analysis.marketForecast && renderTable([
-                    { key: 'timePeriod', label: 'Time Period' },
-                    { key: 'priceTrend', label: 'Price Trend' },
-                    { key: 'supply', label: 'Supply' },
-                    { key: 'demand', label: 'Demand' },
-                    { key: 'recommendation', label: 'Recommendation' },
+                    { key: 'timePeriod', label: 'সময়কাল' },
+                    { key: 'priceTrend', label: 'মূল্য প্রবণতা' },
+                    { key: 'supply', label: 'সরবরাহ' },
+                    { key: 'demand', label: 'চাহিদা' },
+                    { key: 'recommendation', label: 'সুপারিশ' },
                   ], analysis.marketForecast)}
                 </View>
               ) : analysis ? (

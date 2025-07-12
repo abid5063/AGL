@@ -308,7 +308,7 @@ export default function Profile() {
 
 <TouchableOpacity
   style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 25 }]}
-  onPress={() => router.push('/foodSuggestion')}
+  onPress={() => router.push('/foodSuggestions')}
 >
   <Text style={styles.editProfileButtonText}>Feeding suggestion</Text>
 </TouchableOpacity>

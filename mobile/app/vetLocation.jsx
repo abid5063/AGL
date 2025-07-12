@@ -13,12 +13,12 @@ const VeterinaryTable = ({ data }) => {
 
   return (
     <View style={styles.tableContainer}>
-      <Text style={styles.tableTitle}>Nearby Veterinary Clinics</Text>
-      <Text style={styles.tableSubtitle}>Sorted by distance (nearest first)</Text>
+      <Text style={styles.tableTitle}>নিকটস্থ পশু চিকিৎসা কেন্দ্রসমূহ</Text>
+      <Text style={styles.tableSubtitle}>দূরত্ব অনুযায়ী সাজানো (নিকটবর্তী প্রথমে)</Text>
       <View style={styles.tableHeader}>
-        <Text style={[styles.tableHeaderCell, { flex: 2 }]}>Name</Text>
-        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Distance</Text>
-        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Rating</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 2 }]}>নাম</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>দূরত্ব</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>রেটিং</Text>
       </View>
       {data.map((clinic, index) => {
         const distance = parseFloat(clinic.distance.replace(/[^\d.]/g, ''));
@@ -36,7 +36,7 @@ const VeterinaryTable = ({ data }) => {
                 <Text style={styles.clinicName}>{clinic.name}</Text>
                 {isNearest && (
                   <View style={styles.nearestBadge}>
-                    <Text style={styles.nearestBadgeText}>Nearest</Text>
+                    <Text style={styles.nearestBadgeText}>নিকটতম</Text>
                   </View>
                 )}
               </View>
@@ -52,7 +52,7 @@ const VeterinaryTable = ({ data }) => {
                 {clinic.distance}
               </Text>
               {isNearby && (
-                <Text style={styles.nearbyText}>Nearby</Text>
+                <Text style={styles.nearbyText}>কাছাকাছি</Text>
               )}
             </View>
             <Text style={[styles.tableCell, { flex: 1, textAlign: 'center' }]}>
@@ -191,6 +191,8 @@ export default function VetLocation() {
 You are a veterinary assistant AI. Generate a list of nearby veterinary clinics and hospitals.
 
 The user is located at: ${fullLocation}
+
+IMPORTANT: Respond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.
 
 IMPORTANT: Respond ONLY with a valid JSON object in the following format:
 {
