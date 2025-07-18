@@ -329,6 +329,22 @@ export default function Profile() {
   <Text style={styles.editProfileButtonText}>Add Vaccine</Text>
 </TouchableOpacity>
 
+<TouchableOpacity
+  style={[styles.editProfileButton, { backgroundColor: '#2ecc71', marginBottom: 10 }]}
+  onPress={() => router.push('/taskManagement')}
+  testID="task-management-button"
+>
+  <Text style={styles.editProfileButtonText}>Task Management</Text>
+</TouchableOpacity>
+
+<TouchableOpacity
+  style={[styles.editProfileButton, { backgroundColor: '#27ae60', marginBottom: 25 }]}
+  onPress={() => router.push('/addTask')}
+  testID="add-task-button"
+>
+  <Text style={styles.editProfileButtonText}>Add Task</Text>
+</TouchableOpacity>
+
 
 
         {/* Farm Details */}

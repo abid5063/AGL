@@ -41,6 +41,7 @@ import express from "express";
 import cloudinary from "../lib/cloudinary.js";
 import Animal from "../models/Animal.js";
 import Vaccine from "../models/Vaccine.js";
+import Task from "../models/Task.js";
 import protectRoute from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -192,7 +193,13 @@ router.delete("/:id", protectRoute, async (req, res) => {
       farmer: req.farmer._id 
     });
 
-    // 3. Delete image from cloudinary if needed
+    // 3. Delete all task records for this animal
+    await Task.deleteMany({ 
+      animal: animal._id,
+      farmer: req.farmer._id 
+    });
+
+    // 4. Delete image from cloudinary if needed
     if (animal.photo_url && animal.photo_url.includes("cloudinary")) {
       try {
         const parts = animal.photo_url.split("/");
@@ -205,7 +212,7 @@ router.delete("/:id", protectRoute, async (req, res) => {
       }
     }
 
-    // 4. Delete the animal from the database
+    // 5. Delete the animal from the database
     await Animal.deleteOne({ _id: animal._id });
 
     res.status(200).json({ message: "Animal removed successfully" });
