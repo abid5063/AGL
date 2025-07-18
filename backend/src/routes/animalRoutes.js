@@ -40,6 +40,7 @@
 import express from "express";
 import cloudinary from "../lib/cloudinary.js";
 import Animal from "../models/Animal.js";
+import Vaccine from "../models/Vaccine.js";
 import protectRoute from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -185,7 +186,13 @@ router.delete("/:id", protectRoute, async (req, res) => {
       return res.status(404).json({ message: "Animal not found in your farm" });
     }
 
-    // 2. Delete image from cloudinary if needed
+    // 2. Delete all vaccine records for this animal
+    await Vaccine.deleteMany({ 
+      animal: animal._id,
+      farmer: req.farmer._id 
+    });
+
+    // 3. Delete image from cloudinary if needed
     if (animal.photo_url && animal.photo_url.includes("cloudinary")) {
       try {
         const parts = animal.photo_url.split("/");
@@ -198,7 +205,7 @@ router.delete("/:id", protectRoute, async (req, res) => {
       }
     }
 
-    // 3. Delete the animal from the database
+    // 4. Delete the animal from the database
     await Animal.deleteOne({ _id: animal._id });
 
     res.status(200).json({ message: "Animal removed successfully" });
