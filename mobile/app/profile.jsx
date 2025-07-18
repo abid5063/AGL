@@ -313,6 +313,24 @@ export default function Profile() {
   <Text style={styles.editProfileButtonText}>Feeding suggestion</Text>
 </TouchableOpacity>
 
+<TouchableOpacity
+  style={[styles.editProfileButton, { backgroundColor: '#8e44ad', marginBottom: 10 }]}
+  onPress={() => router.push('/vaccineManagement')}
+  testID="vaccine-management-button"
+>
+  <Text style={styles.editProfileButtonText}>Vaccine Management</Text>
+</TouchableOpacity>
+
+<TouchableOpacity
+  style={[styles.editProfileButton, { backgroundColor: '#9b59b6', marginBottom: 25 }]}
+  onPress={() => router.push('/addVaccine')}
+  testID="add-vaccine-button"
+>
+  <Text style={styles.editProfileButtonText}>Add Vaccine</Text>
+</TouchableOpacity>
+
+
+
         {/* Farm Details */}
         <View style={styles.detailsContainer}>
           <View style={styles.detailItem}>
