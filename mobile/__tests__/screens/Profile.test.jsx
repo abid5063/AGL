@@ -46,6 +46,9 @@ jest.mock('@expo/vector-icons', () => {
     MaterialIcons: ({ name, size, color }) => (
       <View testID={`material-icon-${name}`} style={{ width: size, height: size, backgroundColor: color }} />
     ),
+    Ionicons: ({ name, size, color }) => (
+      <View testID={`ionicons-icon-${name}`} style={{ width: size, height: size, backgroundColor: color }} />
+    ),
   };
 });
 
@@ -174,7 +177,7 @@ describe('Profile Component', () => {
   });
 
   it('fetches and displays animals', async () => {
-    const { getByText, getAllByText } = render(<Profile />);
+    const { getByText, getByTestId } = render(<Profile />);
     
     // Wait for animals to load
     await waitFor(() => {
@@ -188,9 +191,11 @@ describe('Profile Component', () => {
       { headers: { Authorization: 'Bearer mock-token' } }
     );
     
-    // Check if view buttons are present
-    const viewButtons = getAllByText('View');
-    expect(viewButtons.length).toBe(2);
+    // Check if animal cards are present (they are now clickable cards instead of separate view buttons)
+    const animalCard1 = getByTestId(`view-animal-${mockAnimals[0]._id}`);
+    const animalCard2 = getByTestId(`view-animal-${mockAnimals[1]._id}`);
+    expect(animalCard1).toBeTruthy();
+    expect(animalCard2).toBeTruthy();
   });
 
   it('displays profile information correctly', async () => {
