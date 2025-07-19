@@ -492,18 +492,7 @@ export default function Profile() {
               <Text style={styles.featureSubtitle}>Chat with vets</Text>
             </TouchableOpacity>
 
-            {/* Find Veterinarians */}
-            <TouchableOpacity
-              style={[styles.featureCard, styles.vetCard]}
-              onPress={() => setShowVets(true)}
-              testID="find-vets-button"
-            >
-              <View style={styles.featureIconContainer}>
-                <Ionicons name="people" size={28} color="#fff" />
-              </View>
-              <Text style={styles.featureTitle}>Find Vets</Text>
-              <Text style={styles.featureSubtitle}>Consult experts</Text>
-            </TouchableOpacity>
+
 
             {/* Find Vet */}
             <TouchableOpacity
@@ -1196,10 +1185,11 @@ const styles = StyleSheet.create({
   animalsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    justifyContent: "space-between",
+    paddingHorizontal: 2,
   },
   animalCard: {
-    width: (width - 60) / 2,
+    width: (width - 64) / 2, // Adjusted for container padding (40) + gap (12) + extra spacing (12)
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,

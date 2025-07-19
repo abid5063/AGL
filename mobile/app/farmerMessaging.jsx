@@ -85,19 +85,32 @@ export default function FarmerMessaging() {
 
   const startNewConversation = async (vet) => {
     try {
-      const conversation = {
-        participant: {
-          id: vet._id,
-          name: vet.name,
-          specialty: vet.specialty,
-          avatar: vet.profileImage
-        },
-        messages: []
-      };
-      setSelectedConversation(conversation);
-      setMessages([]);
+      // Close the search modal first
       setShowSearch(false);
-      setShowChat(true);
+      
+      // First, check if there's an existing conversation with this vet
+      const existingConversation = conversations.find(conv => 
+        conv.participant.id === vet._id || conv.participant._id === vet._id
+      );
+
+      if (existingConversation) {
+        // Open existing conversation
+        await openExistingConversation(existingConversation);
+      } else {
+        // Create new conversation
+        const conversation = {
+          participant: {
+            id: vet._id,
+            name: vet.name,
+            specialty: vet.specialty,
+            avatar: vet.profileImage
+          },
+          messages: []
+        };
+        setSelectedConversation(conversation);
+        setMessages([]);
+        setShowChat(true);
+      }
     } catch (error) {
       console.error("Error starting conversation:", error);
     }
