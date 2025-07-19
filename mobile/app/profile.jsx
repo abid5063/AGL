@@ -10,7 +10,8 @@ import {
   Modal,
   TextInput,
   Pressable,
-  Dimensions
+  Dimensions,
+  FlatList
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -30,6 +31,13 @@ export default function Profile() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentAnimal, setCurrentAnimal] = useState(null);
   const [image, setImage] = useState(null);
+  const [showMessages, setShowMessages] = useState(false);
+  const [showVets, setShowVets] = useState(false);
+  const [conversations, setConversations] = useState([]);
+  const [vets, setVets] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [conversationMessages, setConversationMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -64,6 +72,8 @@ export default function Profile() {
         }
         setFarmer(parsedFarmer);
         await fetchAnimals(token);
+        await fetchConversations();
+        await fetchVets();
       } catch (error) {
         Alert.alert("Error", "Failed to load data");
       } finally {
@@ -222,6 +232,97 @@ export default function Profile() {
     });
   };
 
+  const fetchConversations = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      const response = await axios.get(`http://localhost:3000/api/messages/conversations`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setConversations(response.data.conversations || []);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+    }
+  };
+
+  const fetchVets = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      const response = await axios.get(`http://localhost:3000/api/vets/search`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setVets(response.data.vets || []);
+    } catch (error) {
+      console.error("Error fetching vets:", error);
+    }
+  };
+
+  const openConversation = async (conversation) => {
+    try {
+      setSelectedConversation(conversation);
+      const token = await AsyncStorage.getItem('authToken');
+      
+      const response = await axios.get(
+        `http://localhost:3000/api/messages/conversation/${conversation.participant.id}/vet`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setConversationMessages(response.data.messages || []);
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      Alert.alert("Error", "Failed to load conversation");
+    }
+  };
+
+  const startConversationWithVet = async (vet) => {
+    try {
+      const conversation = {
+        participant: {
+          id: vet._id,
+          name: vet.name,
+          specialty: vet.specialty
+        }
+      };
+      setSelectedConversation(conversation);
+      setConversationMessages([]);
+      setShowVets(false);
+      setShowMessages(true);
+    } catch (error) {
+      console.error("Error starting conversation:", error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversation) return;
+
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      
+      await axios.post(
+        `http://localhost:3000/api/messages`,
+        {
+          receiverId: selectedConversation.participant.id,
+          receiverType: 'vet',
+          content: newMessage.trim()
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setNewMessage('');
+      
+      // Refresh conversation
+      const response = await axios.get(
+        `http://localhost:3000/api/messages/conversation/${selectedConversation.participant.id}/vet`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setConversationMessages(response.data.messages || []);
+      
+    } catch (error) {
+      console.error("Error sending message:", error);
+      Alert.alert("Error", "Failed to send message");
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -376,6 +477,32 @@ export default function Profile() {
               </View>
               <Text style={styles.featureTitle}>New Vaccine</Text>
               <Text style={styles.featureSubtitle}>Add vaccine record</Text>
+            </TouchableOpacity>
+
+            {/* Messages */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.messageCard]}
+              onPress={() => router.push('/farmerMessaging')}
+              testID="messages-button"
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="chatbubbles" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>Messages</Text>
+              <Text style={styles.featureSubtitle}>Chat with vets</Text>
+            </TouchableOpacity>
+
+            {/* Find Veterinarians */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.vetCard]}
+              onPress={() => setShowVets(true)}
+              testID="find-vets-button"
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="people" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>Find Vets</Text>
+              <Text style={styles.featureSubtitle}>Consult experts</Text>
             </TouchableOpacity>
 
             {/* Find Vet */}
@@ -692,6 +819,145 @@ export default function Profile() {
             </View>
           </View>
         </Modal>
+
+        {/* Messages Modal */}
+        <Modal
+          visible={showMessages}
+          animationType="slide"
+          presentationStyle="pageSheet"
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {selectedConversation ? selectedConversation.participant.name : "Messages"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  if (selectedConversation) {
+                    setSelectedConversation(null);
+                    setConversationMessages([]);
+                  } else {
+                    setShowMessages(false);
+                  }
+                }}
+                testID="close-messages-modal"
+              >
+                <Ionicons name={selectedConversation ? "arrow-back" : "close"} size={24} color="#34495e" />
+              </TouchableOpacity>
+            </View>
+            
+            {selectedConversation ? (
+              <View style={styles.chatContainer}>
+                <FlatList
+                  data={conversationMessages}
+                  renderItem={({ item }) => (
+                    <View style={[
+                      styles.messageItem,
+                      item.senderType === 'farmer' ? styles.sentMessage : styles.receivedMessage
+                    ]}>
+                      <Text style={styles.messageContent}>{item.content}</Text>
+                      <Text style={styles.messageTime}>
+                        {new Date(item.createdAt).toLocaleTimeString()}
+                      </Text>
+                    </View>
+                  )}
+                  keyExtractor={(item) => item._id}
+                  contentContainerStyle={styles.messagesContainer}
+                  showsVerticalScrollIndicator={false}
+                />
+                <View style={styles.messageInputContainer}>
+                  <TextInput
+                    style={styles.messageInput}
+                    value={newMessage}
+                    onChangeText={setNewMessage}
+                    placeholder="Type a message..."
+                    multiline
+                    testID="message-input"
+                  />
+                  <TouchableOpacity
+                    style={styles.sendButton}
+                    onPress={sendMessage}
+                    testID="send-message-button"
+                  >
+                    <Ionicons name="send" size={20} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <FlatList
+                data={conversations}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.conversationItem}
+                    onPress={() => openConversation(item)}
+                    testID={`conversation-${item.participant.id}`}
+                  >
+                    <View style={styles.conversationHeader}>
+                      <Text style={styles.conversationName}>{item.participant.name}</Text>
+                      <Text style={styles.conversationTime}>
+                        {new Date(item.lastMessage.timestamp).toLocaleDateString()}
+                      </Text>
+                    </View>
+                    <Text style={styles.conversationPreview} numberOfLines={2}>
+                      {item.lastMessage.content}
+                    </Text>
+                    {item.unreadCount > 0 && (
+                      <View style={styles.unreadBadge}>
+                        <Text style={styles.unreadText}>{item.unreadCount}</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.conversationId}
+                contentContainerStyle={styles.modalContent}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
+          </View>
+        </Modal>
+
+        {/* Find Vets Modal */}
+        <Modal
+          visible={showVets}
+          animationType="slide"
+          presentationStyle="pageSheet"
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Find Veterinarians</Text>
+              <TouchableOpacity
+                onPress={() => setShowVets(false)}
+                testID="close-vets-modal"
+              >
+                <Ionicons name="close" size={24} color="#34495e" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={vets}
+              renderItem={({ item }) => (
+                <View style={styles.vetItem}>
+                  <View style={styles.vetInfo}>
+                    <Text style={styles.vetName}>Dr. {item.name}</Text>
+                    <Text style={styles.vetSpecialty}>{item.specialty}</Text>
+                    <Text style={styles.vetLocation}>{item.location}</Text>
+                    <Text style={styles.vetRating}>⭐ {item.rating}/5 ({item.totalReviews} reviews)</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.chatButton}
+                    onPress={() => startConversationWithVet(item)}
+                    testID={`chat-with-vet-${item._id}`}
+                  >
+                    <Ionicons name="chatbubbles" size={16} color="#fff" />
+                    <Text style={styles.chatButtonText}>Chat</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={styles.modalContent}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </Modal>
       </View>
     </ScrollView>
   );
@@ -825,16 +1091,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12,
+    paddingHorizontal: 4,
   },
   featureCard: {
-    width: (width - 60) / 2,
+    width: "48%",
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -1120,5 +1386,178 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 12,
     marginBottom: 16,
+  },
+  messageCard: {
+    backgroundColor: "#27ae60",
+  },
+  vetCard: {
+    backgroundColor: "#8e44ad",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ecf0f1",
+  },
+  chatContainer: {
+    flex: 1,
+  },
+  messagesContainer: {
+    padding: 16,
+  },
+  messageItem: {
+    maxWidth: "80%",
+    marginBottom: 12,
+    padding: 12,
+    borderRadius: 12,
+  },
+  sentMessage: {
+    alignSelf: "flex-end",
+    backgroundColor: "#3498db",
+  },
+  receivedMessage: {
+    alignSelf: "flex-start",
+    backgroundColor: "#ecf0f1",
+  },
+  messageContent: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#2c3e50",
+  },
+  messageTime: {
+    fontSize: 10,
+    marginTop: 4,
+    opacity: 0.7,
+    color: "#7f8c8d",
+  },
+  messageInputContainer: {
+    flexDirection: "row",
+    padding: 16,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#ecf0f1",
+    alignItems: "flex-end",
+  },
+  messageInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 8,
+    maxHeight: 100,
+    fontSize: 14,
+  },
+  sendButton: {
+    backgroundColor: "#3498db",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  conversationItem: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    position: "relative",
+  },
+  conversationHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  conversationName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2c3e50",
+  },
+  conversationTime: {
+    fontSize: 12,
+    color: "#95a5a6",
+  },
+  conversationPreview: {
+    fontSize: 14,
+    color: "#34495e",
+    lineHeight: 20,
+  },
+  unreadBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#e74c3c",
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    minWidth: 20,
+    alignItems: "center",
+  },
+  unreadText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  vetItem: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  vetInfo: {
+    flex: 1,
+  },
+  vetName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2c3e50",
+    marginBottom: 4,
+  },
+  vetSpecialty: {
+    fontSize: 14,
+    color: "#27ae60",
+    marginBottom: 2,
+  },
+  vetLocation: {
+    fontSize: 12,
+    color: "#7f8c8d",
+    marginBottom: 2,
+  },
+  vetRating: {
+    fontSize: 12,
+    color: "#f39c12",
+  },
+  chatButton: {
+    backgroundColor: "#3498db",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 4,
+  },
+  chatButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });

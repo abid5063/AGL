@@ -6,7 +6,10 @@ import protectRoute from "../middleware/auth.middleware.js"; // <-- Import your 
 const router = express.Router();
 
 const generateToken = (farmerId) => {
-  return jwt.sign({ farmerId }, process.env.JWT_SECRET, { expiresIn: "15d" });
+  return jwt.sign({ 
+    farmerId, 
+    userType: 'farmer' 
+  }, process.env.JWT_SECRET, { expiresIn: "15d" });
 }
 
 router.post("/register", async (req, res) => {
@@ -144,6 +147,47 @@ router.delete("/delete/:id", protectRoute, async (req, res) => {
     res.status(200).json({ message: "Farmer deleted successfully" });
   } catch (error) {
     console.log("Error in delete farmer route", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Search for farmers (for vets to find farmers to message)
+router.get("/farmers/search", async (req, res) => {
+  try {
+    const { search } = req.query;
+    
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const farmers = await Farmer.find(query)
+      .select('name location profileImage phoneNo')
+      .limit(20);
+
+    res.json({ farmers });
+
+  } catch (error) {
+    console.error("Search farmers error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Get all farmers (for vets)
+router.get("/farmers", async (req, res) => {
+  try {
+    const farmers = await Farmer.find({})
+      .select('name location profileImage phoneNo')
+      .limit(20);
+
+    res.json({ farmers });
+
+  } catch (error) {
+    console.error("Get farmers error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
