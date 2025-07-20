@@ -9,14 +9,17 @@ import {
   Alert,
   Modal,
   TextInput,
-  Pressable
+  Pressable,
+  Dimensions
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useEffect, useState } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Feather, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import axios from "axios";
 import * as ImagePicker from 'expo-image-picker';
+
+const { width } = Dimensions.get('window');
 
 export default function Profile() {
   const params = useLocalSearchParams();
@@ -242,123 +245,250 @@ export default function Profile() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        {/* Profile Header */}
-        {/* <View style={styles.header}>
-          <Image 
-            source={farmer.profileImage ? { uri: farmer.profileImage } : null}
-            style={styles.profileImage}
-          />
-          <Text style={styles.name}>{farmer.name}</Text>
-          <Text style={styles.email}>{farmer.email}</Text>
-        </View> */}
-
-
-{/* // Edit Profile Button */}
-        <View style={styles.header}>
-  <Image 
-    source={farmer.profileImage ? { uri: farmer.profileImage } : null}
-    style={styles.profileImage}
-  />
-  <Text style={styles.name}>{farmer.name}</Text>
-  <Text style={styles.email}>{farmer.email}</Text>
-</View>
-
-<View style={styles.actionButtonRow}>
-  <TouchableOpacity
-    style={[styles.editProfileButton, { marginBottom: 12 }]}
-    onPress={() => router.push({
-      pathname: '/editProfile',
-      params: { farmer: JSON.stringify(farmer) }
-    })}
-    testID="edit-profile-button"
-  >
-    <Text style={styles.editProfileButtonText}>Edit Profile</Text>
-  </TouchableOpacity>
-  <TouchableOpacity
-    style={[styles.editProfileButton, { backgroundColor: '#27ae60', marginBottom: 12 }]}
-    onPress={() => router.push('/aiChatbot')}
-    testID="ai-chatbot-button"
-  >
-    <Text style={styles.editProfileButtonText}>AI Chatbot</Text>
-  </TouchableOpacity>
-  <TouchableOpacity
-    style={[styles.editProfileButton, { backgroundColor: '#e67e22', marginBottom: 12 }]}
-    onPress={() => router.push('/symptomChecker')}
-    testID="disease-detection-button"
-  >
-    <Text style={styles.editProfileButtonText}>Disease Detection</Text>
-  </TouchableOpacity>
-  <TouchableOpacity
-    style={[styles.editProfileButton, { backgroundColor: '#2980b9', marginBottom: 12 }]}
-    onPress={() => router.push('/marketAnalysis')}
-  >
-    <Text style={styles.editProfileButtonText}>Market Analysis</Text>
-  </TouchableOpacity>
-  <TouchableOpacity
-    style={[styles.editProfileButton, { backgroundColor: '#8e44ad', marginBottom: 12 }]}
-    onPress={() => router.push('/vetLocation')}
-  >
-    <Text style={styles.editProfileButtonText}>Find Nearest Vet</Text>
-  </TouchableOpacity>
-</View>
-
-        {/* Farm Details */}
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailItem}>
-            <AntDesign name="enviromento" size={20} color="#4a89dc" />
-            <Text style={styles.detailText}>
-              {farmer.location || "Location not specified"}
-            </Text>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <View style={styles.headerContent}>
+            <Text style={styles.welcomeText}>Welcome Back</Text>
+            <Text style={styles.farmerName}>{farmer.name}</Text>
+            <Text style={styles.farmerEmail}>{farmer.email}</Text>
           </View>
+          <TouchableOpacity 
+            style={styles.profileImageContainer}
+            onPress={() => router.push({
+              pathname: '/editProfile',
+              params: { farmer: JSON.stringify(farmer) }
+            })}
+            testID="edit-profile-button"
+          >
+            <Image 
+              source={farmer.profileImage ? { uri: farmer.profileImage } : require('../assets/images/icon.png')}
+              style={styles.profileImage}
+            />
+            <View style={styles.editIndicator}>
+              <Ionicons name="pencil" size={12} color="#fff" />
+            </View>
+          </TouchableOpacity>
+        </View>
 
-          <View style={styles.detailItem}>
-            <AntDesign name="phone" size={20} color="#4a89dc" />
-            <Text style={styles.detailText}>
-              {farmer.phoneNo || "Phone not specified"}
-            </Text>
+        {/* Quick Stats */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="paw" size={24} color="#4a89dc" />
+            </View>
+            <Text style={styles.statNumber}>{animals.length}</Text>
+            <Text style={styles.statLabel}>Animals</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="location" size={24} color="#27ae60" />
+            </View>
+            <Text style={styles.statNumber}>1</Text>
+            <Text style={styles.statLabel}>Farm</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="shield-checkmark" size={24} color="#e67e22" />
+            </View>
+            <Text style={styles.statNumber}>Active</Text>
+            <Text style={styles.statLabel}>Status</Text>
+          </View>
+        </View>
+
+        {/* Main Features Grid */}
+        <View style={styles.featuresContainer}>
+          <Text style={styles.sectionTitle}>Farm Management</Text>
+          
+          <View style={styles.featuresGrid}>
+            {/* AI Chatbot */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.primaryCard]}
+              onPress={() => router.push('/aiChatbot')}
+              testID="ai-chatbot-button"
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>AI Assistant</Text>
+              <Text style={styles.featureSubtitle}>Get instant help</Text>
+            </TouchableOpacity>
+
+            {/* Disease Detection */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.secondaryCard]}
+              onPress={() => router.push('/symptomChecker')}
+              testID="disease-detection-button"
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="medical" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>Health Check</Text>
+              <Text style={styles.featureSubtitle}>Disease detection</Text>
+            </TouchableOpacity>
+
+            {/* Task Management */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.accentCard]}
+              onPress={() => router.push('/taskManagement')}
+              testID="task-management-button"
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="clipboard" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>Tasks</Text>
+              <Text style={styles.featureSubtitle}>Manage daily tasks</Text>
+            </TouchableOpacity>
+
+            {/* Add Task */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.warningCard]}
+              onPress={() => router.push('/addTask')}
+              testID="add-task-button"
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="add-circle" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>New Task</Text>
+              <Text style={styles.featureSubtitle}>Add new task</Text>
+            </TouchableOpacity>
+
+            {/* Vaccine Management */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.infoCard]}
+              onPress={() => router.push('/vaccineManagement')}
+              testID="vaccine-management-button"
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="shield-checkmark" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>Vaccines</Text>
+              <Text style={styles.featureSubtitle}>Manage vaccines</Text>
+            </TouchableOpacity>
+
+            {/* Add Vaccine */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.successCard]}
+              onPress={() => router.push('/addVaccine')}
+              testID="add-vaccine-button"
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="add-circle" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>New Vaccine</Text>
+              <Text style={styles.featureSubtitle}>Add vaccine record</Text>
+            </TouchableOpacity>
+
+            {/* Find Vet */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.warningCard]}
+              onPress={() => router.push('/vetLocation')}
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="location" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>Find Vet</Text>
+              <Text style={styles.featureSubtitle}>Nearest veterinarian</Text>
+            </TouchableOpacity>
+
+            {/* Market Analysis */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.accentCard]}
+              onPress={() => router.push('/marketAnalysis')}
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="trending-up" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>Market</Text>
+              <Text style={styles.featureSubtitle}>Price analysis</Text>
+            </TouchableOpacity>
+
+            {/* Food Suggestions */}
+            <TouchableOpacity
+              style={[styles.featureCard, styles.primaryCard]}
+              onPress={() => router.push('/foodSuggestions')}
+            >
+              <View style={styles.featureIconContainer}>
+                <Ionicons name="nutrition" size={28} color="#fff" />
+              </View>
+              <Text style={styles.featureTitle}>Nutrition</Text>
+              <Text style={styles.featureSubtitle}>Feed suggestions</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* Animals Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>My Animals</Text>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Feather name="plus" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
+        <View style={styles.animalsSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>My Animals</Text>
+            <TouchableOpacity 
+              style={styles.addAnimalButton}
+              onPress={() => setModalVisible(true)}
+              testID="add-animal-button"
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
 
-        {animals.length === 0 ? (
-          <Text style={styles.noAnimalsText}>No animals added yet</Text>
-        ) : (
-          animals.map(animal => (
-            <View key={animal._id} style={styles.animalCard}>
-              {animal.photo_url ? (
-                <Image 
-                  source={{ uri: animal.photo_url }} 
-                  style={styles.animalImage}
-                />
-              ) : (
-                <View style={[styles.animalImage, { backgroundColor: "#e0e0e0", justifyContent: "center", alignItems: "center" }]}>
-                  <Feather name="image" size={28} color="#aaa" />
-                </View>
-              )}
-              <View style={styles.animalInfo}>
-                <Text style={styles.animalName}>{animal.name}</Text>
-              </View>
-              <View style={styles.animalActions}>
+          {animals.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="paw" size={48} color="#ccc" />
+              <Text style={styles.emptyStateText}>No animals added yet</Text>
+              <Text style={styles.emptyStateSubtext}>Tap the + button to add your first animal</Text>
+            </View>
+          ) : (
+            <View style={styles.animalsGrid}>
+              {animals.map(animal => (
                 <TouchableOpacity 
+                  key={animal._id} 
+                  style={styles.animalCard}
                   onPress={() => handleViewAnimal(animal)}
                   testID={`view-animal-${animal._id}`}
                 >
-                  <Text style={styles.viewButtonText}>View</Text>
+                  <View style={styles.animalImageContainer}>
+                    {animal.photo_url ? (
+                      <Image 
+                        source={{ uri: animal.photo_url }} 
+                        style={styles.animalImage}
+                      />
+                    ) : (
+                      <View style={styles.animalImagePlaceholder}>
+                        <Ionicons name="paw" size={24} color="#aaa" />
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.animalInfo}>
+                    <Text style={styles.animalName}>{animal.name}</Text>
+                    <Text style={styles.animalType}>{animal.type}</Text>
+                    <Text style={styles.animalBreed}>{animal.breed}</Text>
+                  </View>
                 </TouchableOpacity>
-              </View>
+              ))}
             </View>
-          ))
-        )}
+          )}
+        </View>
+
+        {/* Farm Details */}
+        <View style={styles.farmDetailsSection}>
+          <Text style={styles.sectionTitle}>Farm Details</Text>
+          <View style={styles.detailsCard}>
+            <View style={styles.detailItem}>
+              <View style={styles.detailIconContainer}>
+                <Ionicons name="location" size={20} color="#4a89dc" />
+              </View>
+              <Text style={styles.detailText}>
+                {farmer.location || "Location not specified"}
+              </Text>
+            </View>
+            <View style={styles.detailItem}>
+              <View style={styles.detailIconContainer}>
+                <Ionicons name="call" size={20} color="#4a89dc" />
+              </View>
+              <Text style={styles.detailText}>
+                {farmer.phoneNo || "Phone not specified"}
+              </Text>
+            </View>
+          </View>
+        </View>
 
         {/* Logout Button */}
         <TouchableOpacity 
@@ -366,7 +496,8 @@ export default function Profile() {
           onPress={handleLogout}
           testID="logout-button"
         >
-          <Text style={styles.logoutButtonText}>Log Out</Text>
+          <Ionicons name="log-out" size={20} color="#fff" style={styles.logoutIcon} />
+          <Text style={styles.logoutButtonText}>Sign Out</Text>
         </TouchableOpacity>
 
         {/* Add Animal Modal */}
@@ -572,165 +703,338 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f7f9fa",
+    backgroundColor: "#f5f6fa",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f7f9fa",
+    backgroundColor: "#f5f6fa",
   },
   loadingText: {
     marginTop: 15,
     fontSize: 16,
     color: "#4a89dc",
   },
-  header: {
+  headerSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 25,
-    marginTop: 10,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingVertical: 25,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: "#7f8c8d",
+    marginBottom: 4,
+  },
+  farmerName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#2c3e50",
+    marginBottom: 2,
+  },
+  farmerEmail: {
+    fontSize: 14,
+    color: "#95a5a6",
+  },
+  profileImageContainer: {
+    position: "relative",
   },
   profileImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    marginBottom: 10,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: "#e0e0e0",
+    borderWidth: 3,
+    borderColor: "#fff",
   },
-  name: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  email: {
-    fontSize: 15,
-    color: "#666",
-    marginTop: 2,
-  },
-  detailsContainer: {
-    marginBottom: 20,
-  },
-  detailItem: {
-    flexDirection: "row",
+  editIndicator: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#4a89dc",
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 6,
+    borderWidth: 2,
+    borderColor: "#fff",
   },
-  detailText: {
-    marginLeft: 8,
-    fontSize: 15,
-    color: "#555",
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    gap: 10,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-    marginTop: 30,
+  statCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    flex: 1,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f8f9fa",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#2c3e50",
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#7f8c8d",
+  },
+  featuresContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#2c3e50",
+    marginBottom: 16,
   },
-  sectionButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  featuresGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     gap: 12,
   },
-  foodSuggestionButton: {
-    backgroundColor: '#27ae60',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 4,
+  featureCard: {
+    width: (width - 60) / 2,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    minHeight: 110,
   },
-  foodSuggestionButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+  primaryCard: {
+    backgroundColor: "#4a89dc",
+  },
+  secondaryCard: {
+    backgroundColor: "#e67e22",
+  },
+  accentCard: {
+    backgroundColor: "#9b59b6",
+  },
+  warningCard: {
+    backgroundColor: "#f39c12",
+  },
+  infoCard: {
+    backgroundColor: "#3498db",
+  },
+  successCard: {
+    backgroundColor: "#27ae60",
+  },
+  featureIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  featureTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  featureSubtitle: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 12,
+    textAlign: "center",
+  },
+  animalsSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  addAnimalButton: {
+    backgroundColor: "#4a89dc",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 40,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: "#7f8c8d",
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  emptyStateSubtext: {
     fontSize: 14,
+    color: "#95a5a6",
+    textAlign: "center",
+    paddingHorizontal: 20,
   },
-  marketButton: {
-    backgroundColor: '#f39c12',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 4,
-  },
-  marketButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  addButton: {
-    backgroundColor: '#4a89dc',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noAnimalsText: {
-    textAlign: 'center',
-    marginVertical: 20,
-    color: '#666',
+  animalsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
   },
   animalCard: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    elevation: 2,
+    width: (width - 60) / 2,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 10,
+  },
+  animalImageContainer: {
+    marginBottom: 12,
   },
   animalImage: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    marginRight: 15,
     backgroundColor: "#e0e0e0",
   },
+  animalImagePlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#f8f9fa",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   animalInfo: {
-    flex: 1,
-    justifyContent: 'center',
+    alignItems: "center",
   },
   animalName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 3,
-  },
-  animalActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-  },
-  viewButtonText: {
-    color: "#4a89dc",
     fontWeight: "bold",
-    fontSize: 15,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: "#4a89dc",
-    borderRadius: 6,
-    overflow: "hidden",
+    color: "#2c3e50",
+    marginBottom: 2,
+  },
+  animalType: {
+    fontSize: 14,
+    color: "#7f8c8d",
+    marginBottom: 1,
+  },
+  animalBreed: {
+    fontSize: 12,
+    color: "#95a5a6",
+  },
+  farmDetailsSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  detailsCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  detailIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#f8f9fa",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  detailText: {
+    fontSize: 16,
+    color: "#2c3e50",
   },
   logoutButton: {
-    marginTop: 30,
     backgroundColor: "#e74c3c",
-    padding: 12,
-    borderRadius: 8,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoutIcon: {
+    marginRight: 8,
   },
   logoutButtonText: {
-    color: "white",
-    fontWeight: "bold",
+    color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
   },
   modalContainer: {
     flex: 1,
@@ -741,33 +1045,40 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '90%',
     backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#2c3e50',
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
-    fontSize: 15,
-    backgroundColor: "#fafbfc",
+    borderColor: "#e0e0e0",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    fontSize: 16,
+    backgroundColor: "#f8f9fa",
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+    gap: 12,
   },
   modalButton: {
-    padding: 12,
-    borderRadius: 8,
-    width: '48%',
+    padding: 16,
+    borderRadius: 12,
+    flex: 1,
     alignItems: 'center',
   },
   cancelButton: {
@@ -779,10 +1090,12 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: 'white',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   cancelButtonText: {
-    color: '#333',
+    color: '#2c3e50',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   linkText: {
     color: "#4a89dc",
@@ -792,42 +1105,20 @@ const styles = StyleSheet.create({
   imagePickerButton: {
     borderWidth: 1,
     borderColor: '#4a89dc',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
     alignItems: 'center',
   },
   imagePickerText: {
     color: '#4a89dc',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   previewImage: {
     width: '100%',
     height: 150,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  actionButtonRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  editProfileButton: {
-    backgroundColor: '#4a89dc',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 12,
-    width: '48%',
-    minWidth: 150,
-    marginRight: 0,
-    marginLeft: 0,
-  },
-  editProfileButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
+    borderRadius: 12,
+    marginBottom: 16,
   },
 });

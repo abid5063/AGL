@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  ActivityIndicator, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
   Alert,
   Modal,
   Image,
@@ -78,10 +78,10 @@ export default function MarketAnalysis() {
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contents: [{ 
-            parts: [{ text: prompt }] 
-          }] 
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
         }),
       });
 
@@ -129,10 +129,10 @@ export default function MarketAnalysis() {
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contents: [{ 
-            parts: [{ text: prompt }] 
-          }] 
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
         }),
       });
 
@@ -213,7 +213,7 @@ export default function MarketAnalysis() {
         </Text>
 
         <View style={styles.mainButtons}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.mainButton}
             onPress={() => setShowMainOptions(true)}
           >
@@ -235,7 +235,7 @@ export default function MarketAnalysis() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Market Analysis Options</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowMainOptions(false)}
                 style={styles.closeButton}
               >
@@ -244,7 +244,7 @@ export default function MarketAnalysis() {
             </View>
 
             <View style={styles.optionsContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.optionButton}
                 onPress={() => {
                   setShowMainOptions(false);
@@ -256,7 +256,7 @@ export default function MarketAnalysis() {
                 <Text style={styles.optionButtonSubtext}>Analyze your animals for selling</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.optionButton}
                 onPress={() => {
                   setShowMainOptions(false);
@@ -283,7 +283,7 @@ export default function MarketAnalysis() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Animal to Sell</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowSellOptions(false)}
                 style={styles.closeButton}
               >
@@ -306,8 +306,8 @@ export default function MarketAnalysis() {
                   >
                     <View style={styles.animalImageContainer}>
                       {animal.photo_url ? (
-                        <Image 
-                          source={{ uri: animal.photo_url }} 
+                        <Image
+                          source={{ uri: animal.photo_url }}
                           style={styles.animalImage}
                         />
                       ) : (
@@ -345,7 +345,7 @@ export default function MarketAnalysis() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Buy Analysis</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowBuyOptions(false)}
                 style={styles.closeButton}
               >
@@ -360,21 +360,21 @@ export default function MarketAnalysis() {
                 value={buyFormData.animalType}
                 onChangeText={(text) => handleInputChange('animalType', text)}
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Breed"
                 value={buyFormData.breed}
                 onChangeText={(text) => handleInputChange('breed', text)}
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Gender"
                 value={buyFormData.gender}
                 onChangeText={(text) => handleInputChange('gender', text)}
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Weight (kg)"
@@ -382,7 +382,7 @@ export default function MarketAnalysis() {
                 onChangeText={(text) => handleInputChange('weight', text)}
                 keyboardType="numeric"
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Age (years)"
@@ -390,7 +390,7 @@ export default function MarketAnalysis() {
                 onChangeText={(text) => handleInputChange('age', text)}
                 keyboardType="numeric"
               />
-              
+
               <TextInput
                 style={styles.input}
                 placeholder="Location (optional)"
@@ -398,7 +398,7 @@ export default function MarketAnalysis() {
                 onChangeText={(text) => handleInputChange('location', text)}
               />
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.analyzeButton}
                 onPress={() => {
                   setShowBuyOptions(false);
@@ -425,7 +425,7 @@ export default function MarketAnalysis() {
               <Text style={styles.modalTitle}>
                 Market Analysis {selectedAnimal ? `for ${selectedAnimal.name}` : ''}
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowAnalysisModal(false)}
                 style={styles.closeButton}
               >
