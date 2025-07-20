@@ -105,30 +105,17 @@ const TaskManagement = () => {
 
   // Delete task
   const deleteTask = async (taskId) => {
-    Alert.alert(
-      'Delete Task',
-      'Are you sure you want to delete this task?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const token = await AsyncStorage.getItem('authToken');
-              await axios.delete(`${API_BASE_URL}/api/tasks/${taskId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-              });
-              
-              fetchTasks(); // Refresh tasks
-            } catch (error) {
-              console.error('Error deleting task:', error);
-              Alert.alert('Error', 'Failed to delete task');
-            }
-          }
-        }
-      ]
-    );
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      await axios.delete(`${API_BASE_URL}/api/tasks/${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      fetchTasks(); // Refresh tasks
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      Alert.alert('Error', 'Failed to delete task');
+    }
   };
 
   // Format date for display
@@ -316,6 +303,12 @@ const TaskManagement = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
         <Text style={styles.title}>Task Management</Text>
         <TouchableOpacity
           style={styles.addButton}
@@ -369,10 +362,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
+    textAlign: 'center',
   },
   addButton: {
     backgroundColor: '#007AFF',
@@ -390,18 +393,23 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   filterButton: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    marginRight: 10,
+    marginRight: 8,
     borderRadius: 20,
     backgroundColor: '#f0f0f0',
+    minWidth: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   activeFilter: {
     backgroundColor: '#007AFF',
   },
   filterText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
+    textAlign: 'center',
+    fontWeight: '500',
   },
   activeFilterText: {
     color: '#fff',
