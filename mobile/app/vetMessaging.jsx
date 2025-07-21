@@ -367,9 +367,28 @@ export default function VetMessaging() {
                 {selectedConversation.participant.location || "Location not specified"}
               </Text>
             </View>
-            <TouchableOpacity>
-              <Ionicons name="call" size={24} color="#27ae60" />
-            </TouchableOpacity>
+            <View style={styles.chatHeaderActions}>
+              <TouchableOpacity 
+                style={styles.appointmentButton}
+                onPress={() => {
+                  const farmerId = selectedConversation.participant._id || selectedConversation.participant.id;
+                  const farmerName = selectedConversation.participant.name;
+                  router.push({
+                    pathname: '/addAppointment',
+                    params: { 
+                      farmerId: farmerId,
+                      farmerName: farmerName,
+                      fromChat: 'true'
+                    }
+                  });
+                }}
+              >
+                <Ionicons name="calendar" size={20} color="#3498db" />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Ionicons name="call" size={24} color="#27ae60" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Messages */}
@@ -378,7 +397,6 @@ export default function VetMessaging() {
             renderItem={renderMessage}
             keyExtractor={(item) => item._id}
             contentContainerStyle={styles.messagesList}
-            inverted
           />
 
           {/* Message Input */}
@@ -589,6 +607,18 @@ const styles = StyleSheet.create({
   chatHeaderInfo: {
     flex: 1,
     marginLeft: 16,
+  },
+  chatHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  appointmentButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#3498db',
   },
   chatHeaderName: {
     fontSize: 16,

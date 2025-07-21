@@ -398,7 +398,7 @@ export default function FarmerMessaging() {
             renderItem={renderMessage}
             keyExtractor={(item) => item._id}
             contentContainerStyle={styles.messagesList}
-            inverted
+          // removed inverted so latest message is at the bottom
           />
 
           {/* Message Input */}

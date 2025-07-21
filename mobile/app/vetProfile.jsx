@@ -121,25 +121,12 @@ export default function VetProfile() {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await AsyncStorage.multiRemove(['authToken', 'userData']);
-              router.replace('/');
-            } catch (error) {
-              console.error("Error during logout:", error);
-            }
-          }
-        }
-      ]
-    );
+    try {
+      await AsyncStorage.multiRemove(['authToken', 'userData']);
+      router.replace('/');
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   const handleAppointmentAction = async (appointmentId, action) => {
@@ -215,7 +202,7 @@ export default function VetProfile() {
       icon: "calendar",
       color: "#3498db",
       count: appointments.filter(a => a.status === 'pending').length,
-      onPress: () => setShowAppointments(true),
+      onPress: () => router.push('/appointmentManagement'),
       testID: "appointments-card"
     },
     {
