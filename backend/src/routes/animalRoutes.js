@@ -43,7 +43,7 @@ import Animal from "../models/Animal.js";
 import Vaccine from "../models/Vaccine.js";
 import Task from "../models/Task.js";
 import protectRoute from "../middleware/auth.middleware.js";
-
+ 
 const router = express.Router();
  
 // Create a new animal
