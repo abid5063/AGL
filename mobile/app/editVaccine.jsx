@@ -14,8 +14,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
-const API_BASE_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
 
 export default function EditVaccine() {
   const router = useRouter();
@@ -42,10 +41,10 @@ export default function EditVaccine() {
       
       // Fetch both animals and vaccine details
       const [animalsResponse, vaccineResponse] = await Promise.all([
-        axios.get(`${API_BASE_URL}/animals`, {
+        axios.get(`${API_BASE_URL}/api/animals`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get(`${API_BASE_URL}/vaccines/${vaccineId}`, {
+        axios.get(`${API_BASE_URL}/api/vaccines/${vaccineId}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);
@@ -121,7 +120,7 @@ export default function EditVaccine() {
         requestData.next_due_date = formData.next_due_date;
       }
 
-      await axios.put(`${API_BASE_URL}/vaccines/${vaccineId}`, requestData, {
+      await axios.put(`${API_BASE_URL}/api/vaccines/${vaccineId}`, requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

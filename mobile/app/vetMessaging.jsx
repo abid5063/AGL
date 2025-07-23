@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
 const { width } = Dimensions.get('window');
 
 export default function VetMessaging() {
@@ -33,7 +33,7 @@ export default function VetMessaging() {
   const [refreshing, setRefreshing] = useState(false);
   const [vet, setVet] = useState(null);
 
-  const API_BASE_URL = "http://localhost:3000/api";
+  // const API_BASE_URL = "http://localhost:3000/api";
 
   useEffect(() => {
     loadVetData();
@@ -61,7 +61,7 @@ export default function VetMessaging() {
   const fetchConversations = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`${API_BASE_URL}/messages/conversations`, {
+      const response = await axios.get(`${API_BASE_URL}/api/messages/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setConversations(response.data.conversations || []);
@@ -72,7 +72,7 @@ export default function VetMessaging() {
 
   const searchFarmers = async (query = '') => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/auth/farmers/search`, {
+      const response = await axios.get(`${API_BASE_URL}/api/auth/farmers/search`, {
         params: query.trim() !== '' ? { search: query } : {}
       });
       
@@ -118,7 +118,7 @@ export default function VetMessaging() {
       }
       
       const response = await axios.get(
-        `${API_BASE_URL}/messages/conversation/${participantId}/farmer`,
+        `${API_BASE_URL}/api/messages/conversation/${participantId}/farmer`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -159,7 +159,7 @@ export default function VetMessaging() {
       }
       
       const response = await axios.post(
-        `${API_BASE_URL}/messages`,
+        `${API_BASE_URL}/api/messages`,
         {
           receiverId: participantId,
           receiverType: 'farmer',
@@ -170,7 +170,7 @@ export default function VetMessaging() {
 
       // Refresh messages to get the actual saved message
       const messagesResponse = await axios.get(
-        `${API_BASE_URL}/messages/conversation/${participantId}/farmer`,
+        `${API_BASE_URL}/api/messages/conversation/${participantId}/farmer`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       

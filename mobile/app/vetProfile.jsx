@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import axios from "axios";
-
+import { API_BASE_URL } from "../utils/apiConfig"; // Adjust the import path as needed
 const { width } = Dimensions.get('window');
 
 export default function VetProfile() {
@@ -34,7 +34,7 @@ export default function VetProfile() {
   const [newMessage, setNewMessage] = useState('');
   const [conversationMessages, setConversationMessages] = useState([]);
 
-  const API_BASE_URL = "http://localhost:3000/api";
+  // const API_BASE_URL = "http://localhost:3000/api";
 
   useEffect(() => {
     loadVetData();
@@ -87,19 +87,19 @@ export default function VetProfile() {
       const token = await AsyncStorage.getItem('authToken');
       
       // Fetch appointments
-      const appointmentsResponse = await axios.get(`${API_BASE_URL}/appointments/vet`, {
+      const appointmentsResponse = await axios.get(`${API_BASE_URL}/api/appointments/vet`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAppointments(appointmentsResponse.data.appointments || []);
 
       // Fetch conversations
-      const conversationsResponse = await axios.get(`${API_BASE_URL}/messages/conversations`, {
+      const conversationsResponse = await axios.get(`${API_BASE_URL}/api/messages/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setConversations(conversationsResponse.data.conversations || []);
 
       // Fetch recent messages for dashboard
-      const messagesResponse = await axios.get(`${API_BASE_URL}/messages/vet`, {
+      const messagesResponse = await axios.get(`${API_BASE_URL}/api/messages/vet`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(messagesResponse.data || []);
@@ -133,7 +133,7 @@ export default function VetProfile() {
     try {
       const token = await AsyncStorage.getItem('authToken');
       await axios.put(
-        `${API_BASE_URL}/appointments/${appointmentId}`,
+        `${API_BASE_URL}/api/appointments/${appointmentId}`,
         { status: action },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -151,7 +151,7 @@ export default function VetProfile() {
       const token = await AsyncStorage.getItem('authToken');
       
       const response = await axios.get(
-        `${API_BASE_URL}/messages/conversation/${conversation.participant.id}/farmer`,
+        `${API_BASE_URL}/api/messages/conversation/${conversation.participant.id}/farmer`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -170,7 +170,7 @@ export default function VetProfile() {
       const token = await AsyncStorage.getItem('authToken');
       
       await axios.post(
-        `${API_BASE_URL}/messages`,
+        `${API_BASE_URL}/api/messages`,
         {
           receiverId: selectedConversation.participant.id,
           receiverType: 'farmer',
@@ -183,7 +183,7 @@ export default function VetProfile() {
       
       // Refresh conversation
       const response = await axios.get(
-        `${API_BASE_URL}/messages/conversation/${selectedConversation.participant.id}/farmer`,
+        `${API_BASE_URL}/api/messages/conversation/${selectedConversation.participant.id}/farmer`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       

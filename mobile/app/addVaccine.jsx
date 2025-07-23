@@ -14,8 +14,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
-const API_BASE_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from '../utils/apiConfig';
 
 export default function AddVaccine() {
   const router = useRouter();
@@ -38,7 +37,7 @@ export default function AddVaccine() {
   const fetchAnimals = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`${API_BASE_URL}/animals`, {
+      const response = await axios.get(`${API_BASE_URL}/api/animals`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -104,7 +103,7 @@ export default function AddVaccine() {
         requestData.next_due_date = formData.next_due_date; // Already in YYYY-MM-DD format
       }
 
-      await axios.post(`${API_BASE_URL}/vaccines`, requestData, {
+      await axios.post(`${API_BASE_URL}/api/vaccines`, requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
