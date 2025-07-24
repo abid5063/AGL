@@ -15,60 +15,35 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerSection}>
+      <View style={styles.logoContainer}>
         <Image 
-          source={require('../assets/images/icon.png')}
+          source={require('../assets/images/logo.png')}
           style={styles.logo}
+          resizeMode="contain"
         />
-        <Text style={styles.title}>Welcome to AgroLink</Text>
-        <Text style={styles.subtitle}>Connecting Farmers and Veterinarians</Text>
-        <Text style={styles.description}>
-          Your comprehensive platform for livestock management, health monitoring, and professional veterinary care.
-        </Text>
       </View>
 
-      <View style={styles.optionsSection}>
-        <Text style={styles.questionText}>How would you like to continue?</Text>
-        
+      <Text style={styles.tagline}>Having trouble with livestock management?</Text>
+      <Text style={styles.subTagline}>Ride with us</Text>
+
+      <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.optionCard, styles.farmerCard]}
+          style={styles.optionButton}
           onPress={handleFarmerAuth}
           testID="farmer-option-button"
         >
-          <View style={styles.optionIconContainer}>
-            <Ionicons name="leaf" size={32} color="#fff" />
-          </View>
-          <View style={styles.optionContent}>
-            <Text style={styles.optionTitle}>I'm a Farmer</Text>
-            <Text style={styles.optionSubtitle}>
-              Manage your livestock, track health, schedule tasks, and connect with veterinarians
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color="#fff" />
+          <Ionicons name="leaf" size={24} color="#fff" />
+          <Text style={styles.buttonText}>I'm a Farmer</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.optionCard, styles.vetCard]}
+          style={styles.optionButton}
           onPress={handleVetAuth}
           testID="vet-option-button"
         >
-          <View style={styles.optionIconContainer}>
-            <Ionicons name="medical" size={32} color="#fff" />
-          </View>
-          <View style={styles.optionContent}>
-            <Text style={styles.optionTitle}>I'm a Veterinarian</Text>
-            <Text style={styles.optionSubtitle}>
-              Connect with farmers, manage appointments, and provide professional care
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color="#fff" />
+          <Ionicons name="medical" size={24} color="#fff" />
+          <Text style={styles.buttonText}>I'm a Veterinarian</Text>
         </TouchableOpacity>
-      </View>
-
-      <View style={styles.footerSection}>
-        <Text style={styles.footerText}>
-          Join thousands of farmers and veterinarians already using AgroLink
-        </Text>
       </View>
     </View>
   );
@@ -77,100 +52,59 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f6fa",
+    backgroundColor: "#fff",
     padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerSection: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 60,
+  logoContainer: {
+    marginBottom: 20,
+    width: '100%',
+    paddingHorizontal: 10, // Small margin on both sides
   },
   logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 30,
+    width: '100%',
+    height: 220, // Increased height to make image more prominent
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 10,
-    textAlign: "center",
+  tagline: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 5,
+    marginTop: 10,
   },
-  subtitle: {
+  subTagline: {
     fontSize: 18,
-    color: "#7f8c8d",
-    marginBottom: 20,
-    textAlign: "center",
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 40,
   },
-  description: {
-    fontSize: 16,
-    color: "#95a5a6",
-    textAlign: "center",
-    lineHeight: 24,
-    paddingHorizontal: 20,
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 15,
+    marginTop: 20,
   },
-  optionsSection: {
-    flex: 1,
-    justifyContent: "center",
-    gap: 20,
-  },
-  questionText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  optionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  farmerCard: {
-    backgroundColor: "#4a89dc",
-  },
-  vetCard: {
-    backgroundColor: "#27ae60",
-  },
-  optionIconContainer: {
-    width: 60,
-    height: 60,
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0d3b16',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
     borderRadius: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
+    width: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    gap: 10,
   },
-  optionContent: {
-    flex: 1,
-  },
-  optionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  optionSubtitle: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.9)",
-    lineHeight: 20,
-  },
-  footerSection: {
-    paddingVertical: 20,
-  },
-  footerText: {
-    fontSize: 14,
-    color: "#95a5a6",
-    textAlign: "center",
-    fontStyle: "italic",
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });
