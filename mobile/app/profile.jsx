@@ -443,13 +443,13 @@ export default function Profile() {
             {/* Add Task */}
             <TouchableOpacity
               style={[styles.featureCard, styles.warningCard]}
-              onPress={() => router.push('/addTask')}
+              onPress={() => router.push('/farmerAppointmentManagement')}
               testID="add-task-button"
             >
               <View style={styles.featureIconContainer}>
                 <Ionicons name="add-circle" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>New Task</Text>
+              <Text style={styles.featureTitle}>Appointments</Text>
               <Text style={styles.featureSubtitle}>Add new task</Text>
             </TouchableOpacity>
 

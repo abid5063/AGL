@@ -368,23 +368,7 @@ export default function VetMessaging() {
               </Text>
             </View>
             <View style={styles.chatHeaderActions}>
-              <TouchableOpacity 
-                style={styles.appointmentButton}
-                onPress={() => {
-                  const farmerId = selectedConversation.participant._id || selectedConversation.participant.id;
-                  const farmerName = selectedConversation.participant.name;
-                  router.push({
-                    pathname: '/addAppointment',
-                    params: { 
-                      farmerId: farmerId,
-                      farmerName: farmerName,
-                      fromChat: 'true'
-                    }
-                  });
-                }}
-              >
-                <Ionicons name="calendar" size={20} color="#3498db" />
-              </TouchableOpacity>
+              {/* Removed appointment button here */}
               <TouchableOpacity>
                 <Ionicons name="call" size={24} color="#27ae60" />
               </TouchableOpacity>

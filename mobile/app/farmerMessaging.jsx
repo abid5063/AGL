@@ -387,9 +387,30 @@ export default function FarmerMessaging() {
                 {selectedConversation.participant.specialty}
               </Text>
             </View>
-            <TouchableOpacity>
-              <Ionicons name="call" size={24} color="#27ae60" />
-            </TouchableOpacity>
+            <View style={styles.chatHeaderActions}>
+              <TouchableOpacity 
+                style={styles.appointmentButton}
+                onPress={() => {
+                  const vetId = selectedConversation.participant._id || selectedConversation.participant.id;
+                  const vetName = selectedConversation.participant.name;
+                  router.push({
+                    pathname: '/addAppointment',
+                    params: {
+                      vetId: vetId,
+                      vetName: vetName,
+                      fromChat: 'true',
+                      farmerId: farmer?._id,
+                      farmerName: farmer?.name
+                    }
+                  });
+                }}
+              >
+                <Ionicons name="calendar" size={20} color="#3498db" />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Ionicons name="call" size={24} color="#27ae60" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Messages */}
@@ -618,6 +639,13 @@ const styles = StyleSheet.create({
   chatHeaderSpecialty: {
     fontSize: 12,
     color: '#27ae60',
+  },
+  chatHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  appointmentButton: {
+    marginRight: 16,
   },
   messagesList: {
     paddingVertical: 16,

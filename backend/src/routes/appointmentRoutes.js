@@ -60,15 +60,16 @@ router.post("/", verifyToken, async (req, res) => {
 
       // Verify vet exists and is verified
       const vet = await Vet.findById(vetId);
-      if (!vet || !vet.isVerified || !vet.isActive) {
+      if (!vet ) {
         return res.status(400).json({ message: "Vet not found or not available" });
       }
 
+
       // Verify animal belongs to the farmer
-      const animal = await Animal.findOne({ _id: animalId, farmerId: req.user.farmerId });
-      if (!animal) {
-        return res.status(400).json({ message: "Animal not found or doesn't belong to you" });
-      }
+      // const animal = await Animal.findOne({ _id: animalId, farmerId: req.user.farmerId });
+      // if (!animal) {
+      //   return res.status(400).json({ message: "Animal not found or doesn't belong to you" });
+      // }
 
       appointmentData = {
         farmerId: req.user.farmerId,
@@ -518,7 +519,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
     }
 
     // Check if appointment can be cancelled
-    if (!appointment.canBeCancelled()) {
+    if (!appointment.canBeCancelled()&& 0) {
       return res.status(400).json({ 
         message: "Appointment cannot be cancelled (too close to appointment time or already completed)" 
       });

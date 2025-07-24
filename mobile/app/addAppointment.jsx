@@ -25,9 +25,11 @@ const AddAppointment = () => {
   const isFromChat = params.fromChat === 'true';
   const preSelectedFarmerId = params.farmerId;
   const preSelectedFarmerName = params.farmerName;
+  const preSelectedVetId = params.vetId;
+  const preSelectedVetName = params.vetName;
   
   const [formData, setFormData] = useState({
-    farmer: '',
+    animalId: '',
     animalName: '',
     date: new Date(),
     time: new Date(),
@@ -37,33 +39,44 @@ const AddAppointment = () => {
   const [errors, setErrors] = useState({});
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [farmers, setFarmers] = useState([]);
-  const [selectedFarmer, setSelectedFarmer] = useState(null);
-  const [showFarmerModal, setShowFarmerModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [animals, setAnimals] = useState([]);
+  const [selectedAnimal, setSelectedAnimal] = useState(null);
   const [vetId, setVetId] = useState(null);
+  const [vetName, setVetName] = useState('');
+  // Add farmerId and vetId state
+  const [farmerId, setFarmerId] = useState(preSelectedFarmerId || '');
+  const [farmerName, setFarmerName] = useState(preSelectedFarmerName || '');
+  const [farmers, setFarmers] = useState([]);
 
   useEffect(() => {
     initializeData();
   }, []);
 
   useEffect(() => {
-    // If coming from chat, set the pre-selected farmer
-    if (isFromChat && preSelectedFarmerId && preSelectedFarmerName) {
-      setSelectedFarmer({
-        _id: preSelectedFarmerId,
-        name: preSelectedFarmerName
-      });
+    if (isFromChat && preSelectedVetId && preSelectedVetName) {
+      setVetId(preSelectedVetId);
+      setVetName(preSelectedVetName);
     }
-  }, [isFromChat, preSelectedFarmerId, preSelectedFarmerName]);
+    if (isFromChat && preSelectedFarmerId && preSelectedFarmerName) {
+      setFarmerId(preSelectedFarmerId);
+      setFarmerName(preSelectedFarmerName);
+    }
+  }, [isFromChat, preSelectedVetId, preSelectedVetName, preSelectedFarmerId, preSelectedFarmerName]);
 
   const initializeData = async () => {
     try {
-      const userData = await AsyncStorage.getItem('userData');
-      if (userData) {
-        const user = JSON.parse(userData);
-        setVetId(user._id);
-        if (!isFromChat) {
+      if (isFromChat) {
+        // Fetch farmer's animals
+        const token = await AsyncStorage.getItem('authToken');
+        const response = await axios.get(`${API_BASE_URL}/api/animals`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setAnimals(response.data);
+      } else {
+        const userData = await AsyncStorage.getItem('userData');
+        if (userData) {
+          const user = JSON.parse(userData);
+          setVetId(user._id);
           loadFarmers();
         }
       }
@@ -86,13 +99,14 @@ const AddAppointment = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!selectedFarmer) {
-      newErrors.farmer = 'Please select a farmer';
-    }
-
-    if (!formData.animalName.trim()) {
-      newErrors.animalName = 'Please enter the animal name';
+    if (isFromChat) {
+      if (!selectedAnimal) {
+        newErrors.animalId = 'Please select an animal';
+      }
+    } else {
+      if (!formData.animalName.trim()) {
+        newErrors.animalName = 'Please enter the animal name';
+      }
     }
 
     if (!formData.reason.trim()) {
@@ -121,17 +135,33 @@ const AddAppointment = () => {
 
     try {
       const token = await AsyncStorage.getItem('authToken');
-      
-      const appointmentData = {
-        vet: vetId,
-        farmer: selectedFarmer._id,
-        animalName: formData.animalName.trim(),
-        date: formData.date.toISOString().split('T')[0],
-        time: formData.time.toTimeString().slice(0, 5),
-        reason: formData.reason.trim(),
-        notes: formData.notes.trim(),
-        status: 'pending'
-      };
+      let appointmentData;
+      if (isFromChat) {
+appointmentData = {
+  vetId: vetId,
+  farmerId: farmerId,
+  animalId: formData.animalId,
+  animalName: formData.animalName,
+  scheduledDate: formData.date.toISOString().split('T')[0],
+  scheduledTime: formData.time.toTimeString().slice(0, 5),
+  symptoms: formData.reason.trim(), // or use a separate symptoms field if you have one
+  notes: formData.notes.trim(),
+  status: 'pending'
+};
+      console.log(appointmentData);
+
+      } else {
+        const appointmentData = {
+          vet: vetId,
+          farmer: selectedFarmer._id,
+          animalName: formData.animalName.trim(),
+          date: formData.date.toISOString().split('T')[0],
+          time: formData.time.toTimeString().slice(0, 5),
+          reason: formData.reason.trim(),
+          notes: formData.notes.trim(),
+          status: 'pending'
+        };
+      }
 
       const response = await axios.post(
         `${API_BASE_URL}/api/appointments`,
@@ -139,8 +169,12 @@ const AddAppointment = () => {
         { headers: { Authorization: `Bearer ${token}` }}
       );
 
-      // Automatically redirect to appointment management without alert
-      router.replace('/appointmentManagement');
+      // Redirect to farmer appointment management if from chat
+      if (isFromChat) {
+        router.replace('/farmerAppointmentManagement');
+      } else {
+        router.replace('/appointmentManagement');
+      }
 
     } catch (error) {
       console.error('Error creating appointment:', error);
@@ -208,6 +242,15 @@ const AddAppointment = () => {
     </TouchableOpacity>
   );
 
+  // When an animal is selected, set both animalId and animalName in formData
+  const handleSelectAnimal = (animal) => {
+    setSelectedAnimal(animal);
+    setFormData(prev => ({ ...prev, animalId: animal._id, animalName: animal.name }));
+    if (errors.animalId) {
+      setErrors(prev => ({ ...prev, animalId: null }));
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2c3e50" />
@@ -227,53 +270,77 @@ const AddAppointment = () => {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.form}>
           
-          {/* Farmer Selection - Hidden when coming from chat */}
+          {/* Vet Selection - Hidden when coming from chat */}
           {!isFromChat && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Select Farmer *</Text>
+              <Text style={styles.label}>Select Veterinarian *</Text>
               <TouchableOpacity
-                style={[styles.selectButton, errors.farmer && styles.inputError]}
+                style={[styles.selectButton, errors.vet && styles.inputError]}
                 onPress={() => setShowFarmerModal(true)}
               >
                 <Text style={[
                   styles.selectButtonText,
-                  !selectedFarmer && styles.placeholderText
+                  !vetName && styles.placeholderText
                 ]}>
-                  {selectedFarmer ? selectedFarmer.name : 'Choose a farmer'}
+                  {vetName || 'Choose a veterinarian'}
                 </Text>
                 <Ionicons name="chevron-down" size={20} color="#7f8c8d" />
               </TouchableOpacity>
-              {errors.farmer && <Text style={styles.errorText}>{errors.farmer}</Text>}
+              {errors.vet && <Text style={styles.errorText}>{errors.vet}</Text>}
             </View>
           )}
-
-          {/* Show selected farmer when coming from chat */}
-          {isFromChat && selectedFarmer && (
+          {/* Show selected vet when coming from chat */}
+          {isFromChat && vetName && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Farmer</Text>
-              <View style={styles.selectedFarmerContainer}>
-                <Ionicons name="person" size={20} color="#27ae60" />
-                <Text style={styles.selectedFarmerText}>{selectedFarmer.name}</Text>
+              <Text style={styles.label}>Veterinarian</Text>
+              <View style={styles.selectedVetContainer}>
+                <Ionicons name="person" size={20} color="#3498db" />
+                <Text style={styles.selectedVetText}>{vetName}</Text>
               </View>
             </View>
           )}
-
-          {/* Animal Name Input */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Animal Name *</Text>
-            <TextInput
-              style={[styles.textInput, styles.singleLineInput, errors.animalName && styles.inputError]}
-              value={formData.animalName}
-              onChangeText={(text) => {
-                setFormData(prev => ({ ...prev, animalName: text }));
-                if (errors.animalName) {
-                  setErrors(prev => ({ ...prev, animalName: null }));
-                }
-              }}
-              placeholder="Enter the animal's name (e.g., Bella, Max, Cow #123)"
-            />
-            {errors.animalName && <Text style={styles.errorText}>{errors.animalName}</Text>}
-          </View>
+          {/* Animal Selection for Farmer (from chat) */}
+          {isFromChat && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Select Animal *</Text>
+              <FlatList
+                data={animals}
+                horizontal
+                keyExtractor={item => item._id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.animalCard,
+                      selectedAnimal && selectedAnimal._id === item._id && styles.selectedAnimalCard
+                    ]}
+                    onPress={() => handleSelectAnimal(item)}
+                  >
+                    <Text style={styles.animalName}>{item.name}</Text>
+                    <Text style={styles.animalType}>{item.type}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+              {errors.animalId && <Text style={styles.errorText}>{errors.animalId}</Text>}
+            </View>
+          )}
+          {/* Animal Name Input for Vet (not from chat) */}
+          {!isFromChat && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Animal Name *</Text>
+              <TextInput
+                style={[styles.textInput, styles.singleLineInput, errors.animalName && styles.inputError]}
+                value={formData.animalName}
+                onChangeText={(text) => {
+                  setFormData(prev => ({ ...prev, animalName: text }));
+                  if (errors.animalName) {
+                    setErrors(prev => ({ ...prev, animalName: null }));
+                  }
+                }}
+                placeholder="Enter the animal's name (e.g., Bella, Max, Cow #123)"
+              />
+              {errors.animalName && <Text style={styles.errorText}>{errors.animalName}</Text>}
+            </View>
+          )}
 
           {/* Date Selection */}
           <View style={styles.inputGroup}>
@@ -384,7 +451,7 @@ const AddAppointment = () => {
               >
                 <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <Text style={styles.modalTitle}>Select Farmer</Text>
+              <Text style={styles.modalTitle}>Select Veterinarian</Text>
               <View style={styles.placeholder} />
             </View>
             
@@ -392,7 +459,7 @@ const AddAppointment = () => {
               <Ionicons name="search" size={20} color="#7f8c8d" style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search farmers..."
+                placeholder="Search veterinarians..."
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
@@ -509,6 +576,45 @@ const styles = StyleSheet.create({
     color: '#27ae60',
     fontWeight: '600',
     marginLeft: 8,
+  },
+  selectedVetContainer: {
+    backgroundColor: '#e8f5e8',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#3498db',
+  },
+  selectedVetText: {
+    fontSize: 16,
+    color: '#3498db',
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  animalCard: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 12,
+    padding: 15,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    width: 150,
+    alignItems: 'center',
+  },
+  selectedAnimalCard: {
+    borderColor: '#3498db',
+    borderWidth: 2,
+  },
+  animalName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: 4,
+  },
+  animalType: {
+    fontSize: 14,
+    color: '#7f8c8d',
   },
   inputError: {
     borderColor: '#e74c3c',
