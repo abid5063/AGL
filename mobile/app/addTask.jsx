@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { 
   View, 
   Text, 
@@ -27,6 +28,9 @@ const AddTask = () => {
     animal: '',
     notes: ''
   });
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -62,13 +66,11 @@ const AddTask = () => {
       const response = await axios.get(`${API_BASE_URL}/api/animals`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
       setAnimals(response.data);
     } catch (error) {
       console.error('Error fetching animals:', error);
       console.error('Error response:', error.response?.data);
       console.error('Error status:', error.response?.status);
-      
       // Show user-friendly error message
       if (error.response?.status === 401) {
         Alert.alert('Authentication Error', 'Please log in again');
@@ -95,6 +97,17 @@ const AddTask = () => {
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
+    });
+  };
+
+  const formatTime = (timeString) => {
+    const [hour, minute] = timeString.split(':');
+    const date = new Date();
+    date.setHours(hour, minute);
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
     });
   };
 
@@ -291,30 +304,54 @@ const AddTask = () => {
         <View style={styles.dateTimeContainer}>
           <View style={styles.dateContainer}>
             <Text style={styles.label}>Due Date *</Text>
-            <TextInput
-              style={styles.dateInput}
-              placeholder="YYYY-MM-DD"
-              value={formData.dueDate}
-              onChangeText={(text) => handleInputChange('dueDate', text)}
-              placeholderTextColor="#999"
-              {...(Platform.OS === 'web' ? { type: 'date' } : {})}
-            />
+            <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
+              <Text style={styles.dateText}>{formatDate(formData.dueDate)}</Text>
+              <Ionicons name="calendar" size={20} color="#007AFF" style={{ marginLeft: 8 }} />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.timeContainer}>
             <Text style={styles.label}>Due Time *</Text>
-            <TextInput
-              style={styles.timeInput}
-              placeholder="HH:MM"
-              value={formData.dueTime}
-              onChangeText={(text) => handleInputChange('dueTime', text)}
-              placeholderTextColor="#999"
-              {...(Platform.OS === 'web' ? { type: 'time' } : {})}
-            />
+            <TouchableOpacity style={styles.timeButton} onPress={() => setShowTimePicker(true)}>
+              <Text style={styles.timeText}>{formatTime(formData.dueTime)}</Text>
+              <Ionicons name="time" size={20} color="#007AFF" style={{ marginLeft: 8 }} />
+            </TouchableOpacity>
           </View>
-        </View>
 
-        <View style={styles.inputContainer}>
+          {/* Date/Time pickers for mobile */}
+          {showDatePicker && (
+            <DateTimePicker
+              value={new Date(formData.dueDate)}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) {
+                  const yyyy = selectedDate.getFullYear();
+                  const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                  const dd = String(selectedDate.getDate()).padStart(2, '0');
+                  handleInputChange('dueDate', `${yyyy}-${mm}-${dd}`);
+                }
+              }}
+            />
+          )}
+          {showTimePicker && (
+            <DateTimePicker
+              value={new Date(`1970-01-01T${formData.dueTime}`)}
+              mode="time"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(event, selectedTime) => {
+                setShowTimePicker(false);
+                if (selectedTime) {
+                  const hh = String(selectedTime.getHours()).padStart(2, '0');
+                  const min = String(selectedTime.getMinutes()).padStart(2, '0');
+                  handleInputChange('dueTime', `${hh}:${min}`);
+                }
+              }}
+            />
+          )}
+        </View>
+        {/* ...existing code... */}
           <Text style={styles.label}>Estimated Cost ($)</Text>
           <TextInput
             style={styles.input}
@@ -351,12 +388,39 @@ const AddTask = () => {
             {loading ? 'Creating Task...' : 'Create Task'}
           </Text>
         </TouchableOpacity>
-      </View>
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
+  dateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    gap: 8,
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  timeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    gap: 8,
+  },
+  timeText: {
+    fontSize: 16,
+    color: '#333',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

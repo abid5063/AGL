@@ -103,19 +103,31 @@ const TaskManagement = () => {
     }
   };
 
-  // Delete task
-  const deleteTask = async (taskId) => {
-    try {
-      const token = await AsyncStorage.getItem('authToken');
-      await axios.delete(`${API_BASE_URL}/api/tasks/${taskId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      fetchTasks(); // Refresh tasks
-    } catch (error) {
-      console.error('Error deleting task:', error);
-      Alert.alert('Error', 'Failed to delete task');
-    }
+  // Delete task with confirmation
+  const deleteTask = (taskId) => {
+    Alert.alert(
+      'Delete Task',
+      'Are you sure you want to delete this task? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('authToken');
+              await axios.delete(`${API_BASE_URL}/api/tasks/${taskId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              fetchTasks(); // Refresh tasks
+            } catch (error) {
+              console.error('Error deleting task:', error);
+              Alert.alert('Error', 'Failed to delete task');
+            }
+          }
+        }
+      ]
+    );
   };
 
   // Format date for display

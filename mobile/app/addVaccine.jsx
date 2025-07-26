@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   View,
   Text,
@@ -25,10 +26,22 @@ export default function AddVaccine() {
   const [formData, setFormData] = useState({
     vaccine_name: '',
     animal_id: '',
-    vaccine_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+    vaccine_date: new Date(),
     next_due_date: '',
     notes: ''
   });
+  const [showVaccineDatePicker, setShowVaccineDatePicker] = useState(false);
+  const [showNextDueDatePicker, setShowNextDueDatePicker] = useState(false);
+  const formatDate = (date) => {
+    if (!date) return '';
+    if (typeof date === 'string') date = new Date(date);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   useEffect(() => {
     fetchAnimals();
@@ -63,25 +76,20 @@ export default function AddVaccine() {
       Alert.alert('Validation Error', 'Please enter vaccine name');
       return false;
     }
-
     if (!formData.animal_id) {
       Alert.alert('Validation Error', 'Please select an animal');
       return false;
     }
-
-    // Validate date format (YYYY-MM-DD)
-    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-    if (!datePattern.test(formData.vaccine_date)) {
-      Alert.alert('Validation Error', 'Please enter a valid vaccine date (YYYY-MM-DD)');
+    // Validate vaccine_date
+    if (!(formData.vaccine_date instanceof Date) || isNaN(formData.vaccine_date)) {
+      Alert.alert('Validation Error', 'Please select a valid vaccine date');
       return false;
     }
-
-    // Validate next due date if provided
-    if (formData.next_due_date && !datePattern.test(formData.next_due_date)) {
-      Alert.alert('Validation Error', 'Please enter a valid next due date (YYYY-MM-DD)');
+    // Validate next_due_date if provided
+    if (formData.next_due_date && (!(formData.next_due_date instanceof Date) || isNaN(formData.next_due_date))) {
+      Alert.alert('Validation Error', 'Please select a valid next due date');
       return false;
     }
-
     return true;
   };
 
@@ -95,12 +103,11 @@ export default function AddVaccine() {
       const requestData = {
         vaccine_name: formData.vaccine_name.trim(),
         animal_id: formData.animal_id,
-        vaccine_date: formData.vaccine_date, // Already in YYYY-MM-DD format
+        vaccine_date: formData.vaccine_date instanceof Date ? formData.vaccine_date.toISOString().split('T')[0] : formData.vaccine_date,
         notes: formData.notes.trim()
       };
-
       if (formData.next_due_date) {
-        requestData.next_due_date = formData.next_due_date; // Already in YYYY-MM-DD format
+        requestData.next_due_date = formData.next_due_date instanceof Date ? formData.next_due_date.toISOString().split('T')[0] : formData.next_due_date;
       }
 
       await axios.post(`${API_BASE_URL}/api/vaccines`, requestData, {
@@ -190,27 +197,25 @@ export default function AddVaccine() {
         {/* Vaccine Date */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Vaccine Date *</Text>
-          <TextInput
-            style={styles.dateInput}
-            placeholder="YYYY-MM-DD"
-            value={formData.vaccine_date}
-            onChangeText={(text) => handleInputChange('vaccine_date', text)}
-            placeholderTextColor="#999"
-            {...(Platform.OS === 'web' ? { type: 'date' } : {})}
-          />
+          <TouchableOpacity
+            style={styles.dateButton}
+            onPress={() => setShowVaccineDatePicker(true)}
+          >
+            <Text style={styles.dateText}>{formatDate(formData.vaccine_date)}</Text>
+            <Ionicons name="calendar" size={20} color="#4a89dc" style={{ marginLeft: 8 }} />
+          </TouchableOpacity>
         </View>
 
         {/* Next Due Date */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Next Due Date (Optional)</Text>
-          <TextInput
-            style={styles.dateInput}
-            placeholder="YYYY-MM-DD"
-            value={formData.next_due_date}
-            onChangeText={(text) => handleInputChange('next_due_date', text)}
-            placeholderTextColor="#999"
-            {...(Platform.OS === 'web' ? { type: 'date' } : {})}
-          />
+          <TouchableOpacity
+            style={styles.dateButton}
+            onPress={() => setShowNextDueDatePicker(true)}
+          >
+            <Text style={styles.dateText}>{formData.next_due_date ? formatDate(formData.next_due_date) : 'Select next due date'}</Text>
+            <Ionicons name="calendar" size={20} color="#4a89dc" style={{ marginLeft: 8 }} />
+          </TouchableOpacity>
           {formData.next_due_date && (
             <TouchableOpacity
               style={styles.clearButton}
@@ -240,12 +245,39 @@ export default function AddVaccine() {
           onPress={handleSubmit}
           disabled={saving}
         >
+          <Ionicons name="medkit" size={20} color="#fff" style={styles.submitButtonIcon} />
           {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.submitButtonText}>Add Vaccine Record</Text>
           )}
         </TouchableOpacity>
+      {/* Vaccine Date Picker */}
+      {showVaccineDatePicker && (
+        <DateTimePicker
+          value={formData.vaccine_date instanceof Date ? formData.vaccine_date : new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowVaccineDatePicker(false);
+            if (selectedDate) handleInputChange('vaccine_date', selectedDate);
+          }}
+          minimumDate={new Date('2000-01-01')}
+        />
+      )}
+      {/* Next Due Date Picker */}
+      {showNextDueDatePicker && (
+        <DateTimePicker
+          value={formData.next_due_date instanceof Date ? formData.next_due_date : new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowNextDueDatePicker(false);
+            if (selectedDate) handleInputChange('next_due_date', selectedDate);
+          }}
+          minimumDate={new Date('2000-01-01')}
+        />
+      )}
       </ScrollView>
     </View>
   );
@@ -373,18 +405,23 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: '#4a89dc',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
     marginBottom: 40,
+  },
+  submitButtonIcon: {
+    marginRight: 8,
   },
   submitButtonDisabled: {
     backgroundColor: '#ccc',
   },
   submitButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });

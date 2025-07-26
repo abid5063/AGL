@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
@@ -26,10 +27,12 @@ export default function EditVaccine() {
   const [formData, setFormData] = useState({
     vaccine_name: '',
     animal_id: '',
-    vaccine_date: '',
+    vaccine_date: new Date(),
     next_due_date: '',
     notes: ''
   });
+  const [showVaccineDatePicker, setShowVaccineDatePicker] = useState(false);
+  const [showNextDueDatePicker, setShowNextDueDatePicker] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -55,8 +58,8 @@ export default function EditVaccine() {
       setFormData({
         vaccine_name: vaccine.vaccine_name,
         animal_id: vaccine.animal._id,
-        vaccine_date: new Date(vaccine.vaccine_date).toISOString().split('T')[0], // Convert to YYYY-MM-DD format
-        next_due_date: vaccine.next_due_date ? new Date(vaccine.next_due_date).toISOString().split('T')[0] : '',
+        vaccine_date: vaccine.vaccine_date ? new Date(vaccine.vaccine_date) : new Date(),
+        next_due_date: vaccine.next_due_date ? new Date(vaccine.next_due_date) : '',
         notes: vaccine.notes || ''
       });
     } catch (error) {
@@ -75,30 +78,36 @@ export default function EditVaccine() {
     }));
   };
 
+  const formatDate = (date) => {
+    if (!date) return '';
+    if (typeof date === 'string') date = new Date(date);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   const validateForm = () => {
     if (!formData.vaccine_name.trim()) {
       Alert.alert('Validation Error', 'Please enter vaccine name');
       return false;
     }
-
     if (!formData.animal_id) {
       Alert.alert('Validation Error', 'Please select an animal');
       return false;
     }
-
-    // Validate date format (YYYY-MM-DD)
-    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-    if (!datePattern.test(formData.vaccine_date)) {
-      Alert.alert('Validation Error', 'Please enter a valid vaccine date (YYYY-MM-DD)');
+    // Validate vaccine_date
+    if (!(formData.vaccine_date instanceof Date) || isNaN(formData.vaccine_date)) {
+      Alert.alert('Validation Error', 'Please select a valid vaccine date');
       return false;
     }
-
-    // Validate next due date if provided
-    if (formData.next_due_date && !datePattern.test(formData.next_due_date)) {
-      Alert.alert('Validation Error', 'Please enter a valid next due date (YYYY-MM-DD)');
+    // Validate next_due_date if provided
+    if (formData.next_due_date && (!(formData.next_due_date instanceof Date) || isNaN(formData.next_due_date))) {
+      Alert.alert('Validation Error', 'Please select a valid next due date');
       return false;
     }
-
     return true;
   };
 
@@ -112,12 +121,11 @@ export default function EditVaccine() {
       const requestData = {
         vaccine_name: formData.vaccine_name.trim(),
         animal_id: formData.animal_id,
-        vaccine_date: formData.vaccine_date,
+        vaccine_date: formData.vaccine_date instanceof Date ? formData.vaccine_date.toISOString().split('T')[0] : formData.vaccine_date,
         notes: formData.notes.trim()
       };
-
       if (formData.next_due_date) {
-        requestData.next_due_date = formData.next_due_date;
+        requestData.next_due_date = formData.next_due_date instanceof Date ? formData.next_due_date.toISOString().split('T')[0] : formData.next_due_date;
       }
 
       await axios.put(`${API_BASE_URL}/api/vaccines/${vaccineId}`, requestData, {
@@ -148,11 +156,14 @@ export default function EditVaccine() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Header with logo */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.push('/vaccineManagement')}>
-          <Ionicons name="arrow-back" size={28} color="#4a89dc" />
+          <Ionicons name="arrow-back" size={28} color="#3498db" />
         </TouchableOpacity>
+        <View style={styles.logoContainer}>
+          <Ionicons name="medkit" size={28} color="#3498db" />
+        </View>
         <Text style={styles.headerTitle}>Edit Vaccine</Text>
         <View style={{ width: 28 }} />
       </View>
@@ -202,27 +213,25 @@ export default function EditVaccine() {
         {/* Vaccine Date */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Vaccine Date *</Text>
-          <TextInput
-            style={styles.dateInput}
-            placeholder="YYYY-MM-DD"
-            value={formData.vaccine_date}
-            onChangeText={(text) => handleInputChange('vaccine_date', text)}
-            placeholderTextColor="#999"
-            {...(Platform.OS === 'web' ? { type: 'date' } : {})}
-          />
+          <TouchableOpacity
+            style={styles.dateButton}
+            onPress={() => setShowVaccineDatePicker(true)}
+          >
+            <Text style={styles.dateText}>{formatDate(formData.vaccine_date)}</Text>
+            <Ionicons name="calendar" size={20} color="#3498db" style={{ marginLeft: 8 }} />
+          </TouchableOpacity>
         </View>
 
         {/* Next Due Date */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Next Due Date (Optional)</Text>
-          <TextInput
-            style={styles.dateInput}
-            placeholder="YYYY-MM-DD"
-            value={formData.next_due_date}
-            onChangeText={(text) => handleInputChange('next_due_date', text)}
-            placeholderTextColor="#999"
-            {...(Platform.OS === 'web' ? { type: 'date' } : {})}
-          />
+          <TouchableOpacity
+            style={styles.dateButton}
+            onPress={() => setShowNextDueDatePicker(true)}
+          >
+            <Text style={styles.dateText}>{formData.next_due_date ? formatDate(formData.next_due_date) : 'Select next due date'}</Text>
+            <Ionicons name="calendar" size={20} color="#3498db" style={{ marginLeft: 8 }} />
+          </TouchableOpacity>
           {formData.next_due_date && (
             <TouchableOpacity
               style={styles.clearButton}
@@ -252,6 +261,7 @@ export default function EditVaccine() {
           onPress={handleSubmit}
           disabled={saving}
         >
+          <Ionicons name="medkit" size={20} color="#fff" style={styles.submitButtonIcon} />
           {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
@@ -259,6 +269,32 @@ export default function EditVaccine() {
           )}
         </TouchableOpacity>
       </ScrollView>
+      {/* Vaccine Date Picker */}
+      {showVaccineDatePicker && (
+        <DateTimePicker
+          value={formData.vaccine_date instanceof Date ? formData.vaccine_date : new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowVaccineDatePicker(false);
+            if (selectedDate) handleInputChange('vaccine_date', selectedDate);
+          }}
+          minimumDate={new Date('2000-01-01')}
+        />
+      )}
+      {/* Next Due Date Picker */}
+      {showNextDueDatePicker && (
+        <DateTimePicker
+          value={formData.next_due_date instanceof Date ? formData.next_due_date : new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowNextDueDatePicker(false);
+            if (selectedDate) handleInputChange('next_due_date', selectedDate);
+          }}
+          minimumDate={new Date('2000-01-01')}
+        />
+      )}
     </View>
   );
 }
@@ -279,10 +315,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
+  logoContainer: {
+    marginRight: 8,
+  },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#3498db',
+    flex: 1,
+    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -384,19 +425,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   submitButton: {
-    backgroundColor: '#4a89dc',
-    borderRadius: 8,
+    backgroundColor: '#3498db',
+    borderRadius: 12,
     padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
     marginBottom: 40,
+  },
+  submitButtonIcon: {
+    marginRight: 8,
   },
   submitButtonDisabled: {
     backgroundColor: '#ccc',
   },
   submitButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
