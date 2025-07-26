@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
 const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
@@ -62,7 +62,7 @@ export default function FoodSuggestions() {
         return;
       }
 
-      const response = await axios.get('http://localhost:3000/api/animals', {
+      const response = await axios.get(`${API_BASE_URL}/api/animals`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

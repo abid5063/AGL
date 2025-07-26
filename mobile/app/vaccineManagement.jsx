@@ -13,8 +13,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
-const API_BASE_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+// const API_BASE_URL = "http://localhost:3000/api";
 
 export default function VaccineManagement() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function VaccineManagement() {
   const fetchVaccines = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`${API_BASE_URL}/vaccines`, {
+      const response = await axios.get(`${API_BASE_URL}/api/vaccines`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -59,7 +59,7 @@ export default function VaccineManagement() {
   const handleDeleteVaccine = async (vaccineId) => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      await axios.delete(`${API_BASE_URL}/vaccines/${vaccineId}`, {
+      await axios.delete(`${API_BASE_URL}/api/vaccines/${vaccineId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
 const { width } = Dimensions.get('window');
 
 export default function FarmerMessaging() {
@@ -33,7 +33,7 @@ export default function FarmerMessaging() {
   const [refreshing, setRefreshing] = useState(false);
   const [farmer, setFarmer] = useState(null);
 
-  const API_BASE_URL = "http://localhost:3000/api";
+  // const API_BASE_URL = "http://localhost:3000/api";
 
   useEffect(() => {
     loadFarmerData();
@@ -61,7 +61,7 @@ export default function FarmerMessaging() {
   const fetchConversations = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`${API_BASE_URL}/messages/conversations`, {
+      const response = await axios.get(`${API_BASE_URL}/api/messages/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setConversations(response.data.conversations || []);
@@ -72,7 +72,7 @@ export default function FarmerMessaging() {
 
   const searchVets = async (query = '') => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/vets/search`, {
+      const response = await axios.get(`${API_BASE_URL}/api/vets/search`, {
         params: query.trim() !== '' ? { search: query } : {}
       });
       
@@ -131,7 +131,7 @@ export default function FarmerMessaging() {
       }
       
       const response = await axios.get(
-        `${API_BASE_URL}/messages/conversation/${participantId}/vet`,
+        `${API_BASE_URL}/api/messages/conversation/${participantId}/vet`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -172,7 +172,7 @@ export default function FarmerMessaging() {
       }
       
       const response = await axios.post(
-        `${API_BASE_URL}/messages`,
+        `${API_BASE_URL}/api/messages`,
         {
           receiverId: participantId,
           receiverType: 'vet',
@@ -183,7 +183,7 @@ export default function FarmerMessaging() {
 
       // Refresh messages to get the actual saved message
       const messagesResponse = await axios.get(
-        `${API_BASE_URL}/messages/conversation/${participantId}/vet`,
+        `${API_BASE_URL}/api/messages/conversation/${participantId}/vet`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -387,9 +387,30 @@ export default function FarmerMessaging() {
                 {selectedConversation.participant.specialty}
               </Text>
             </View>
-            <TouchableOpacity>
-              <Ionicons name="call" size={24} color="#27ae60" />
-            </TouchableOpacity>
+            <View style={styles.chatHeaderActions}>
+              <TouchableOpacity 
+                style={styles.appointmentButton}
+                onPress={() => {
+                  const vetId = selectedConversation.participant._id || selectedConversation.participant.id;
+                  const vetName = selectedConversation.participant.name;
+                  router.push({
+                    pathname: '/addAppointment',
+                    params: {
+                      vetId: vetId,
+                      vetName: vetName,
+                      fromChat: 'true',
+                      farmerId: farmer?._id,
+                      farmerName: farmer?.name
+                    }
+                  });
+                }}
+              >
+                <Ionicons name="calendar" size={20} color="#3498db" />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Ionicons name="call" size={24} color="#27ae60" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Messages */}
@@ -398,7 +419,7 @@ export default function FarmerMessaging() {
             renderItem={renderMessage}
             keyExtractor={(item) => item._id}
             contentContainerStyle={styles.messagesList}
-            inverted
+          // removed inverted so latest message is at the bottom
           />
 
           {/* Message Input */}
@@ -618,6 +639,13 @@ const styles = StyleSheet.create({
   chatHeaderSpecialty: {
     fontSize: 12,
     color: '#27ae60',
+  },
+  chatHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  appointmentButton: {
+    marginRight: 16,
   },
   messagesList: {
     paddingVertical: 16,

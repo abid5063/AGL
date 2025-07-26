@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign, Feather, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import axios from "axios";
 import * as ImagePicker from 'expo-image-picker';
-
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
 const { width } = Dimensions.get('window');
 
 export default function Profile() {
@@ -86,7 +86,7 @@ export default function Profile() {
 
   const fetchAnimals = async (token) => {
     try {
-      const response = await axios.get('http://localhost:3000/api/animals', {
+      const response = await axios.get(`${API_BASE_URL}/api/animals`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -154,7 +154,7 @@ export default function Profile() {
     try {
       const token = await AsyncStorage.getItem('authToken');
       const response = await axios.post(
-        'http://localhost:3000/api/animals',
+        `${API_BASE_URL}/api/animals`,
         {
           ...formData,
           age: Number(formData.age),
@@ -198,7 +198,7 @@ export default function Profile() {
     try {
       const token = await AsyncStorage.getItem('authToken');
       const response = await axios.put(
-        `http://localhost:3000/api/animals/${currentAnimal._id}`,
+        `${API_BASE_URL}/api/animals/${currentAnimal._id}`,
         {
           ...formData,
           age: Number(formData.age),
@@ -235,7 +235,7 @@ export default function Profile() {
   const fetchConversations = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`http://localhost:3000/api/messages/conversations`, {
+      const response = await axios.get(`${API_BASE_URL}/api/messages/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setConversations(response.data.conversations || []);
@@ -247,7 +247,7 @@ export default function Profile() {
   const fetchVets = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`http://localhost:3000/api/vets/search`, {
+      const response = await axios.get(`${API_BASE_URL}/api/vets/search`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setVets(response.data.vets || []);
@@ -262,7 +262,7 @@ export default function Profile() {
       const token = await AsyncStorage.getItem('authToken');
       
       const response = await axios.get(
-        `http://localhost:3000/api/messages/conversation/${conversation.participant.id}/vet`,
+        `${API_BASE_URL}/api/messages/conversation/${conversation.participant.id}/vet`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -298,7 +298,7 @@ export default function Profile() {
       const token = await AsyncStorage.getItem('authToken');
       
       await axios.post(
-        `http://localhost:3000/api/messages`,
+        `${API_BASE_URL}/api/messages`,
         {
           receiverId: selectedConversation.participant.id,
           receiverType: 'vet',
@@ -311,7 +311,7 @@ export default function Profile() {
       
       // Refresh conversation
       const response = await axios.get(
-        `http://localhost:3000/api/messages/conversation/${selectedConversation.participant.id}/vet`,
+        `${API_BASE_URL}/api/messages/conversation/${selectedConversation.participant.id}/vet`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -443,13 +443,13 @@ export default function Profile() {
             {/* Add Task */}
             <TouchableOpacity
               style={[styles.featureCard, styles.warningCard]}
-              onPress={() => router.push('/addTask')}
+              onPress={() => router.push('/farmerAppointmentManagement')}
               testID="add-task-button"
             >
               <View style={styles.featureIconContainer}>
                 <Ionicons name="add-circle" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>New Task</Text>
+              <Text style={styles.featureTitle}>Appointments</Text>
               <Text style={styles.featureSubtitle}>Add new task</Text>
             </TouchableOpacity>
 

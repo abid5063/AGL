@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityInd
 import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
-
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
 export default function EditProfile() {
   const params = useLocalSearchParams();
   const farmer = params.farmer ? JSON.parse(params.farmer) : null;
@@ -33,7 +33,7 @@ export default function EditProfile() {
       setLoading(true);
       const token = await AsyncStorage.getItem('authToken');      console.log(token)
       await axios.put(
-        `http://localhost:3000/api/auth/edit/${farmer._id}`,
+        `${API_BASE_URL}/api/auth/edit/${farmer._id}`,
         formData,
         {
           headers: {
@@ -65,9 +65,11 @@ export default function EditProfile() {
           style: "destructive",
           onPress: async () => {
             try {
-              setLoading(true);              const token = await AsyncStorage.getItem('authToken');              console.log(token);
+              setLoading(true);
+              const token = await AsyncStorage.getItem('authToken');
+              console.log(token);
               await axios.delete(
-                `http://localhost:3000/api/auth/delete/${farmer._id}`,
+                `${API_BASE_URL}/api/auth/delete/${farmer._id}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`

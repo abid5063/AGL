@@ -2,9 +2,9 @@ name: Build, Push and Deploy Docker Images
 
 on:
   push:
-    branches: [ main, abid_test1, unit-testing-branch, unitPlusE2E ]  # Updated to include your test branch
+    branches: [ main ]  # Updated to include your test branch
   pull_request:
-    branches: [ main, abid_test1 ]
+    branches: [ main ]
  
 env:
   DOCKER_HUB_USERNAME: abidhasan83  # Your Docker Hub username
@@ -87,8 +87,8 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/abid_test1')
-    
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' )
+
     steps:
     - name: Deploy to Azure VM
       uses: appleboy/ssh-action@v1.0.3

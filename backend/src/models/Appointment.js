@@ -14,7 +14,19 @@ const appointmentSchema = new mongoose.Schema({
   animalId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Animal',
-    required: [true, "Animal ID is required"]
+    required: function() {
+      // animalId is required only if animalName is not provided
+      return !this.animalName;
+    }
+  },
+  animalName: {
+    type: String,
+    trim: true,
+    maxlength: [100, "Animal name cannot exceed 100 characters"],
+    required: function() {
+      // animalName is required only if animalId is not provided
+      return !this.animalId;
+    }
   },
   appointmentType: {
     type: String,

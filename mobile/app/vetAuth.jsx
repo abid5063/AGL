@@ -3,7 +3,7 @@ import { Text, View, TextInput, TouchableOpacity, StyleSheet, Alert } from "reac
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useFocusEffect } from "expo-router";
-
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
 export default function VetAuthScreen() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
@@ -18,7 +18,7 @@ export default function VetAuthScreen() {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const API_BASE_URL = "http://localhost:3000/api/vets";
+  // const API_BASE_URL = "http://localhost:3000/api/vets";
 
   // Reset form when screen is focused (e.g., after logout)
   useFocusEffect(
@@ -100,7 +100,7 @@ export default function VetAuthScreen() {
       }
 
       const endpoint = isLogin ? "/login" : "/register";
-      const response = await axios.post(`${API_BASE_URL}${endpoint}`, formData);
+      const response = await axios.post(`${API_BASE_URL}/api/vets${endpoint}`, formData);
 
       const { token, vet } = response.data;
       await storeAuthData(token, vet);

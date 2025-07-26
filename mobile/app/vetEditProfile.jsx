@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityInd
 import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
-
+import { API_BASE_URL } from "../utils/apiConfig";
 export default function VetEditProfile() {
   const params = useLocalSearchParams();
   const vet = params.vet ? JSON.parse(params.vet) : null;
@@ -37,7 +37,7 @@ export default function VetEditProfile() {
       const token = await AsyncStorage.getItem('authToken');
       console.log(token);
       await axios.put(
-        `http://localhost:3000/api/vets/edit/${vet._id}`,
+        `${API_BASE_URL}/api/vets/edit/${vet._id}`,
         formData,
         {
           headers: {
@@ -78,7 +78,7 @@ export default function VetEditProfile() {
               const token = await AsyncStorage.getItem('authToken');
               console.log(token);
               await axios.delete(
-                `http://localhost:3000/api/vets/delete/${vet._id}`,
+                `${API_BASE_URL}/api/vets/delete/${vet._id}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`

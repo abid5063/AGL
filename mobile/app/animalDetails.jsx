@@ -3,10 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, Tex
 import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
-
-const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
+import { API_BASE_URL } from '../utils/apiConfig';
 export default function AnimalDetails() {
   const params = useLocalSearchParams();
   const animal = params.animal ? JSON.parse(params.animal) : null;
@@ -210,8 +207,9 @@ Use only table format, no other text.`;
     }
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('authToken');      const response = await axios.put(
-        `http://localhost:3000/api/animals/${animal._id}`,
+      const token = await AsyncStorage.getItem('authToken');      
+      const response = await axios.put(
+        `${API_BASE_URL}/api/animals/${animal._id}`,
         {
           ...formData,
           age: Number(formData.age),
@@ -255,8 +253,9 @@ Use only table format, no other text.`;
 const actuallyDeleteAnimal = async () => {
   try {
     setLoading(true);
-    const token = await AsyncStorage.getItem('authToken');    await axios.delete(
-      `http://localhost:3000/api/animals/${animal._id}`,
+    const token = await AsyncStorage.getItem('authToken');    
+    await axios.delete(
+      `${API_BASE_URL}/api/animals/${animal._id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`

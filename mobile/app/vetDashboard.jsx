@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import axios from "axios";
-
+import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
 const { width } = Dimensions.get('window');
 
 export default function VetDashboard() {
@@ -26,7 +26,7 @@ export default function VetDashboard() {
   const [showMessages, setShowMessages] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const API_BASE_URL = "http://localhost:3000/api";
+  // const API_BASE_URL = "http://localhost:3000/api";
 
   useEffect(() => {
     loadVetData();
@@ -48,7 +48,7 @@ export default function VetDashboard() {
   const fetchAppointments = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`${API_BASE_URL}/appointments/vet`, {
+      const response = await axios.get(`${API_BASE_URL}/api/appointments/vet`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAppointments(response.data);
@@ -60,7 +60,7 @@ export default function VetDashboard() {
   const fetchMessages = async () => {
     try {
       const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.get(`${API_BASE_URL}/messages/vet`, {
+      const response = await axios.get(`${API_BASE_URL}/api/messages/vet`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(response.data);
@@ -96,7 +96,7 @@ export default function VetDashboard() {
       setIsLoading(true);
       const token = await AsyncStorage.getItem('authToken');
       await axios.put(
-        `${API_BASE_URL}/appointments/${appointmentId}`,
+        `${API_BASE_URL}/api/appointments/${appointmentId}`,
         { status: action },
         { headers: { Authorization: `Bearer ${token}` } }
       );
