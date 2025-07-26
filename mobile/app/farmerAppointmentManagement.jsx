@@ -32,16 +32,28 @@ export default function FarmerAppointmentManagement() {
   };
 
   const handleDelete = async (appointmentId) => {
-    try {
-      const token = await AsyncStorage.getItem('authToken');
-      // Permanently delete the appointment (no alert)
-      await axios.delete(`${API_BASE_URL}/api/appointments/remove/${appointmentId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setAppointments(appointments.filter(a => a._id !== appointmentId));
-    } catch (error) {
-      // Optionally handle error silently or with a toast/snackbar
-    }
+    Alert.alert(
+      'Delete Appointment',
+      'Are you sure you want to delete this appointment?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('authToken');
+              await axios.delete(`${API_BASE_URL}/api/appointments/remove/${appointmentId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              setAppointments(appointments.filter(a => a._id !== appointmentId));
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete appointment.');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const renderItem = ({ item }) => (

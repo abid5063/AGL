@@ -29,29 +29,42 @@ export default function EditProfile() {
       Alert.alert("Validation", "Please fill all required fields.");
       return;
     }
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('authToken');      console.log(token)
-      await axios.put(
-        `${API_BASE_URL}/api/auth/edit/${farmer._id}`,
-        formData,
+    Alert.alert(
+      "Save Changes",
+      "Are you sure you want to save these changes to your profile?",
+      [
+        { text: "Cancel", style: "cancel" },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
+          text: "Save",
+          style: "default",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              const token = await AsyncStorage.getItem('authToken');
+              await axios.put(
+                `${API_BASE_URL}/api/auth/edit/${farmer._id}`,
+                formData,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                }
+              );
+              Alert.alert("Success", "Profile updated successfully");
+              router.replace({
+                pathname: '/profile',
+                params: { farmer: JSON.stringify({ ...farmer, ...formData }) }
+              });
+            } catch (error) {
+              Alert.alert("Error", error.response?.data?.message || "Failed to update profile");
+            } finally {
+              setLoading(false);
+            }
           }
         }
-      );
-      Alert.alert("Success", "Profile updated successfully");
-      router.replace({
-        pathname: '/profile',
-        params: { farmer: JSON.stringify({ ...farmer, ...formData }) }
-      });
-    } catch (error) {
-      Alert.alert("Error", error.response?.data?.message || "Failed to update profile");
-    } finally {
-      setLoading(false);
-    }
+      ]
+    );
   };
 
   const handleDeleteProfile = async () => {

@@ -57,18 +57,31 @@ export default function VaccineManagement() {
   };
 
   const handleDeleteVaccine = async (vaccineId) => {
-    try {
-      const token = await AsyncStorage.getItem('authToken');
-      await axios.delete(`${API_BASE_URL}/api/vaccines/${vaccineId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
+    Alert.alert(
+      'Delete Vaccine Record',
+      'Are you sure you want to delete this vaccine record?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('authToken');
+              await axios.delete(`${API_BASE_URL}/api/vaccines/${vaccineId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              fetchVaccines(); // Refresh the list immediately
+            } catch (error) {
+              console.error('Error deleting vaccine:', error);
+              Alert.alert('Error', 'Failed to delete vaccine record');
+            }
+          }
         }
-      });
-      fetchVaccines(); // Refresh the list immediately
-    } catch (error) {
-      console.error('Error deleting vaccine:', error);
-      Alert.alert('Error', 'Failed to delete vaccine record');
-    }
+      ]
+    );
   };
 
   const formatDate = (dateString) => {

@@ -139,7 +139,7 @@ const actuallyDeleteAnimal = async () => {
           <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)} testID="animal-edit-button">
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={actuallyDeleteAnimal} testID="animal-delete-button">
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAnimal} testID="animal-delete-button">
             <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </View>

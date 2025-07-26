@@ -121,12 +121,25 @@ export default function VetProfile() {
   };
 
   const handleLogout = async () => {
-    try {
-      await AsyncStorage.multiRemove(['authToken', 'userData']);
-      router.replace('/');
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.multiRemove(['authToken', 'userData']);
+              router.replace('/');
+            } catch (error) {
+              console.error('Error during logout:', error);
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleAppointmentAction = async (appointmentId, action) => {

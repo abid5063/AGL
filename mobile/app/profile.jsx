@@ -125,12 +125,25 @@ export default function Profile() {
   };
 
   const handleLogout = async () => {
-    try {
-      await AsyncStorage.multiRemove(['authToken', 'userData']);
-      router.replace('/');
-    } catch (error) {
-      Alert.alert("Error", "Failed to logout");
-    }
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.multiRemove(['authToken', 'userData']);
+              router.replace('/');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to logout');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleInputChange = (name, value) => {
