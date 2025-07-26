@@ -2,9 +2,31 @@ import { Text, View, TouchableOpacity, StyleSheet, Image, SafeAreaView, StatusBa
 import { useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from "react";
+
+const translations = {
+  en: {
+    tagline: "Having trouble with livestock management?",
+    subTagline1: "Ride with us",
+    subTagline2: "Learn How to use this app.",
+    farmer: "I'm a Farmer",
+    vet: "I'm a Veterinarian",
+    // ...add more as needed
+  },
+  bn: {
+    tagline: "গবাদি পশু ব্যবস্থাপনায় সমস্যা হচ্ছে?",
+    subTagline1: "আমাদের সাথে থাকুন",
+    subTagline2: "এই অ্যাপটি কীভাবে ব্যবহার করবেন শিখুন।",
+    farmer: "আমি একজন কৃষক",
+    vet: "আমি একজন পশু চিকিৎসক",
+    // ...add more as needed
+  }
+};
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const [lang, setLang] = useState('en');
+  const t = translations[lang];
 
   const handleFarmerAuth = () => {
     router.push('/farmerAuth');
@@ -31,6 +53,14 @@ export default function WelcomeScreen() {
         end={{ x: 1, y: 1 }}
       />
 
+      {/* Language Toggle Button */}
+      <TouchableOpacity
+        style={styles.langButton}
+        onPress={() => setLang(lang === 'en' ? 'bn' : 'en')}
+      >
+        <Text style={styles.langButtonText}>{lang === 'en' ? 'BN' : 'EN'}</Text>
+      </TouchableOpacity>
+
       {/* Main Content */}
       <View style={styles.content}>
         {/* Logo Section - Blended with background */}
@@ -56,15 +86,15 @@ export default function WelcomeScreen() {
 
         {/* Tagline Section - More farmer-focused messaging */}
         <View style={styles.taglineSection}>
-          <Text style={styles.tagline}>Having trouble with livestock management?</Text>
-          <Text style={styles.subTagline}>Ride with us</Text>
+          <Text style={styles.tagline}>{t.tagline}</Text>
+          <Text style={styles.subTagline}>{t.subTagline1}</Text>
           <TouchableOpacity 
             style={styles.learnMoreButton}
             onPress={handleLearnMore}
             activeOpacity={0.7}
           >
             <Ionicons name="logo-youtube" size={20} color="#c8f1c8ff" />
-            <Text style={styles.learnMoreText}>Learn How to use this app.</Text>
+            <Text style={styles.learnMoreText}>{t.subTagline2}</Text>
           </TouchableOpacity>
         </View>
 
@@ -77,7 +107,7 @@ export default function WelcomeScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="leaf" size={28} color="#fff" />
-            <Text style={styles.buttonText}>I'm a Farmer</Text>
+            <Text style={styles.buttonText}>{t.farmer}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -87,7 +117,7 @@ export default function WelcomeScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="medical" size={28} color="#fff" />
-            <Text style={styles.buttonText}>I'm a Veterinarian</Text>
+            <Text style={styles.buttonText}>{t.vet}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -280,5 +310,20 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '100%',
+  },
+  langButton: {
+    position: 'absolute',
+    top: 18,
+    right: 18,
+    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+  },
+  langButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
