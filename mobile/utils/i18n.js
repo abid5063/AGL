@@ -22,7 +22,13 @@ i18n
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false
-    }
+    },
+    react: {
+      useSuspense: false
+    },
+    debug: false,
+    keySeparator: '.',
+    nsSeparator: ':'
   });
 
 export default i18n; 

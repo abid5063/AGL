@@ -8,13 +8,19 @@ import { useTranslation } from 'react-i18next';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { language, changeLanguage } = useLanguage();
+  const { language, changeLanguage, isLoading: languageLoading } = useLanguage();
   const { t, i18n } = useTranslation();
 
   // Update i18n language when language changes
   useEffect(() => {
-    i18n.changeLanguage(language);
-  }, [language, i18n]);
+    if (!languageLoading) {
+      try {
+        i18n.changeLanguage(language);
+      } catch (error) {
+        console.log('Error changing language:', error);
+      }
+    }
+  }, [language, i18n, languageLoading]);
 
   const handleFarmerAuth = () => {
     router.push('/farmerAuth');
@@ -25,9 +31,31 @@ export default function WelcomeScreen() {
   };
 
   const handleLearnMore = () => {
-    // You can replace this URL with your actual tutorial video link
-    Linking.openURL('https://www.youtube.com/watch?v=your-tutorial-video-id');
+    try {
+      // You can replace this URL with your actual tutorial video link
+      Linking.openURL('https://www.youtube.com/watch?v=your-tutorial-video-id');
+    } catch (error) {
+      console.log('Error opening tutorial link:', error);
+    }
   };
+
+  // Show loading state while language is initializing
+  if (languageLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#0d3b16" />
+        <LinearGradient
+          colors={['#02290aff', '#80c25aff', '#46c426ff', '#b0dd96ff']}
+          style={styles.gradientBackground}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}> 
@@ -44,7 +72,13 @@ export default function WelcomeScreen() {
       {/* Language Toggle Button */}
       <TouchableOpacity
         style={styles.langButton}
-        onPress={() => changeLanguage(language === 'en' ? 'bn' : 'en')}
+        onPress={() => {
+          try {
+            changeLanguage(language === 'en' ? 'bn' : 'en');
+          } catch (error) {
+            console.log('Error changing language:', error);
+          }
+        }}
       >
         <Text style={styles.langButtonText}>{language === 'en' ? 'BN' : 'EN'}</Text>
       </TouchableOpacity>
@@ -74,15 +108,15 @@ export default function WelcomeScreen() {
 
         {/* Tagline Section - More farmer-focused messaging */}
         <View style={styles.taglineSection}>
-          <Text style={styles.tagline}>{t('tagline')}</Text>
-          <Text style={styles.subTagline}>{t('subTagline1')}</Text>
+          <Text style={styles.tagline}>{t('tagline') || 'Having trouble with livestock management?'}</Text>
+          <Text style={styles.subTagline}>{t('subTagline1') || 'Stay with us'}</Text>
           <TouchableOpacity 
             style={styles.learnMoreButton}
             onPress={handleLearnMore}
             activeOpacity={0.7}
           >
             <Ionicons name="logo-youtube" size={20} color="#023402ff" />
-            <Text style={styles.learnMoreText}>{t('subTagline2')}</Text>
+            <Text style={styles.learnMoreText}>{t('subTagline2') || 'Learn how to use this app.'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -95,7 +129,7 @@ export default function WelcomeScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="leaf" size={28} color='#032301ff' />
-            <Text style={styles.buttonText}>{t('farmer')}</Text>
+            <Text style={styles.buttonText}>{t('farmer') || 'I\'m a Farmer'}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -105,7 +139,7 @@ export default function WelcomeScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="medical" size={28} color='#032001ff'/>
-            <Text style={styles.buttonText}>{t('vet')}</Text>
+            <Text style={styles.buttonText}>{t('vet') || 'I\'m a Veterinarian'}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -162,7 +196,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 8,
-    opacity: 0.95,
+    opacity: 0.98,
     borderRadius: 8,
   },
   logoBlendOverlay: {
@@ -313,5 +347,15 @@ const styles = StyleSheet.create({
     color: '#032001ff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: '600',
   },
 });

@@ -29,11 +29,13 @@ export const LanguageProvider = ({ children }) => {
 
   const changeLanguage = async (newLanguage) => {
     try {
-      await AsyncStorage.setItem('userLanguage', newLanguage);
       setLanguage(newLanguage);
-      i18n.changeLanguage(newLanguage);
+      await AsyncStorage.setItem('userLanguage', newLanguage);
+      await i18n.changeLanguage(newLanguage);
     } catch (error) {
       console.log('Error saving language:', error);
+      // Revert to previous language if there's an error
+      setLanguage(language);
     }
   };
 

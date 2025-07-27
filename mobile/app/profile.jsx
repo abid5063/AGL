@@ -986,7 +986,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#f5f6fa",
+    backgroundColor: "#f2fef7ff",
   },
   loadingContainer: {
     flex: 1,
@@ -1006,6 +1006,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 20,
     paddingVertical: 25,
+    margintop: 8,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     shadowColor: "#000",
@@ -1018,8 +1019,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   welcomeText: {
-    fontSize: 14,
-    color: "#7f8c8d",
+    fontSize: 18,
+    color: "#044c17ff",
     marginBottom: 4,
   },
   farmerName: {
@@ -1030,7 +1031,7 @@ const styles = StyleSheet.create({
   },
   farmerEmail: {
     fontSize: 14,
-    color: "#95a5a6",
+    color: "#4f6364ff",
   },
   profileImageContainer: {
     position: "relative",
@@ -1564,10 +1565,10 @@ const styles = StyleSheet.create({
   },
   vetRating: {
     fontSize: 12,
-    color: "#f39c12",
+    color: "#a16605ff",
   },
   chatButton: {
-    backgroundColor: "#3498db",
+    backgroundColor: "#025c98ff",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 12,
