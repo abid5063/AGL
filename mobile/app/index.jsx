@@ -2,31 +2,19 @@ import { Text, View, TouchableOpacity, StyleSheet, Image, SafeAreaView, StatusBa
 import { useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from "react";
-
-const translations = {
-  en: {
-    tagline: "Having trouble with livestock management?",
-    subTagline1: "Ride with us",
-    subTagline2: "Learn How to use this app.",
-    farmer: "I'm a Farmer",
-    vet: "I'm a Veterinarian",
-    // ...add more as needed
-  },
-  bn: {
-    tagline: "গবাদি পশু ব্যবস্থাপনায় সমস্যা হচ্ছে?",
-    subTagline1: "আমাদের সাথে থাকুন",
-    subTagline2: "এই অ্যাপটি কীভাবে ব্যবহার করবেন শিখুন।",
-    farmer: "আমি একজন কৃষক",
-    vet: "আমি একজন পশু চিকিৎসক",
-    // ...add more as needed
-  }
-};
+import React, { useState, useEffect } from "react";
+import { useLanguage } from "../utils/LanguageContext";
+import { useTranslation } from 'react-i18next';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const [lang, setLang] = useState('en');
-  const t = translations[lang];
+  const { language, changeLanguage } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   const handleFarmerAuth = () => {
     router.push('/farmerAuth');
@@ -56,9 +44,9 @@ export default function WelcomeScreen() {
       {/* Language Toggle Button */}
       <TouchableOpacity
         style={styles.langButton}
-        onPress={() => setLang(lang === 'en' ? 'bn' : 'en')}
+        onPress={() => changeLanguage(language === 'en' ? 'bn' : 'en')}
       >
-        <Text style={styles.langButtonText}>{lang === 'en' ? 'BN' : 'EN'}</Text>
+        <Text style={styles.langButtonText}>{language === 'en' ? 'BN' : 'EN'}</Text>
       </TouchableOpacity>
 
       {/* Main Content */}
@@ -86,15 +74,15 @@ export default function WelcomeScreen() {
 
         {/* Tagline Section - More farmer-focused messaging */}
         <View style={styles.taglineSection}>
-          <Text style={styles.tagline}>{t.tagline}</Text>
-          <Text style={styles.subTagline}>{t.subTagline1}</Text>
+          <Text style={styles.tagline}>{t('tagline')}</Text>
+          <Text style={styles.subTagline}>{t('subTagline1')}</Text>
           <TouchableOpacity 
             style={styles.learnMoreButton}
             onPress={handleLearnMore}
             activeOpacity={0.7}
           >
             <Ionicons name="logo-youtube" size={20} color="#023402ff" />
-            <Text style={styles.learnMoreText}>{t.subTagline2}</Text>
+            <Text style={styles.learnMoreText}>{t('subTagline2')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -107,7 +95,7 @@ export default function WelcomeScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="leaf" size={28} color='#032301ff' />
-            <Text style={styles.buttonText}>{t.farmer}</Text>
+            <Text style={styles.buttonText}>{t('farmer')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -117,14 +105,14 @@ export default function WelcomeScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="medical" size={28} color='#032001ff'/>
-            <Text style={styles.buttonText}>{t.vet}</Text>
+            <Text style={styles.buttonText}>{t('vet')}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Bottom gradient overlay */}
       <LinearGradient
-        colors={['transparent','rgba(166, 206, 119, 1)',  'rgba(3, 61, 6, 0.96)']}
+        colors={['transparent','rgba(186, 228, 138, 1)',  'rgba(3, 61, 6, 0.96)']}
         style={styles.grassOverlay}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}

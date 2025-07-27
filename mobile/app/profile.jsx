@@ -20,10 +20,14 @@ import { AntDesign, Feather, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import axios from "axios";
 import * as ImagePicker from 'expo-image-picker';
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+import { useLanguage } from "../utils/LanguageContext";
+import { useTranslation } from 'react-i18next';
 const { width } = Dimensions.get('window');
 
 export default function Profile() {
   const params = useLocalSearchParams();
+  const { language, changeLanguage } = useLanguage();
+  const { t, i18n } = useTranslation();
   const [farmer, setFarmer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [animals, setAnimals] = useState([]);
@@ -47,6 +51,11 @@ export default function Profile() {
     gender: '',
     details: ''
   });
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,7 +84,7 @@ export default function Profile() {
         await fetchConversations();
         await fetchVets();
       } catch (error) {
-        Alert.alert("Error", "Failed to load data");
+        Alert.alert(t('alerts.error'), t('alerts.failedToLoadData'));
       } finally {
         setLoading(false);
       }
@@ -94,11 +103,11 @@ export default function Profile() {
       setAnimals(response.data);
     } catch (error) {
       if (error.response?.status === 401) {
-        Alert.alert("Session Expired", "Please login again");
+        Alert.alert(t('alerts.sessionExpired'), t('alerts.pleaseLoginAgain'));
         await AsyncStorage.multiRemove(['authToken', 'userData']);
         router.replace('/');
       } else {
-        Alert.alert("Error", "Failed to fetch animals");
+        Alert.alert(t('alerts.error'), t('alerts.failedToFetchAnimals'));
       }
     }
   };
@@ -107,7 +116,7 @@ export default function Profile() {
     // Request permissions first
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission required', 'We need camera roll permissions to upload images');
+      Alert.alert(t('alerts.permissionRequired'), t('alerts.cameraRollPermission'));
       return;
     }
 
@@ -138,7 +147,7 @@ export default function Profile() {
               await AsyncStorage.multiRemove(['authToken', 'userData']);
               router.replace('/');
             } catch (error) {
-              Alert.alert('Error', 'Failed to logout');
+              Alert.alert(t('alerts.error'), t('alerts.failedToLogout'));
             }
           }
         }
@@ -161,7 +170,7 @@ export default function Profile() {
       !formData.age.trim() ||
       !formData.gender.trim()
     ) {
-      Alert.alert("Validation", "Please fill all required fields.");
+      Alert.alert(t('alerts.validation'), t('alerts.fillRequiredFields'));
       return;
     }
     try {
@@ -191,9 +200,9 @@ export default function Profile() {
         details: ''
       });
       setImage(null);
-      Alert.alert("Success", "Animal added successfully");
+      Alert.alert(t('alerts.success'), t('alerts.animalAddedSuccess'));
     } catch (error) {
-      Alert.alert("Error", error.response?.data?.message || "Failed to add animal");
+      Alert.alert(t('alerts.error'), error.response?.data?.message || t('alerts.failedToAddAnimal'));
     }
   };
 
@@ -205,7 +214,7 @@ export default function Profile() {
       !formData.age.trim() ||
       !formData.gender.trim()
     ) {
-      Alert.alert("Validation", "Please fill all required fields.");
+      Alert.alert(t('alerts.validation'), t('alerts.fillRequiredFields'));
       return;
     }
     try {
@@ -230,9 +239,9 @@ export default function Profile() {
       setEditModalVisible(false);
       setCurrentAnimal(null);
       setImage(null);
-      Alert.alert("Success", "Animal updated successfully");
+      Alert.alert(t('alerts.success'), t('alerts.animalUpdatedSuccess'));
     } catch (error) {
-      Alert.alert("Error", error.response?.data?.message || "Failed to update animal");
+      Alert.alert(t('alerts.error'), error.response?.data?.message || t('alerts.failedToUpdateAnimal'));
     }
   };
 
@@ -282,7 +291,7 @@ export default function Profile() {
       setConversationMessages(response.data.messages || []);
     } catch (error) {
       console.error("Error fetching conversation:", error);
-      Alert.alert("Error", "Failed to load conversation");
+      Alert.alert(t('alerts.error'), t('alerts.failedToLoadConversation'));
     }
   };
 
@@ -332,7 +341,7 @@ export default function Profile() {
       
     } catch (error) {
       console.error("Error sending message:", error);
-      Alert.alert("Error", "Failed to send message");
+      Alert.alert(t('alerts.error'), t('alerts.failedToSendMessage'));
     }
   };
 
@@ -340,7 +349,7 @@ export default function Profile() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4a89dc" />
-        <Text style={styles.loadingText}>Loading your profile...</Text>
+        <Text style={styles.loadingText}>{t('profile.loading')}</Text>
       </View>
     );
   }
@@ -348,9 +357,9 @@ export default function Profile() {
   if (!farmer) {
     return (
       <View style={styles.container}>
-        <Text>No profile data found</Text>
+        <Text>{t('profile.noProfileData')}</Text>
         <TouchableOpacity onPress={() => router.replace('/')}>
-          <Text style={styles.linkText}>Go to login</Text>
+          <Text style={styles.linkText}>{t('profile.goToLogin')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -362,7 +371,7 @@ export default function Profile() {
         {/* Header Section */}
         <View style={styles.headerSection}>
           <View style={styles.headerContent}>
-            <Text style={styles.welcomeText}>Welcome Back</Text>
+            <Text style={styles.welcomeText}>{t('profile.welcomeBack')}</Text>
             <Text style={styles.farmerName}>{farmer.name}</Text>
             <Text style={styles.farmerEmail}>{farmer.email}</Text>
           </View>
@@ -391,27 +400,27 @@ export default function Profile() {
               <Ionicons name="paw" size={24} color="#4a89dc" />
             </View>
             <Text style={styles.statNumber}>{animals.length}</Text>
-            <Text style={styles.statLabel}>Animals</Text>
+            <Text style={styles.statLabel}>{t('profile.animals')}</Text>
           </View>
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
               <Ionicons name="location" size={24} color="#27ae60" />
             </View>
             <Text style={styles.statNumber}>1</Text>
-            <Text style={styles.statLabel}>Farm</Text>
+            <Text style={styles.statLabel}>{t('profile.farm')}</Text>
           </View>
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
               <Ionicons name="shield-checkmark" size={24} color="#e67e22" />
             </View>
-            <Text style={styles.statNumber}>Active</Text>
-            <Text style={styles.statLabel}>Status</Text>
+            <Text style={styles.statNumber}>{t('profile.active')}</Text>
+            <Text style={styles.statLabel}>{t('profile.status')}</Text>
           </View>
         </View>
 
         {/* Main Features Grid */}
         <View style={styles.featuresContainer}>
-          <Text style={styles.sectionTitle}>Farm Management</Text>
+          <Text style={styles.sectionTitle}>{t('profile.farmManagement')}</Text>
           
           <View style={styles.featuresGrid}>
             {/* AI Chatbot */}
@@ -423,8 +432,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>AI Assistant</Text>
-              <Text style={styles.featureSubtitle}>Get instant help</Text>
+              <Text style={styles.featureTitle}>{t('profile.aiAssistant')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.getInstantHelp')}</Text>
             </TouchableOpacity>
 
             {/* Disease Detection */}
@@ -436,8 +445,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="medical" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>Health Check</Text>
-              <Text style={styles.featureSubtitle}>Disease detection</Text>
+              <Text style={styles.featureTitle}>{t('profile.healthCheck')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.diseaseDetection')}</Text>
             </TouchableOpacity>
 
             {/* Task Management */}
@@ -449,8 +458,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="clipboard" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>Tasks</Text>
-              <Text style={styles.featureSubtitle}>Manage daily tasks</Text>
+              <Text style={styles.featureTitle}>{t('profile.tasks')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.manageDailyTasks')}</Text>
             </TouchableOpacity>
 
             {/* Add Task */}
@@ -462,8 +471,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="add-circle" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>Appointments</Text>
-              <Text style={styles.featureSubtitle}>Add new task</Text>
+              <Text style={styles.featureTitle}>{t('profile.appointments')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.addNewTask')}</Text>
             </TouchableOpacity>
 
             {/* Vaccine Management */}
@@ -475,8 +484,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="shield-checkmark" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>Vaccines</Text>
-              <Text style={styles.featureSubtitle}>Manage vaccines</Text>
+              <Text style={styles.featureTitle}>{t('profile.vaccines')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.manageVaccines')}</Text>
             </TouchableOpacity>
 
             {/* Add Vaccine */}
@@ -488,8 +497,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="add-circle" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>New Vaccine</Text>
-              <Text style={styles.featureSubtitle}>Add vaccine record</Text>
+              <Text style={styles.featureTitle}>{t('profile.newVaccine')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.addVaccineRecord')}</Text>
             </TouchableOpacity>
 
             {/* Messages */}
@@ -501,8 +510,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="chatbubbles" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>Messages</Text>
-              <Text style={styles.featureSubtitle}>Chat with vets</Text>
+              <Text style={styles.featureTitle}>{t('profile.message')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.chatWithVets')}</Text>
             </TouchableOpacity>
 
 
@@ -515,8 +524,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="location" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>Find Vet</Text>
-              <Text style={styles.featureSubtitle}>Nearest veterinarian</Text>
+              <Text style={styles.featureTitle}>{t('profile.findVet')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.nearestVeterinarian')}</Text>
             </TouchableOpacity>
 
             {/* Market Analysis */}
@@ -527,8 +536,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="trending-up" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>Market</Text>
-              <Text style={styles.featureSubtitle}>Price analysis</Text>
+              <Text style={styles.featureTitle}>{t('profile.market')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.priceAnalysis')}</Text>
             </TouchableOpacity>
 
             {/* Food Suggestions */}
@@ -539,8 +548,8 @@ export default function Profile() {
               <View style={styles.featureIconContainer}>
                 <Ionicons name="nutrition" size={28} color="#fff" />
               </View>
-              <Text style={styles.featureTitle}>Nutrition</Text>
-              <Text style={styles.featureSubtitle}>Feed suggestions</Text>
+              <Text style={styles.featureTitle}>{t('profile.nutrition')}</Text>
+              <Text style={styles.featureSubtitle}>{t('profile.feedSuggestions')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -548,7 +557,7 @@ export default function Profile() {
         {/* Animals Section */}
         <View style={styles.animalsSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>My Animals</Text>
+            <Text style={styles.sectionTitle}>{t('profile.myAnimals')}</Text>
             <TouchableOpacity 
               style={styles.addAnimalButton}
               onPress={() => setModalVisible(true)}
@@ -561,8 +570,8 @@ export default function Profile() {
           {animals.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="paw" size={48} color="#ccc" />
-              <Text style={styles.emptyStateText}>No animals added yet</Text>
-              <Text style={styles.emptyStateSubtext}>Tap the + button to add your first animal</Text>
+              <Text style={styles.emptyStateText}>{t('profile.noAnimalsYet')}</Text>
+              <Text style={styles.emptyStateSubtext}>{t('profile.addFirstAnimal')}</Text>
             </View>
           ) : (
             <View style={styles.animalsGrid}>
@@ -598,7 +607,7 @@ export default function Profile() {
 
         {/* Farm Details */}
         <View style={styles.farmDetailsSection}>
-          <Text style={styles.sectionTitle}>Farm Details</Text>
+          <Text style={styles.sectionTitle}>{t('profile.farmDetails')}</Text>
           <View style={styles.detailsCard}>
             <View style={styles.detailItem}>
               <View style={styles.detailIconContainer}>
@@ -626,7 +635,7 @@ export default function Profile() {
           testID="logout-button"
         >
           <Ionicons name="log-out" size={20} color="#fff" style={styles.logoutIcon} />
-          <Text style={styles.logoutButtonText}>Sign Out</Text>
+          <Text style={styles.logoutButtonText}>{t('profile.signOut')}</Text>
         </TouchableOpacity>
 
         {/* Add Animal Modal */}
@@ -638,11 +647,11 @@ export default function Profile() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Add New Animal</Text>
+              <Text style={styles.modalTitle}>{t('profile.addNewAnimal')}</Text>
               
               <TextInput
                 style={styles.input}
-                placeholder="Name"
+                placeholder={t('profile.addAnimal.namePlaceholder')}
                 placeholderTextColor="#333"
                 value={formData.name}
                 onChangeText={(text) => handleInputChange('name', text)}
@@ -651,7 +660,7 @@ export default function Profile() {
               
               <TextInput
                 style={styles.input}
-                placeholder="Type (e.g., Cow, Chicken)"
+                placeholder={t('profile.addAnimal.typePlaceholder')}
                 placeholderTextColor="#333"
                 value={formData.type}
                 onChangeText={(text) => handleInputChange('type', text)}
@@ -660,7 +669,7 @@ export default function Profile() {
               
               <TextInput
                 style={styles.input}
-                placeholder="Breed"
+                placeholder={t('profile.addAnimal.breedPlaceholder')}
                 placeholderTextColor="#333"
                 value={formData.breed}
                 onChangeText={(text) => handleInputChange('breed', text)}
@@ -669,7 +678,7 @@ export default function Profile() {
               
               <TextInput
                 style={styles.input}
-                placeholder="Age"
+                placeholder={t('profile.addAnimal.agePlaceholder')}
                 placeholderTextColor="#333"
                 value={formData.age}
                 onChangeText={(text) => handleInputChange('age', text)}
@@ -679,7 +688,7 @@ export default function Profile() {
               
               <TextInput
                 style={styles.input}
-                placeholder="Gender"
+                placeholder={t('profile.addAnimal.genderPlaceholder')}
                 placeholderTextColor="#333"
                 value={formData.gender}
                 onChangeText={(text) => handleInputChange('gender', text)}
@@ -688,7 +697,7 @@ export default function Profile() {
               
               <TextInput
                 style={[styles.input, { height: 80 }]}
-                placeholder="Details (optional)"
+                placeholder={t('profile.addAnimal.detailsPlaceholder')}
                 placeholderTextColor="#333"
                 value={formData.details}
                 onChangeText={(text) => handleInputChange('details', text)}
@@ -702,7 +711,7 @@ export default function Profile() {
                 testID="image-picker-button"
               >
                 <Text style={styles.imagePickerText}>
-                  {image ? "Image Selected" : "Select Image (Optional)"}
+                  {image ? t('profile.addAnimal.imageSelected') : t('profile.addAnimal.selectImagePlaceholder')}
                 </Text>
               </TouchableOpacity>
 
@@ -722,14 +731,14 @@ export default function Profile() {
                   }}
                   testID="modal-cancel-button"
                 >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                  <Text style={styles.cancelButtonText}>{t('profile.addAnimal.cancelButton')}</Text>
                 </Pressable>
                 <Pressable
                   style={[styles.modalButton, styles.saveButton]}
                   onPress={handleAddAnimal}
                   testID="modal-save-button"
                 >
-                  <Text style={styles.saveButtonText}>Save</Text>
+                  <Text style={styles.saveButtonText}>{t('profile.addAnimal.saveButton')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -745,32 +754,32 @@ export default function Profile() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Edit Animal</Text>
+              <Text style={styles.modalTitle}>{t('profile.editAnimal')}</Text>
               
               <TextInput
                 style={styles.input}
-                placeholder="Name"
+                placeholder={t('profile.editAnimal.namePlaceholder')}
                 value={formData.name}
                 onChangeText={(text) => handleInputChange('name', text)}
               />
               
               <TextInput
                 style={styles.input}
-                placeholder="Type"
+                placeholder={t('profile.editAnimal.typePlaceholder')}
                 value={formData.type}
                 onChangeText={(text) => handleInputChange('type', text)}
               />
               
               <TextInput
                 style={styles.input}
-                placeholder="Breed"
+                placeholder={t('profile.editAnimal.breedPlaceholder')}
                 value={formData.breed}
                 onChangeText={(text) => handleInputChange('breed', text)}
               />
               
               <TextInput
                 style={styles.input}
-                placeholder="Age"
+                placeholder={t('profile.editAnimal.agePlaceholder')}
                 value={formData.age}
                 onChangeText={(text) => handleInputChange('age', text)}
                 keyboardType="numeric"
@@ -778,14 +787,14 @@ export default function Profile() {
               
               <TextInput
                 style={styles.input}
-                placeholder="Gender"
+                placeholder={t('profile.editAnimal.genderPlaceholder')}
                 value={formData.gender}
                 onChangeText={(text) => handleInputChange('gender', text)}
               />
               
               <TextInput
                 style={[styles.input, { height: 80 }]}
-                placeholder="Details"
+                placeholder={t('profile.editAnimal.detailsPlaceholder')}
                 value={formData.details}
                 onChangeText={(text) => handleInputChange('details', text)}
                 multiline
@@ -796,7 +805,7 @@ export default function Profile() {
                 onPress={pickImage}
               >
                 <Text style={styles.imagePickerText}>
-                  {image ? "Change Image" : currentAnimal?.photo_url ? "Keep Current Image" : "Add Image (Optional)"}
+                  {image ? t('profile.editAnimal.changeImage') : currentAnimal?.photo_url ? t('profile.editAnimal.keepCurrentImage') : t('profile.editAnimal.addImagePlaceholder')}
                 </Text>
               </TouchableOpacity>
 
@@ -815,13 +824,13 @@ export default function Profile() {
                     setImage(null);
                   }}
                 >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                  <Text style={styles.cancelButtonText}>{t('profile.editAnimal.cancelButton')}</Text>
                 </Pressable>
                 <Pressable
                   style={[styles.modalButton, styles.saveButton]}
                   onPress={handleEditAnimal}
                 >
-                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                  <Text style={styles.saveButtonText}>{t('profile.editAnimal.saveChangesButton')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -837,7 +846,7 @@ export default function Profile() {
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {selectedConversation ? selectedConversation.participant.name : "Messages"}
+                {selectedConversation ? selectedConversation.participant.name : t('profile.messages.title')}
               </Text>
               <TouchableOpacity
                 onPress={() => {
@@ -878,7 +887,7 @@ export default function Profile() {
                     style={styles.messageInput}
                     value={newMessage}
                     onChangeText={setNewMessage}
-                    placeholder="Type a message..."
+                    placeholder={t('profile.messages.messageInputPlaceholder')}
                     multiline
                     testID="message-input"
                   />
@@ -932,7 +941,7 @@ export default function Profile() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Find Veterinarians</Text>
+              <Text style={styles.modalTitle}>{t('profile.findVets.title')}</Text>
               <TouchableOpacity
                 onPress={() => setShowVets(false)}
                 testID="close-vets-modal"
@@ -956,7 +965,7 @@ export default function Profile() {
                     testID={`chat-with-vet-${item._id}`}
                   >
                     <Ionicons name="chatbubbles" size={16} color="#fff" />
-                    <Text style={styles.chatButtonText}>Chat</Text>
+                    <Text style={styles.chatButtonText}>{t('profile.findVets.chatButton')}</Text>
                   </TouchableOpacity>
                 </View>
               )}
