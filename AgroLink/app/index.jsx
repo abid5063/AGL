@@ -2,31 +2,19 @@ import { Text, View, TouchableOpacity, StyleSheet, Image, SafeAreaView, StatusBa
 import { useRouter } from "expo-router";
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from "react";
-
-const translations = {
-  en: {
-    tagline: "Having trouble with livestock management?",
-    subTagline1: "Ride with us",
-    subTagline2: "Learn How to use this app.",
-    farmer: "I'm a Farmer",
-    vet: "I'm a Veterinarian",
-    // ...add more as needed
-  },
-  bn: {
-    tagline: "গবাদি পশু ব্যবস্থাপনায় সমস্যা হচ্ছে?",
-    subTagline1: "আমাদের সাথে থাকুন",
-    subTagline2: "এই অ্যাপটি কীভাবে ব্যবহার করবেন শিখুন।",
-    farmer: "আমি একজন কৃষক",
-    vet: "আমি একজন পশু চিকিৎসক",
-    // ...add more as needed
-  }
-};
+import React, { useState, useEffect } from "react";
+import { useLanguage } from "../utils/LanguageContext";
+import { useTranslation } from 'react-i18next';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const [lang, setLang] = useState('en');
-  const t = translations[lang];
+  const { language, changeLanguage } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   const handleFarmerAuth = () => {
     router.push('/farmerAuth');
@@ -47,7 +35,7 @@ export default function WelcomeScreen() {
       
       {/* Green Gradient Background */}
       <LinearGradient
-        colors={['#0d3b16', '#1a5a2d', '#2d7a4a', '#4a9a6b']}
+        colors={['#02290aff', '#80c25aff', '#46c426ff', '#b0dd96ff']}
         style={styles.gradientBackground}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -56,9 +44,9 @@ export default function WelcomeScreen() {
       {/* Language Toggle Button */}
       <TouchableOpacity
         style={styles.langButton}
-        onPress={() => setLang(lang === 'en' ? 'bn' : 'en')}
+        onPress={() => changeLanguage(language === 'en' ? 'bn' : 'en')}
       >
-        <Text style={styles.langButtonText}>{lang === 'en' ? 'BN' : 'EN'}</Text>
+        <Text style={styles.langButtonText}>{language === 'en' ? 'BN' : 'EN'}</Text>
       </TouchableOpacity>
 
       {/* Main Content */}
@@ -67,13 +55,13 @@ export default function WelcomeScreen() {
         <View style={styles.logoSection}>
           <View style={styles.logoContainer}>
             <Image 
-              source={require('../assets/images/logo.jpg')}
+              source={require('../assets/images/logo.jpeg')}
               style={styles.logo}
               resizeMode="cover"
             />
             {/* Logo blend overlay */}
             <LinearGradient
-              colors={['rgba(13, 59, 22, 0.3)', 'rgba(26, 90, 45, 0.2)', 'rgba(45, 122, 74, 0.1)', 'transparent']}
+              colors={['rgba(202, 239, 138, 0.97)', 'rgba(4, 106, 35, 0.61)', 'rgba(45, 122, 74, 0.1)', 'transparent']}
               style={styles.logoBlendOverlay}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -86,15 +74,15 @@ export default function WelcomeScreen() {
 
         {/* Tagline Section - More farmer-focused messaging */}
         <View style={styles.taglineSection}>
-          <Text style={styles.tagline}>{t.tagline}</Text>
-          <Text style={styles.subTagline}>{t.subTagline1}</Text>
+          <Text style={styles.tagline}>{t('tagline')}</Text>
+          <Text style={styles.subTagline}>{t('subTagline1')}</Text>
           <TouchableOpacity 
             style={styles.learnMoreButton}
             onPress={handleLearnMore}
             activeOpacity={0.7}
           >
-            <Ionicons name="logo-youtube" size={20} color="#c8f1c8ff" />
-            <Text style={styles.learnMoreText}>{t.subTagline2}</Text>
+            <Ionicons name="logo-youtube" size={20} color="#023402ff" />
+            <Text style={styles.learnMoreText}>{t('subTagline2')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -106,8 +94,8 @@ export default function WelcomeScreen() {
             testID="farmer-option-button"
             activeOpacity={0.8}
           >
-            <Ionicons name="leaf" size={28} color="#fff" />
-            <Text style={styles.buttonText}>{t.farmer}</Text>
+            <Ionicons name="leaf" size={28} color='#032301ff' />
+            <Text style={styles.buttonText}>{t('farmer')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -116,15 +104,15 @@ export default function WelcomeScreen() {
             testID="vet-option-button"
             activeOpacity={0.8}
           >
-            <Ionicons name="medical" size={28} color="#fff" />
-            <Text style={styles.buttonText}>{t.vet}</Text>
+            <Ionicons name="medical" size={28} color='#032001ff'/>
+            <Text style={styles.buttonText}>{t('vet')}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Bottom gradient overlay */}
       <LinearGradient
-        colors={['transparent','rgba(114, 187, 69, 0.86)',  'rgba(3, 61, 6, 0.96)']}
+        colors={['transparent','rgba(186, 228, 138, 1)',  'rgba(3, 61, 6, 0.96)']}
         style={styles.grassOverlay}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
@@ -152,7 +140,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   logoSection: {
-    flex: 1,
+    flex: 0.9, //don't change
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingTop: 12,
@@ -163,7 +151,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 2,
     position: 'relative',
   },
   logo: {
@@ -174,7 +162,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 8,
-    opacity: 0.85,
+    opacity: 0.95,
     borderRadius: 8,
   },
   logoBlendOverlay: {
@@ -220,15 +208,15 @@ const styles = StyleSheet.create({
   },
   taglineSection: {
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 2,
     gap:6,
   },
   tagline: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#2f7112ff',
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 5,
     lineHeight: 26,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 2 },
@@ -236,7 +224,7 @@ const styles = StyleSheet.create({
   },
   subTagline: {
     fontSize: 20,
-    color: '#e8f5e8',
+    color: '#2f7112ff',
     textAlign: 'center',
     fontWeight: '400',
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
@@ -252,14 +240,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(3, 43, 15, 0.1)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     gap: 8,
   },
   learnMoreText: {
     fontSize: 16,
-    color: '#ffffff',
+    color:'#204a0eff',
     fontWeight: '500',
     textDecorationLine: 'underline',
   },
@@ -271,7 +259,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(94, 163, 85, 0.15)',
     paddingVertical: 18,
     paddingHorizontal: 12,
     borderRadius: 10,
@@ -286,7 +274,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   buttonText: {
-    color: '#fff',
+    color: '#164204ff',
     fontSize: 20,
     fontWeight: '600',
     letterSpacing: 0.5,
@@ -322,7 +310,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   langButtonText: {
-    color: '#fff',
+    color: '#032001ff',
     fontWeight: 'bold',
     fontSize: 16,
   },
