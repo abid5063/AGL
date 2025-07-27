@@ -343,9 +343,11 @@ export default function FoodSuggestions() {
                      getFoodSuggestion(selectedAnimal, 'comprehensive');
                    }}
                  >
-                   <Ionicons name="restaurant" size={24} color="#4a89dc" />
-                   <Text style={styles.optionButtonText}>{t('foodSuggestions.comprehensive')}</Text>
-                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.comprehensiveSubtext')}</Text>
+                   <Ionicons name="restaurant" size={28} color="#4a89dc" />
+                   <View style={styles.optionTextContainer}>
+                     <Text style={styles.optionButtonText}>{t('foodSuggestions.comprehensive')}</Text>
+                     <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.comprehensiveSubtext')}</Text>
+                   </View>
                  </TouchableOpacity>
 
                  <TouchableOpacity 
@@ -355,9 +357,11 @@ export default function FoodSuggestions() {
                      showFoodVarietyOptions('dietChart');
                    }}
                  >
-                   <Ionicons name="grid" size={24} color="#27ae60" />
-                   <Text style={styles.optionButtonText}>{t('foodSuggestions.dietChart')}</Text>
-                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.dietChartSubtext')}</Text>
+                   <Ionicons name="grid" size={28} color="#27ae60" />
+                   <View style={styles.optionTextContainer}>
+                     <Text style={styles.optionButtonText}>{t('foodSuggestions.dietChart')}</Text>
+                     <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.dietChartSubtext')}</Text>
+                   </View>
                  </TouchableOpacity>
 
                  <TouchableOpacity 
@@ -367,9 +371,11 @@ export default function FoodSuggestions() {
                      showFoodVarietyOptions('weightGain');
                    }}
                  >
-                   <Ionicons name="trending-up" size={24} color="#f39c12" />
-                   <Text style={styles.optionButtonText}>{t('foodSuggestions.weightGain')}</Text>
-                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.weightGainSubtext')}</Text>
+                   <Ionicons name="trending-up" size={28} color="#f39c12" />
+                   <View style={styles.optionTextContainer}>
+                     <Text style={styles.optionButtonText}>{t('foodSuggestions.weightGain')}</Text>
+                     <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.weightGainSubtext')}</Text>
+                   </View>
                  </TouchableOpacity>
 
                  <TouchableOpacity 
@@ -379,9 +385,11 @@ export default function FoodSuggestions() {
                      showFoodVarietyOptions('weightLoss');
                    }}
                  >
-                   <Ionicons name="trending-down" size={24} color="#e74c3c" />
-                   <Text style={styles.optionButtonText}>{t('foodSuggestions.weightLoss')}</Text>
-                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.weightLossSubtext')}</Text>
+                   <Ionicons name="trending-down" size={28} color="#e74c3c" />
+                   <View style={styles.optionTextContainer}>
+                     <Text style={styles.optionButtonText}>{t('foodSuggestions.weightLoss')}</Text>
+                     <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.weightLossSubtext')}</Text>
+                   </View>
                  </TouchableOpacity>
 
                  <TouchableOpacity 
@@ -391,9 +399,11 @@ export default function FoodSuggestions() {
                      getFoodSuggestion(selectedAnimal, 'pregnancy');
                    }}
                  >
-                   <Ionicons name="heart" size={24} color="#e91e63" />
-                   <Text style={styles.optionButtonText}>{t('foodSuggestions.pregnancy')}</Text>
-                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.pregnancySubtext')}</Text>
+                   <Ionicons name="heart" size={28} color="#e91e63" />
+                   <View style={styles.optionTextContainer}>
+                     <Text style={styles.optionButtonText}>{t('foodSuggestions.pregnancy')}</Text>
+                     <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.pregnancySubtext')}</Text>
+                   </View>
                  </TouchableOpacity>
 
                 
@@ -430,27 +440,33 @@ export default function FoodSuggestions() {
                     style={styles.optionButton}
                     onPress={() => getFoodVariety('vegetarian')}
                   >
-                    <Ionicons name="leaf" size={24} color="#27ae60" />
-                    <Text style={styles.optionButtonText}>{t('foodSuggestions.vegetarian')}</Text>
-                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.vegetarianSubtext')}</Text>
+                    <Ionicons name="leaf" size={28} color="#27ae60" />
+                    <View style={styles.optionTextContainer}>
+                      <Text style={styles.optionButtonText}>{t('foodSuggestions.vegetarian')}</Text>
+                      <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.vegetarianSubtext')}</Text>
+                    </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
                     style={styles.optionButton}
                     onPress={() => getFoodVariety('highProtein')}
                   >
-                    <Ionicons name="fitness" size={24} color="#e74c3c" />
-                    <Text style={styles.optionButtonText}>{t('foodSuggestions.highProtein')}</Text>
-                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.highProteinSubtext')}</Text>
+                    <Ionicons name="fitness" size={28} color="#e74c3c" />
+                    <View style={styles.optionTextContainer}>
+                      <Text style={styles.optionButtonText}>{t('foodSuggestions.highProtein')}</Text>
+                      <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.highProteinSubtext')}</Text>
+                    </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
                     style={styles.optionButton}
                     onPress={() => getFoodVariety('grainFree')}
                   >
-                    <Ionicons name="close-circle" size={24} color="#f39c12" />
-                    <Text style={styles.optionButtonText}>{t('foodSuggestions.grainFree')}</Text>
-                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.grainFreeSubtext')}</Text>
+                    <Ionicons name="close-circle" size={28} color="#f39c12" />
+                    <View style={styles.optionTextContainer}>
+                      <Text style={styles.optionButtonText}>{t('foodSuggestions.grainFree')}</Text>
+                      <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.grainFreeSubtext')}</Text>
+                    </View>
                   </TouchableOpacity>
                 </>
               )}
@@ -461,18 +477,22 @@ export default function FoodSuggestions() {
                     style={styles.optionButton}
                     onPress={() => getFoodVariety('highCalorie')}
                   >
-                    <Ionicons name="flame" size={24} color="#e67e22" />
-                    <Text style={styles.optionButtonText}>{t('foodSuggestions.highCalorie')}</Text>
-                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.highCalorieSubtext')}</Text>
+                    <Ionicons name="flame" size={28} color="#e67e22" />
+                    <View style={styles.optionTextContainer}>
+                      <Text style={styles.optionButtonText}>{t('foodSuggestions.highCalorie')}</Text>
+                      <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.highCalorieSubtext')}</Text>
+                    </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
                     style={styles.optionButton}
                     onPress={() => getFoodVariety('muscleBuilding')}
                   >
-                    <Ionicons name="barbell" size={24} color="#8e44ad" />
-                    <Text style={styles.optionButtonText}>{t('foodSuggestions.muscleBuilding')}</Text>
-                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.muscleBuildingSubtext')}</Text>
+                    <Ionicons name="barbell" size={28} color="#8e44ad" />
+                    <View style={styles.optionTextContainer}>
+                      <Text style={styles.optionButtonText}>{t('foodSuggestions.muscleBuilding')}</Text>
+                      <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.muscleBuildingSubtext')}</Text>
+                    </View>
                   </TouchableOpacity>
                 </>
               )}
@@ -483,18 +503,22 @@ export default function FoodSuggestions() {
                     style={styles.optionButton}
                     onPress={() => getFoodVariety('lowCarb')}
                   >
-                    <Ionicons name="remove-circle" size={24} color="#e74c3c" />
-                    <Text style={styles.optionButtonText}>{t('foodSuggestions.lowCarb')}</Text>
-                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.lowCarbSubtext')}</Text>
+                    <Ionicons name="remove-circle" size={28} color="#e74c3c" />
+                    <View style={styles.optionTextContainer}>
+                      <Text style={styles.optionButtonText}>{t('foodSuggestions.lowCarb')}</Text>
+                      <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.lowCarbSubtext')}</Text>
+                    </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
                     style={styles.optionButton}
                     onPress={() => getFoodVariety('intermittent')}
                   >
-                    <Ionicons name="time" size={24} color="#3498db" />
-                    <Text style={styles.optionButtonText}>{t('foodSuggestions.intermittent')}</Text>
-                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.intermittentSubtext')}</Text>
+                    <Ionicons name="time" size={28} color="#3498db" />
+                    <View style={styles.optionTextContainer}>
+                      <Text style={styles.optionButtonText}>{t('foodSuggestions.intermittent')}</Text>
+                      <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.intermittentSubtext')}</Text>
+                    </View>
                   </TouchableOpacity>
                 </>
               )}
@@ -663,15 +687,15 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   optionsContainer: {
-    padding: 20,
-    gap: 16,
+    padding: 10,
+    gap: 10,
   },
   optionButton: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
+    padding: 10,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#eee',
     shadowColor: '#000',
@@ -679,18 +703,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    minHeight: 80,
+  },
+  optionTextContainer: {
+    flex: 1,
+    marginLeft: 16,
   },
   optionButtonText: {
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginLeft: 12,
-    flex: 1,
+    marginBottom: 4,
   },
   optionButtonSubtext: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#666',
-    marginLeft: 10,
-    marginTop: 2,
+    lineHeight: 20,
   },
 }); 
