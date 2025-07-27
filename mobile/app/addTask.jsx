@@ -15,8 +15,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig';
 import { Ionicons } from '@expo/vector-icons';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const AddTask = () => {
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  React.useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -24,7 +34,7 @@ const AddTask = () => {
     dueTime: '09:00',
     estimatedCost: '',
     priority: 'medium',
-    category: 'other',
+    category: ['other'], // Changed to array to support multiple categories
     animal: '',
     notes: ''
   });
@@ -36,18 +46,18 @@ const AddTask = () => {
   const [loading, setLoading] = useState(false);
 
   const priorities = [
-    { key: 'low', label: 'Low', color: '#44ff44' },
-    { key: 'medium', label: 'Medium', color: '#ffaa00' },
-    { key: 'high', label: 'High', color: '#ff4444' }
+    { key: 'low', label: t('addTask.low'), color: '#106310ff' },
+    { key: 'medium', label: t('addTask.medium'), color: '#bb7f07ff' },
+    { key: 'high', label: t('addTask.high'), color: '#9b0202ff' }
   ];
 
   const categories = [
-    { key: 'feeding', label: 'Feeding', icon: 'restaurant' },
-    { key: 'vaccination', label: 'Vaccination', icon: 'medical' },
-    { key: 'health-check', label: 'Health Check', icon: 'heart' },
-    { key: 'breeding', label: 'Breeding', icon: 'heart-circle' },
-    { key: 'maintenance', label: 'Maintenance', icon: 'construct' },
-    { key: 'other', label: 'Other', icon: 'clipboard' }
+    { key: 'feeding', label: t('addTask.feeding'), icon: 'restaurant' },
+    { key: 'vaccination', label: t('addTask.vaccination'), icon: 'medical' },
+    { key: 'health-check', label: t('addTask.healthCheck'), icon: 'heart' },
+    { key: 'breeding', label: t('addTask.breeding'), icon: 'heart-circle' },
+    { key: 'maintenance', label: t('addTask.maintenance'), icon: 'construct' },
+    { key: 'other', label: t('addTask.other'), icon: 'clipboard' }
   ];
 
   // Fetch animals when component mounts
@@ -73,12 +83,12 @@ const AddTask = () => {
       console.error('Error status:', error.response?.status);
       // Show user-friendly error message
       if (error.response?.status === 401) {
-        Alert.alert('Authentication Error', 'Please log in again');
+        Alert.alert(t('addTask.authenticationError'), t('addTask.pleaseLoginAgain'));
         router.replace('/');
       } else if (error.response?.status === 500) {
-        Alert.alert('Server Error', 'Unable to fetch animals. Please try again later.');
+        Alert.alert(t('addTask.serverError'), t('addTask.unableToFetchAnimals'));
       } else {
-        Alert.alert('Error', 'Failed to fetch animals. Please check your connection.');
+        Alert.alert(t('addTask.error'), t('addTask.failedToFetchAnimals'));
       }
     }
   };
@@ -88,6 +98,27 @@ const AddTask = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleCategoryToggle = (categoryKey) => {
+    setFormData(prev => {
+      const currentCategories = prev.category;
+      if (currentCategories.includes(categoryKey)) {
+        // Remove category if already selected
+        const newCategories = currentCategories.filter(cat => cat !== categoryKey);
+        // Ensure at least one category is selected
+        return {
+          ...prev,
+          category: newCategories.length > 0 ? newCategories : ['other']
+        };
+      } else {
+        // Add category if not selected
+        return {
+          ...prev,
+          category: [...currentCategories, categoryKey]
+        };
+      }
+    });
   };
 
   const formatDate = (dateString) => {
@@ -113,25 +144,25 @@ const AddTask = () => {
 
   const validateForm = () => {
     if (!formData.title.trim()) {
-      Alert.alert('Validation Error', 'Please enter a task title');
+      Alert.alert(t('addTask.validationError'), t('addTask.enterTaskTitle'));
       return false;
     }
     
     // Validate date format (YYYY-MM-DD)
     const datePattern = /^\d{4}-\d{2}-\d{2}$/;
     if (!datePattern.test(formData.dueDate)) {
-      Alert.alert('Validation Error', 'Please enter a valid date (YYYY-MM-DD)');
+      Alert.alert(t('addTask.validationError'), t('addTask.enterValidDate'));
       return false;
     }
     
     // Validate time format (HH:MM)
     if (!formData.dueTime.match(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)) {
-      Alert.alert('Validation Error', 'Please enter a valid time (HH:MM)');
+      Alert.alert(t('addTask.validationError'), t('addTask.enterValidTime'));
       return false;
     }
 
     if (formData.estimatedCost && isNaN(parseFloat(formData.estimatedCost))) {
-      Alert.alert('Validation Error', 'Please enter a valid cost amount');
+      Alert.alert(t('addTask.validationError'), t('addTask.enterValidCost'));
       return false;
     }
 
@@ -149,8 +180,12 @@ const AddTask = () => {
         return;
       }
 
+      // Send only the first selected category to backend (since backend expects single category)
+      const primaryCategory = formData.category[0] || 'other';
+      
       const taskData = {
         ...formData,
+        category: primaryCategory, // Send only the first category to backend
         estimatedCost: formData.estimatedCost ? parseFloat(formData.estimatedCost) : 0,
         animal: formData.animal || null
       };
@@ -162,7 +197,7 @@ const AddTask = () => {
       router.replace('/taskManagement');
     } catch (error) {
       console.error('Error creating task:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to create task');
+      Alert.alert(t('addTask.error'), error.response?.data?.message || t('addTask.failedToCreateTask'));
     } finally {
       setLoading(false);
     }
@@ -170,7 +205,7 @@ const AddTask = () => {
 
   const renderPrioritySelector = () => (
     <View style={styles.selectorContainer}>
-      <Text style={styles.label}>Priority</Text>
+      <Text style={styles.label}>{t('addTask.priority')}</Text>
       <View style={styles.priorityContainer}>
         {priorities.map(priority => (
           <TouchableOpacity
@@ -196,7 +231,10 @@ const AddTask = () => {
 
   const renderCategorySelector = () => (
     <View style={styles.selectorContainer}>
-      <Text style={styles.label}>Category</Text>
+      <Text style={styles.label}>
+        {t('addTask.category')} 
+        {formData.category.length > 1 && ` (${t('addTask.primaryCategory')}: ${categories.find(cat => cat.key === formData.category[0])?.label})`}
+      </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.categoryContainer}>
           {categories.map(category => (
@@ -204,21 +242,29 @@ const AddTask = () => {
               key={category.key}
               style={[
                 styles.categoryButton,
-                formData.category === category.key && styles.selectedCategory
+                formData.category.includes(category.key) && styles.selectedCategory
               ]}
-              onPress={() => handleInputChange('category', category.key)}
+              onPress={() => handleCategoryToggle(category.key)}
             >
               <Ionicons 
                 name={category.icon} 
                 size={20} 
-                color={formData.category === category.key ? '#fff' : '#666'} 
+                color={formData.category.includes(category.key) ? '#fff' : '#666'} 
               />
               <Text style={[
                 styles.categoryText,
-                formData.category === category.key && styles.selectedCategoryText
+                formData.category.includes(category.key) && styles.selectedCategoryText
               ]}>
                 {category.label}
               </Text>
+              {formData.category.includes(category.key) && (
+                <Ionicons 
+                  name={formData.category[0] === category.key ? "star" : "checkmark-circle"} 
+                  size={16} 
+                  color="#fff" 
+                  style={{ marginLeft: 4 }} 
+                />
+              )}
             </TouchableOpacity>
           ))}
         </View>
@@ -228,7 +274,7 @@ const AddTask = () => {
 
   const renderAnimalSelector = () => (
     <View style={styles.selectorContainer}>
-      <Text style={styles.label}>Animal (Optional)</Text>
+      <Text style={styles.label}>{t('addTask.animalOptional')}</Text>
       <View style={styles.animalContainer}>
         <TouchableOpacity
           style={[
@@ -241,7 +287,7 @@ const AddTask = () => {
             styles.animalText,
             !formData.animal && styles.selectedAnimalText
           ]}>
-            No specific animal
+            {t('addTask.noSpecificAnimal')}
           </Text>
         </TouchableOpacity>
         
@@ -272,29 +318,29 @@ const AddTask = () => {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>
-        <Text style={styles.title}>Add New Task</Text>
+        <Text style={styles.title}>{t('addTask.headerTitle')}</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <View style={styles.form}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Task Title *</Text>
+          <Text style={styles.label}>{t('addTask.taskTitle')}</Text>
           <TextInput
             style={styles.input}
             value={formData.title}
             onChangeText={(value) => handleInputChange('title', value)}
-            placeholder="Enter task title"
+            placeholder={t('addTask.taskTitlePlaceholder')}
             maxLength={100}
           />
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>{t('addTask.description')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             value={formData.description}
             onChangeText={(value) => handleInputChange('description', value)}
-            placeholder="Enter task description"
+            placeholder={t('addTask.descriptionPlaceholder')}
             multiline
             numberOfLines={3}
             maxLength={500}
@@ -303,7 +349,7 @@ const AddTask = () => {
 
         <View style={styles.dateTimeContainer}>
           <View style={styles.dateContainer}>
-            <Text style={styles.label}>Due Date *</Text>
+            <Text style={styles.label}>{t('addTask.dueDate')}</Text>
             <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
               <Text style={styles.dateText}>{formatDate(formData.dueDate)}</Text>
               <Ionicons name="calendar" size={20} color="#007AFF" style={{ marginLeft: 8 }} />
@@ -311,7 +357,7 @@ const AddTask = () => {
           </View>
 
           <View style={styles.timeContainer}>
-            <Text style={styles.label}>Due Time *</Text>
+            <Text style={styles.label}>{t('addTask.dueTime')}</Text>
             <TouchableOpacity style={styles.timeButton} onPress={() => setShowTimePicker(true)}>
               <Text style={styles.timeText}>{formatTime(formData.dueTime)}</Text>
               <Ionicons name="time" size={20} color="#007AFF" style={{ marginLeft: 8 }} />
@@ -351,13 +397,14 @@ const AddTask = () => {
             />
           )}
         </View>
-        {/* ...existing code... */}
-          <Text style={styles.label}>Estimated Cost ($)</Text>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>{t('addTask.estimatedCost')}</Text>
           <TextInput
             style={styles.input}
             value={formData.estimatedCost}
             onChangeText={(value) => handleInputChange('estimatedCost', value)}
-            placeholder="0.00"
+            placeholder={t('addTask.costPlaceholder')}
             keyboardType="decimal-pad"
           />
         </View>
@@ -367,12 +414,12 @@ const AddTask = () => {
         {renderAnimalSelector()}
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Notes</Text>
+          <Text style={styles.label}>{t('addTask.notes')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             value={formData.notes}
             onChangeText={(value) => handleInputChange('notes', value)}
-            placeholder="Additional notes..."
+            placeholder={t('addTask.notesPlaceholder')}
             multiline
             numberOfLines={3}
             maxLength={300}
@@ -385,9 +432,10 @@ const AddTask = () => {
           disabled={loading}
         >
           <Text style={styles.submitText}>
-            {loading ? 'Creating Task...' : 'Create Task'}
+            {loading ? t('addTask.creatingTask') : t('addTask.createTask')}
           </Text>
         </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -528,7 +576,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   selectedCategory: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#104176ff',
     borderColor: '#007AFF',
   },
   categoryText: {
@@ -554,8 +602,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   selectedAnimal: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: '#1a4a7dff',
+    borderColor: '#0b4482ff',
   },
   animalText: {
     fontSize: 12,
@@ -565,7 +613,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#08481fff',
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',

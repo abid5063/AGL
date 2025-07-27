@@ -17,10 +17,20 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 const { width } = Dimensions.get('window');
 
 export default function VetMessaging() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [conversations, setConversations] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
@@ -79,7 +89,7 @@ export default function VetMessaging() {
       setSearchResults(response.data.farmers || []);
     } catch (error) {
       console.error("Error searching farmers:", error);
-      Alert.alert("Error", "Failed to search farmers");
+      Alert.alert(t('vetMessaging.error'), t('vetMessaging.failedToSearchFarmers'));
     }
   };
 
@@ -307,7 +317,7 @@ export default function VetMessaging() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading messages...</Text>
+        <Text>{t('vetMessaging.loadingMessages')}</Text>
       </View>
     );
   }
@@ -319,7 +329,7 @@ export default function VetMessaging() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#2c3e50" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Patient Messages</Text>
+        <Text style={styles.headerTitle}>{t('vetMessaging.headerTitle')}</Text>
         <TouchableOpacity onPress={() => {
           setShowSearch(true);
           setSearchQuery(''); // Clear search query
@@ -342,9 +352,9 @@ export default function VetMessaging() {
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Ionicons name="chatbubbles-outline" size={64} color="#bdc3c7" />
-              <Text style={styles.emptyTitle}>No patient conversations</Text>
+              <Text style={styles.emptyTitle}>{t('vetMessaging.noPatientConversations')}</Text>
               <Text style={styles.emptySubtitle}>
-                Tap the search icon to find farmers and start consultations
+                {t('vetMessaging.tapSearchToFindFarmers')}
               </Text>
             </View>
           }
@@ -364,7 +374,7 @@ export default function VetMessaging() {
                 {selectedConversation.participant.name}
               </Text>
               <Text style={styles.chatHeaderFarm}>
-                {selectedConversation.participant.location || "Location not specified"}
+                {selectedConversation.participant.location || t('vetMessaging.locationNotSpecified')}
               </Text>
             </View>
             <View style={styles.chatHeaderActions}>
@@ -389,7 +399,7 @@ export default function VetMessaging() {
               style={styles.messageInput}
               value={newMessage}
               onChangeText={setNewMessage}
-              placeholder="Type your consultation message..."
+              placeholder={t('vetMessaging.typeConsultationMessage')}
               multiline
               maxLength={500}
             />

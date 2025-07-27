@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -11,6 +11,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const IMPORTANT_SYMPTOMS = [
   "fever",
@@ -26,10 +28,18 @@ const IMPORTANT_SYMPTOMS = [
 ];
 
 export default function ProMode() {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [selectedSymptoms, setSelectedSymptoms] = useState({});
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState(null);
-  const router = useRouter();
 
   const toggleSymptom = (symptom) => {
     setSelectedSymptoms(prev => ({
@@ -42,7 +52,7 @@ export default function ProMode() {
     const hasSelectedSymptoms = Object.values(selectedSymptoms).some(value => value === 1);
     
     if (!hasSelectedSymptoms) {
-      Alert.alert("No Symptoms Selected", "Please select at least one symptom to get a prediction.");
+      Alert.alert(t('proMode.noSymptomsSelected'), t('proMode.selectAtLeastOneSymptom'));
       return;
     }
 
@@ -77,8 +87,8 @@ export default function ProMode() {
     } catch (error) {
       console.error('Prediction error:', error);
       Alert.alert(
-        "Error", 
-        error.response?.data?.message || "Failed to get prediction. Please try again."
+        t('proMode.error'), 
+        error.response?.data?.message || t('proMode.failedToGetPrediction')
       );
     } finally {
       setLoading(false);
@@ -96,12 +106,12 @@ export default function ProMode() {
         <TouchableOpacity onPress={() => router.back()} testID="back-button">
           <Ionicons name="arrow-back" size={28} color="#4a89dc" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Pro Mode - Disease Prediction</Text>
+        <Text style={styles.headerTitle}>{t('proMode.headerTitle')}</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.instructionText}>
-          Select symptoms that your animal is experiencing:
+          {t('proMode.instructionText')}
         </Text>
 
         <View style={styles.symptomsContainer}>
@@ -136,7 +146,7 @@ export default function ProMode() {
             onPress={clearSelection}
             testID="clear-button"
           >
-            <Text style={styles.clearButtonText}>Clear All</Text>
+            <Text style={styles.clearButtonText}>{t('proMode.clearAll')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -148,18 +158,18 @@ export default function ProMode() {
             {loading ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={styles.predictButtonText}>Predict Disease</Text>
+              <Text style={styles.predictButtonText}>{t('proMode.predictDisease')}</Text>
             )}
           </TouchableOpacity>
         </View>
 
         {prediction && (
           <View style={styles.resultContainer}>
-            <Text style={styles.resultTitle}>Prediction Result:</Text>
+            <Text style={styles.resultTitle}>{t('proMode.predictionResult')}</Text>
             <View style={styles.resultCard}>
-              <Text style={styles.diagnosisLabel}>Diagnosis:</Text>
+              <Text style={styles.diagnosisLabel}>{t('proMode.diagnosis')}</Text>
               <Text style={styles.diagnosisText}>{prediction.prognosis}</Text>
-              <Text style={styles.statusLabel}>Status:</Text>
+              <Text style={styles.statusLabel}>{t('proMode.status')}</Text>
               <Text style={[
                 styles.statusText,
                 prediction.status === 'success' ? styles.successStatus : styles.errorStatus
@@ -168,7 +178,7 @@ export default function ProMode() {
               </Text>
             </View>
             <Text style={styles.recommendationText}>
-              ⚠️ This is an AI prediction. Please consult with a qualified veterinarian for proper diagnosis and treatment.
+              {t('proMode.recommendationText')}
             </Text>
           </View>
         )}
@@ -195,7 +205,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4a89dc',
+    color: '#043f8dff',
     marginLeft: 16,
     flex: 1,
   },
@@ -257,7 +267,7 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     flex: 1,
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#780f04ff',
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -269,7 +279,7 @@ const styles = StyleSheet.create({
   },
   predictButton: {
     flex: 1,
-    backgroundColor: '#27ae60',
+    backgroundColor: '#065f2bff',
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -323,14 +333,14 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   successStatus: {
-    color: '#27ae60',
+    color: '#025a27ff',
   },
   errorStatus: {
-    color: '#e74c3c',
+    color: '#9b1304ff',
   },
   recommendationText: {
     fontSize: 14,
-    color: '#e67e22',
+    color: '#964a07ff',
     textAlign: 'center',
     fontStyle: 'italic',
     backgroundColor: '#fff3cd',

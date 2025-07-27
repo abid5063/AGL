@@ -15,9 +15,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig';
 import { Ionicons } from '@expo/vector-icons';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const EditTask = () => {
   const { id } = useLocalSearchParams();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -51,25 +61,25 @@ const EditTask = () => {
   const [initialLoading, setInitialLoading] = useState(true);
 
   const priorities = [
-    { key: 'low', label: 'Low', color: '#44ff44' },
-    { key: 'medium', label: 'Medium', color: '#ffaa00' },
-    { key: 'high', label: 'High', color: '#ff4444' }
+    { key: 'low', label: t('editTask.priorities.low'), color: '#155b15ff' },
+    { key: 'medium', label: t('editTask.priorities.medium'), color: '#a06c04ff' },
+    { key: 'high', label: t('editTask.priorities.high'), color: '#860303ff' }
   ];
 
   const categories = [
-    { key: 'feeding', label: 'Feeding', icon: 'restaurant' },
-    { key: 'vaccination', label: 'Vaccination', icon: 'medical' },
-    { key: 'health-check', label: 'Health Check', icon: 'heart' },
-    { key: 'breeding', label: 'Breeding', icon: 'heart-circle' },
-    { key: 'maintenance', label: 'Maintenance', icon: 'construct' },
-    { key: 'other', label: 'Other', icon: 'clipboard' }
+    { key: 'feeding', label: t('editTask.categories.feeding'), icon: 'restaurant' },
+    { key: 'vaccination', label: t('editTask.categories.vaccination'), icon: 'medical' },
+    { key: 'health-check', label: t('editTask.categories.healthCheck'), icon: 'heart' },
+    { key: 'breeding', label: t('editTask.categories.breeding'), icon: 'heart-circle' },
+    { key: 'maintenance', label: t('editTask.categories.maintenance'), icon: 'construct' },
+    { key: 'other', label: t('editTask.categories.other'), icon: 'clipboard' }
   ];
 
   const statuses = [
-    { key: 'pending', label: 'Pending', color: '#ffaa00' },
-    { key: 'in-progress', label: 'In Progress', color: '#007AFF' },
-    { key: 'completed', label: 'Completed', color: '#44ff44' },
-    { key: 'cancelled', label: 'Cancelled', color: '#ff4444' }
+    { key: 'pending', label: t('editTask.statuses.pending'), color: '#805705ff' },
+    { key: 'in-progress', label: t('editTask.statuses.inProgress'), color: '#103f71ff' },
+    { key: 'completed', label: t('editTask.statuses.completed'), color: '#105b10ff' },
+    { key: 'cancelled', label: t('editTask.statuses.cancelled'), color: '#770505ff' }
   ];
 
   // Fetch task data and animals when component mounts
@@ -107,7 +117,7 @@ const EditTask = () => {
 
     } catch (error) {
       console.error('Error fetching task:', error);
-      Alert.alert('Error', 'Failed to load task data');
+      Alert.alert(t('editTask.error'), t('editTask.failedToLoad'));
       router.back();
     } finally {
       setInitialLoading(false);
@@ -148,25 +158,25 @@ const EditTask = () => {
 
   const validateForm = () => {
     if (!formData.title.trim()) {
-      Alert.alert('Validation Error', 'Please enter a task title');
+      Alert.alert(t('editTask.validationError'), t('editTask.enterTaskTitle'));
       return false;
     }
     
     // Validate date format (YYYY-MM-DD)
     const datePattern = /^\d{4}-\d{2}-\d{2}$/;
     if (!datePattern.test(formData.dueDate)) {
-      Alert.alert('Validation Error', 'Please enter a valid date (YYYY-MM-DD)');
+      Alert.alert(t('editTask.validationError'), t('editTask.enterValidDate'));
       return false;
     }
     
     // Validate time format (HH:MM)
     if (!formData.dueTime.match(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)) {
-      Alert.alert('Validation Error', 'Please enter a valid time (HH:MM)');
+      Alert.alert(t('editTask.validationError'), t('editTask.enterValidTime'));
       return false;
     }
 
     if (formData.estimatedCost && isNaN(parseFloat(formData.estimatedCost))) {
-      Alert.alert('Validation Error', 'Please enter a valid cost amount');
+      Alert.alert(t('editTask.validationError'), t('editTask.enterValidCost'));
       return false;
     }
 
@@ -197,7 +207,7 @@ const EditTask = () => {
       router.replace('/taskManagement');
     } catch (error) {
       console.error('Error updating task:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update task');
+      Alert.alert(t('editTask.error'), error.response?.data?.message || t('editTask.failedToUpdate'));
     } finally {
       setLoading(false);
     }
@@ -205,7 +215,7 @@ const EditTask = () => {
 
   const renderPrioritySelector = () => (
     <View style={styles.selectorContainer}>
-      <Text style={styles.label}>Priority</Text>
+      <Text style={styles.label}>{t('editTask.priority')}</Text>
       <View style={styles.priorityContainer}>
         {priorities.map(priority => (
           <TouchableOpacity
@@ -231,7 +241,7 @@ const EditTask = () => {
 
   const renderStatusSelector = () => (
     <View style={styles.selectorContainer}>
-      <Text style={styles.label}>Status</Text>
+      <Text style={styles.label}>{t('editTask.status')}</Text>
       <View style={styles.statusContainer}>
         {statuses.map(status => (
           <TouchableOpacity
@@ -257,7 +267,7 @@ const EditTask = () => {
 
   const renderCategorySelector = () => (
     <View style={styles.selectorContainer}>
-      <Text style={styles.label}>Category</Text>
+      <Text style={styles.label}>{t('editTask.category')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.categoryContainer}>
           {categories.map(category => (
@@ -289,7 +299,7 @@ const EditTask = () => {
 
   const renderAnimalSelector = () => (
     <View style={styles.selectorContainer}>
-      <Text style={styles.label}>Animal (Optional)</Text>
+      <Text style={styles.label}>{t('editTask.animalOptional')}</Text>
       <View style={styles.animalContainer}>
         <TouchableOpacity
           style={[
@@ -302,7 +312,7 @@ const EditTask = () => {
             styles.animalText,
             !formData.animal && styles.selectedAnimalText
           ]}>
-            No specific animal
+            {t('editTask.noSpecificAnimal')}
           </Text>
         </TouchableOpacity>
         
@@ -330,7 +340,7 @@ const EditTask = () => {
   if (initialLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading task...</Text>
+        <Text>{t('editTask.loadingTask')}</Text>
       </View>
     );
   }
@@ -339,31 +349,31 @@ const EditTask = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#007AFF" />
+          <Ionicons name="arrow-back" size={24} color="#073668ff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Edit Task</Text>
+        <Text style={styles.title}>{t('editTask.headerTitle')}</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <View style={styles.form}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Task Title *</Text>
+          <Text style={styles.label}>{t('editTask.taskTitle')}</Text>
           <TextInput
             style={styles.input}
             value={formData.title}
             onChangeText={(value) => handleInputChange('title', value)}
-            placeholder="Enter task title"
+            placeholder={t('editTask.taskTitlePlaceholder')}
             maxLength={100}
           />
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>{t('editTask.description')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             value={formData.description}
             onChangeText={(value) => handleInputChange('description', value)}
-            placeholder="Enter task description"
+            placeholder={t('editTask.descriptionPlaceholder')}
             multiline
             numberOfLines={3}
             maxLength={500}
@@ -372,18 +382,18 @@ const EditTask = () => {
 
         <View style={styles.dateTimeContainer}>
           <View style={styles.dateContainer}>
-            <Text style={styles.label}>Due Date *</Text>
+            <Text style={styles.label}>{t('editTask.dueDate')}</Text>
             <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
               <Text style={styles.dateText}>{formatDate(formData.dueDate)}</Text>
-              <Ionicons name="calendar" size={20} color="#007AFF" style={{ marginLeft: 8 }} />
+              <Ionicons name="calendar" size={20} color="#053a73ff" style={{ marginLeft: 8 }} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.timeContainer}>
-            <Text style={styles.label}>Due Time *</Text>
+            <Text style={styles.label}>{t('editTask.dueTime')}</Text>
             <TouchableOpacity style={styles.timeButton} onPress={() => setShowTimePicker(true)}>
               <Text style={styles.timeText}>{formatTime(formData.dueTime)}</Text>
-              <Ionicons name="time" size={20} color="#007AFF" style={{ marginLeft: 8 }} />
+              <Ionicons name="time" size={20} color="#064487ff" style={{ marginLeft: 8 }} />
             </TouchableOpacity>
           </View>
 
@@ -421,12 +431,12 @@ const EditTask = () => {
           )}
         </View>
         {/* ...existing code... */}
-          <Text style={styles.label}>Estimated Cost ($)</Text>
+          <Text style={styles.label}>{t('editTask.estimatedCost')}</Text>
           <TextInput
             style={styles.input}
             value={formData.estimatedCost}
             onChangeText={(value) => handleInputChange('estimatedCost', value)}
-            placeholder="0.00"
+            placeholder={t('editTask.estimatedCostPlaceholder')}
             keyboardType="decimal-pad"
           />
         </View>
@@ -437,12 +447,12 @@ const EditTask = () => {
         {renderAnimalSelector()}
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Notes</Text>
+          <Text style={styles.label}>{t('editTask.notes')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             value={formData.notes}
             onChangeText={(value) => handleInputChange('notes', value)}
-            placeholder="Additional notes..."
+            placeholder={t('editTask.notesPlaceholder')}
             multiline
             numberOfLines={3}
             maxLength={300}
@@ -463,7 +473,7 @@ const EditTask = () => {
               )}
             </View>
             <Text style={styles.completionText}>
-              Mark as {formData.isCompleted ? 'incomplete' : 'completed'}
+              {formData.isCompleted ? t('editTask.markAsIncomplete') : t('editTask.markAsCompleted')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -474,7 +484,7 @@ const EditTask = () => {
           disabled={loading}
         >
           <Text style={styles.submitText}>
-            {loading ? 'Updating Task...' : 'Update Task'}
+            {loading ? t('editTask.updatingTask') : t('editTask.updateTask')}
           </Text>
         </TouchableOpacity>
     </ScrollView>
@@ -637,7 +647,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   selectedCategory: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#073464ff',
     borderColor: '#007AFF',
   },
   categoryText: {
@@ -663,7 +673,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   selectedAnimal: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#043466ff',
     borderColor: '#007AFF',
   },
   animalText: {
@@ -686,20 +696,20 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: '#093e77ff',
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkedCheckbox: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#083564ff',
   },
   completionText: {
     fontSize: 16,
     color: '#333',
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#0a5324ff',
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',

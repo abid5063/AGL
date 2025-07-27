@@ -112,7 +112,7 @@ export default function WelcomeScreen() {
 
       {/* Bottom gradient overlay */}
       <LinearGradient
-        colors={['transparent','rgba(186, 228, 138, 1)',  'rgba(3, 61, 6, 0.96)']}
+        colors={['transparent','rgba(218, 238, 195, 1)',  'rgba(155, 209, 131, 1)']}
         style={styles.grassOverlay}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   logoSection: {
-    flex: 0.9, //don't change
+    flex: 1, //don't change
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingTop: 12,

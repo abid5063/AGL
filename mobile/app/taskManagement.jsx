@@ -14,8 +14,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig';
 import { Ionicons } from '@expo/vector-icons';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const TaskManagement = () => {
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,7 +54,7 @@ const TaskManagement = () => {
       calculateStats(response.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
-      Alert.alert('Error', 'Failed to fetch tasks');
+      Alert.alert(t('taskManagement.error'), t('taskManagement.failedToFetchTasks'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -99,19 +109,19 @@ const TaskManagement = () => {
       fetchTasks(); // Refresh tasks
     } catch (error) {
       console.error('Error toggling task:', error);
-      Alert.alert('Error', 'Failed to update task');
+      Alert.alert(t('taskManagement.error'), t('taskManagement.failedToUpdateTask'));
     }
   };
 
   // Delete task with confirmation
   const deleteTask = (taskId) => {
     Alert.alert(
-      'Delete Task',
-      'Are you sure you want to delete this task? This action cannot be undone.',
+      t('taskManagement.deleteTask'),
+      t('taskManagement.deleteTaskMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('taskManagement.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('taskManagement.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -122,7 +132,7 @@ const TaskManagement = () => {
               fetchTasks(); // Refresh tasks
             } catch (error) {
               console.error('Error deleting task:', error);
-              Alert.alert('Error', 'Failed to delete task');
+              Alert.alert(t('taskManagement.error'), t('taskManagement.failedToDeleteTask'));
             }
           }
         }
@@ -143,9 +153,9 @@ const TaskManagement = () => {
   // Get priority color
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return '#ff4444';
-      case 'medium': return '#ffaa00';
-      case 'low': return '#44ff44';
+      case 'high': return '#760d0dff';
+      case 'medium': return '#bb8519ff';
+      case 'low': return '#157615ff';
       default: return '#666';
     }
   };
@@ -258,7 +268,7 @@ const TaskManagement = () => {
           onPress={() => router.push(`/editTask?id=${item._id}`)}
         >
           <Ionicons name="pencil" size={16} color="#007AFF" />
-          <Text style={styles.editText}>Edit</Text>
+                      <Text style={styles.editText}>{t('taskManagement.edit')}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
@@ -266,7 +276,7 @@ const TaskManagement = () => {
           onPress={() => deleteTask(item._id)}
         >
           <Ionicons name="trash" size={16} color="#ff4444" />
-          <Text style={styles.deleteText}>Delete</Text>
+                      <Text style={styles.deleteText}>{t('taskManagement.delete')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -280,10 +290,10 @@ const TaskManagement = () => {
       style={styles.filterContainer}
     >
       {[
-        { key: 'all', label: `All (${stats.totalTasks})` },
-        { key: 'pending', label: `Pending (${stats.pendingTasks})` },
-        { key: 'completed', label: `Completed (${stats.completedTasks})` },
-        { key: 'overdue', label: `Overdue (${stats.overdueTasks})` }
+        { key: 'all', label: `${t('taskManagement.all')} (${stats.totalTasks})` },
+        { key: 'pending', label: `${t('taskManagement.pending')} (${stats.pendingTasks})` },
+        { key: 'completed', label: `${t('taskManagement.completed')} (${stats.completedTasks})` },
+        { key: 'overdue', label: `${t('taskManagement.overdue')} (${stats.overdueTasks})` }
       ].map(filterOption => (
         <TouchableOpacity
           key={filterOption.key}
@@ -307,7 +317,7 @@ const TaskManagement = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading tasks...</Text>
+                    <Text>{t('taskManagement.loadingTasks')}</Text>
       </View>
     );
   }
@@ -321,7 +331,7 @@ const TaskManagement = () => {
         >
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.title}>Task Management</Text>
+        <Text style={styles.title}>{t('taskManagement.title')}</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => router.push('/addTask')}
@@ -349,9 +359,9 @@ const TaskManagement = () => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="clipboard-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>No tasks found</Text>
+            <Text style={styles.emptyText}>{t('taskManagement.noTasksFound')}</Text>
             <Text style={styles.emptySubText}>
-              Tap the + button to add your first task
+              {t('taskManagement.tapToAddFirstTask')}
             </Text>
           </View>
         }
@@ -390,7 +400,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#043c10ff',
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -445,7 +455,7 @@ const styles = StyleSheet.create({
   },
   overdueTask: {
     borderLeftWidth: 4,
-    borderLeftColor: '#ff4444',
+    borderLeftColor: '#a00505ff',
   },
   taskHeader: {
     flexDirection: 'row',
@@ -553,7 +563,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f8ff',
   },
   deleteButton: {
-    borderColor: '#ff4444',
+    borderColor: '#a90707ff',
     backgroundColor: '#fff5f5',
   },
   editText: {

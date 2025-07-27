@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, RefreshControl } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,15 +6,25 @@ import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export default function TaskCalendar() {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [markedDates, setMarkedDates] = useState({});
   const [selectedDateTasks, setSelectedDateTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const router = useRouter();
 
   // Fetch tasks from API
   const fetchTasks = async () => {
@@ -33,7 +43,7 @@ export default function TaskCalendar() {
       updateMarkedDates(response.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
-      Alert.alert('Error', 'Failed to fetch tasks');
+      Alert.alert(t('taskCalendar.error'), t('taskCalendar.failedToFetchTasks'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -59,15 +69,15 @@ export default function TaskCalendar() {
       // Add color-coded dots based on task status and priority
       let dotColor = '#007AFF';
       if (task.isCompleted) {
-        dotColor = '#2ecc71';
+        dotColor = '#03682dff';
       } else if (isOverdue) {
-        dotColor = '#e74c3c';
+        dotColor = '#780f03ff';
       } else if (task.priority === 'high') {
-        dotColor = '#ff4444';
+        dotColor = '#790202ff';
       } else if (task.priority === 'medium') {
-        dotColor = '#ffaa00';
+        dotColor = '#9c6903ff';
       } else {
-        dotColor = '#44ff44';
+        dotColor = '#039103ff';
       }
       
       marked[dateStr].dots.push({
@@ -128,9 +138,9 @@ export default function TaskCalendar() {
   // Get priority color
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return '#ff4444';
-      case 'medium': return '#ffaa00';
-      case 'low': return '#44ff44';
+      case 'high': return '#900505ff';
+      case 'medium': return '#ae7503ff';
+      case 'low': return '#026c02ff';
       default: return '#666';
     }
   };
@@ -201,8 +211,8 @@ export default function TaskCalendar() {
           style={styles.editButton}
           onPress={() => router.push(`/editTask?id=${item._id}`)}
         >
-          <Ionicons name="pencil" size={14} color="#007AFF" />
-          <Text style={styles.editButtonText}>Edit</Text>
+          <Ionicons name="pencil" size={14} color="#0350a3ff" />
+          <Text style={styles.editButtonText}>{t('taskCalendar.edit')}</Text>
         </TouchableOpacity>
         
         {item.animal && (
@@ -218,7 +228,7 @@ export default function TaskCalendar() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading calendar...</Text>
+        <Text>{t('taskCalendar.loadingCalendar')}</Text>
       </View>
     );
   }
@@ -226,7 +236,7 @@ export default function TaskCalendar() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Task Calendar</Text>
+        <Text style={styles.title}>{t('taskCalendar.title')}</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => router.push('/addTask')}
@@ -241,7 +251,7 @@ export default function TaskCalendar() {
           backgroundColor: '#ffffff',
           calendarBackground: '#ffffff',
           textSectionTitleColor: '#b6c1cd',
-          selectedDayBackgroundColor: '#007AFF',
+          selectedDayBackgroundColor: '#055fbfff',
           selectedDayTextColor: '#ffffff',
           todayTextColor: '#007AFF',
           dayTextColor: '#2d4150',
@@ -289,12 +299,12 @@ export default function TaskCalendar() {
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Ionicons name="calendar-outline" size={48} color="#ccc" />
-                <Text style={styles.emptyText}>No tasks for this date</Text>
+                <Text style={styles.emptyText}>{t('taskCalendar.noTasksForDate')}</Text>
                 <TouchableOpacity
                   style={styles.addTaskButton}
                   onPress={() => router.push('/addTask')}
                 >
-                  <Text style={styles.addTaskText}>Add Task</Text>
+                  <Text style={styles.addTaskText}>{t('taskCalendar.addTask')}</Text>
                 </TouchableOpacity>
               </View>
             }

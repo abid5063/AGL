@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import { API_BASE_URL } from "../utils/apiConfig";
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 export default function VetEditProfile() {
   const params = useLocalSearchParams();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const vet = params.vet ? JSON.parse(params.vet) : null;
 
   const [formData, setFormData] = useState({
@@ -29,16 +39,16 @@ export default function VetEditProfile() {
       !formData.email.trim() ||
       !formData.specialty.trim()
     ) {
-      Alert.alert("Validation", "Please fill all required fields (Name, Email, Specialty).");
+      Alert.alert(t('vetEditProfile.validation'), t('vetEditProfile.fillRequiredFields'));
       return;
     }
     Alert.alert(
-      "Save Changes",
-      "Are you sure you want to save these changes to your profile?",
+      t('vetEditProfile.saveChanges'),
+      t('vetEditProfile.saveChangesMessage'),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('vetEditProfile.cancel'), style: "cancel" },
         {
-          text: "Save",
+          text: t('vetEditProfile.save'),
           style: "default",
           onPress: async () => {
             try {
@@ -57,13 +67,13 @@ export default function VetEditProfile() {
               // Update the stored user data
               const updatedVetData = { ...vet, ...formData };
               await AsyncStorage.setItem('userData', JSON.stringify(updatedVetData));
-              Alert.alert("Success", "Profile updated successfully");
+              Alert.alert(t('vetEditProfile.success'), t('vetEditProfile.profileUpdated'));
               router.replace({
                 pathname: '/vetProfile',
                 params: { vet: JSON.stringify(updatedVetData) }
               });
             } catch (error) {
-              Alert.alert("Error", error.response?.data?.message || "Failed to update profile");
+              Alert.alert(t('vetEditProfile.error'), error.response?.data?.message || t('vetEditProfile.failedToUpdate'));
             } finally {
               setLoading(false);
             }
@@ -75,12 +85,12 @@ export default function VetEditProfile() {
 
   const handleDeleteProfile = async () => {
     Alert.alert(
-      "Delete Profile",
-      "Are you sure you want to delete your profile? This action cannot be undone.",
+      t('vetEditProfile.deleteProfile'),
+      t('vetEditProfile.deleteProfileMessage'),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('vetEditProfile.cancel'), style: "cancel" },
         {
-          text: "Delete",
+          text: t('vetEditProfile.delete'),
           style: "destructive",
           onPress: async () => {
             try {
@@ -95,10 +105,10 @@ export default function VetEditProfile() {
                 }
               );
               await AsyncStorage.multiRemove(['authToken', 'userData']);
-              Alert.alert("Deleted", "Your profile has been deleted.");
+              Alert.alert(t('vetEditProfile.deleted'), t('vetEditProfile.profileDeleted'));
               router.replace('/');
             } catch (error) {
-              Alert.alert("Error", error.response?.data?.message || "Failed to delete profile");
+              Alert.alert(t('vetEditProfile.error'), error.response?.data?.message || t('vetEditProfile.failedToDelete'));
             } finally {
               setLoading(false);
             }
@@ -111,9 +121,9 @@ export default function VetEditProfile() {
   if (!vet) {
     return (
       <View style={styles.container}>
-        <Text>No vet data found.</Text>
+        <Text>{t('vetEditProfile.noVetData')}</Text>
         <TouchableOpacity onPress={() => router.replace('/')} testID="go-to-login">
-          <Text style={styles.linkText}>Go to login</Text>
+          <Text style={styles.linkText}>{t('vetEditProfile.goToLogin')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -121,10 +131,10 @@ export default function VetEditProfile() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Vet Profile</Text>
+      <Text style={styles.title}>{t('vetEditProfile.title')}</Text>
       <TextInput
         style={styles.input}
-        placeholder="Name *"
+        placeholder={t('vetEditProfile.namePlaceholder')}
         placeholderTextColor="#333"
         value={formData.name}
         onChangeText={text => handleInputChange('name', text)}
@@ -132,7 +142,7 @@ export default function VetEditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Email *"
+        placeholder={t('vetEditProfile.emailPlaceholder')}
         placeholderTextColor="#333"
         value={formData.email}
         onChangeText={text => handleInputChange('email', text)}
@@ -142,7 +152,7 @@ export default function VetEditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Phone Number"
+        placeholder={t('vetEditProfile.phoneNumberPlaceholder')}
         placeholderTextColor="#333"
         value={formData.phoneNo}
         onChangeText={text => handleInputChange('phoneNo', text)}
@@ -151,7 +161,7 @@ export default function VetEditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Location"
+        placeholder={t('vetEditProfile.locationPlaceholder')}
         placeholderTextColor="#333"
         value={formData.location}
         onChangeText={text => handleInputChange('location', text)}
@@ -159,7 +169,7 @@ export default function VetEditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Specialty *"
+        placeholder={t('vetEditProfile.specialtyPlaceholder')}
         placeholderTextColor="#333"
         value={formData.specialty}
         onChangeText={text => handleInputChange('specialty', text)}
@@ -167,7 +177,7 @@ export default function VetEditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Years of Experience"
+        placeholder={t('vetEditProfile.experiencePlaceholder')}
         placeholderTextColor="#333"
         value={formData.experience}
         onChangeText={text => handleInputChange('experience', text)}
@@ -176,7 +186,7 @@ export default function VetEditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Profile Image URL"
+        placeholder={t('vetEditProfile.profileImagePlaceholder')}
         placeholderTextColor="#333"
         value={formData.profileImage}
         onChangeText={text => handleInputChange('profileImage', text)}
@@ -188,10 +198,10 @@ export default function VetEditProfile() {
       ) : (
         <>
           <TouchableOpacity style={styles.saveButton} onPress={handleEditProfile} testID="vet-save-button">
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+            <Text style={styles.saveButtonText}>{t('vetEditProfile.saveChanges')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile} testID="vet-delete-button">
-            <Text style={styles.deleteButtonText}>Delete Profile</Text>
+            <Text style={styles.deleteButtonText}>{t('vetEditProfile.deleteProfile')}</Text>
           </TouchableOpacity>
         </>
       )}

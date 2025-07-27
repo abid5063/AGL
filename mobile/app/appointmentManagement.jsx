@@ -17,21 +17,31 @@ import { router, useFocusEffect } from 'expo-router';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig';
 import { useCallback } from 'react';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
 const AppointmentManagement = () => {
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [appointments, setAppointments] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [vetId, setVetId] = useState(null);
 
   const filterOptions = [
-    { key: 'all', label: 'All' },
-    { key: 'pending', label: 'Pending' },
-    { key: 'accepted', label: 'Confirmed' },
-    { key: 'completed', label: 'Completed' },
-    { key: 'cancelled', label: 'Cancelled' },
+    { key: 'all', label: t('appointmentManagement.filterAll') },
+    { key: 'pending', label: t('appointmentManagement.filterPending') },
+    { key: 'accepted', label: t('appointmentManagement.filterConfirmed') },
+    { key: 'completed', label: t('appointmentManagement.filterCompleted') },
+    { key: 'cancelled', label: t('appointmentManagement.filterCancelled') },
   ];
 
   useEffect(() => {
@@ -83,7 +93,7 @@ const AppointmentManagement = () => {
       console.error('Error loading appointments:', error);
       console.error('Error response:', error.response?.data);
       setAppointments([]); // Set empty array on error
-      Alert.alert('Error', 'Failed to load appointments');
+      Alert.alert(t('appointmentManagement.error'), t('appointmentManagement.failedToLoad'));
     }
   };
 
@@ -95,14 +105,14 @@ const AppointmentManagement = () => {
 
   const updateAppointmentStatus = async (appointmentId, newStatus) => {
     Alert.alert(
-      newStatus === 'accepted' ? 'Confirm Appointment' : 'Complete Appointment',
+      newStatus === 'accepted' ? t('appointmentManagement.confirmAppointment') : t('appointmentManagement.completeAppointment'),
       newStatus === 'accepted'
-        ? 'Are you sure you want to confirm this appointment?'
-        : 'Are you sure you want to mark this appointment as completed?',
+        ? t('appointmentManagement.confirmAppointmentMessage')
+        : t('appointmentManagement.completeAppointmentMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('appointmentManagement.cancel'), style: 'cancel' },
         {
-          text: newStatus === 'accepted' ? 'Confirm' : 'Complete',
+          text: newStatus === 'accepted' ? t('appointmentManagement.confirmButton') : t('appointmentManagement.completeButton'),
           style: 'default',
           onPress: async () => {
             try {
@@ -114,7 +124,7 @@ const AppointmentManagement = () => {
               loadAppointments();
             } catch (error) {
               console.error('Error updating appointment:', error);
-              Alert.alert('Error', 'Failed to update appointment status');
+              Alert.alert(t('appointmentManagement.error'), t('appointmentManagement.failedToUpdate'));
             }
           }
         }
@@ -124,12 +134,12 @@ const AppointmentManagement = () => {
 
   const cancelAndRemoveAppointment = async (appointmentId) => {
     Alert.alert(
-      'Cancel Appointment',
-      'Are you sure you want to cancel this appointment?',
+      t('appointmentManagement.cancelAppointment'),
+      t('appointmentManagement.cancelAppointmentMessage'),
       [
-        { text: 'No', style: 'cancel' },
+        { text: t('appointmentManagement.cancel'), style: 'cancel' },
         {
-          text: 'Yes, Cancel',
+          text: t('appointmentManagement.yesCancel'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -146,7 +156,7 @@ const AppointmentManagement = () => {
               );
               console.log('Cancel response:', response.data);
               loadAppointments();
-              Alert.alert('Success', 'Appointment cancelled successfully');
+              Alert.alert(t('appointmentManagement.success'), t('appointmentManagement.appointmentCancelled'));
             } catch (error) {
               console.error('Error cancelling appointment:', error);
               console.error('Error response:', error.response?.data);
@@ -161,10 +171,10 @@ const AppointmentManagement = () => {
                 });
                 console.log('Delete response:', deleteResponse.data);
                 loadAppointments();
-                Alert.alert('Success', 'Appointment cancelled successfully');
+                Alert.alert(t('appointmentManagement.success'), t('appointmentManagement.appointmentCancelled'));
               } catch (deleteError) {
                 console.error('Both PUT and DELETE failed:', deleteError);
-                Alert.alert('Error', deleteError.response?.data?.message || 'Failed to cancel appointment');
+                Alert.alert(t('appointmentManagement.error'), deleteError.response?.data?.message || t('appointmentManagement.failedToCancel'));
               }
             }
           }
@@ -175,12 +185,12 @@ const AppointmentManagement = () => {
 
   const deleteAppointmentPermanently = async (appointmentId) => {
     Alert.alert(
-      'Delete Appointment',
-      'Are you sure you want to permanently delete this appointment?',
+      t('appointmentManagement.deleteAppointment'),
+      t('appointmentManagement.deleteAppointmentMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('appointmentManagement.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('appointmentManagement.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -194,7 +204,7 @@ const AppointmentManagement = () => {
             } catch (error) {
               console.error('Error deleting appointment:', error);
               console.error('Error response:', error.response?.data);
-              Alert.alert('Error', error.response?.data?.message || 'Failed to delete appointment');
+              Alert.alert(t('appointmentManagement.error'), error.response?.data?.message || t('appointmentManagement.failedToDelete'));
             }
           }
         }
@@ -239,8 +249,8 @@ const AppointmentManagement = () => {
     <View style={styles.appointmentCard}>
       <View style={styles.appointmentHeader}>
         <View style={styles.appointmentInfo}>
-          <Text style={styles.farmerName}>{item.farmerName || item.farmerId?.name || 'Unknown Farmer'}</Text>
-          <Text style={styles.animalName}>{item.animalName || item.animal?.name || 'No Animal'}</Text>
+          <Text style={styles.farmerName}>{item.farmerName || item.farmerId?.name || t('appointmentManagement.unknownFarmer')}</Text>
+          <Text style={styles.animalName}>{item.animalName || item.animal?.name || t('appointmentManagement.noAnimal')}</Text>
           <View style={styles.statusContainer}>
             <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
               <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
@@ -254,7 +264,7 @@ const AppointmentManagement = () => {
       </View>
 
       {(item.reason || item.symptoms) && (
-        <Text style={styles.reasonText}>Reason: {item.reason || item.symptoms}</Text>
+        <Text style={styles.reasonText}>{t('appointmentManagement.reasonLabel')} {item.reason || item.symptoms}</Text>
       )}
 
       <View style={styles.actionButtons}>
@@ -265,7 +275,7 @@ const AppointmentManagement = () => {
               onPress={() => updateAppointmentStatus(item._id, 'accepted')}
             >
               <Ionicons name="checkmark" size={16} color="white" />
-              <Text style={styles.actionButtonText}>Confirm</Text>
+              <Text style={styles.actionButtonText}>{t('appointmentManagement.confirmButton')}</Text>
             </TouchableOpacity>
           </>
         )}
@@ -276,7 +286,7 @@ const AppointmentManagement = () => {
             onPress={() => updateAppointmentStatus(item._id, 'completed')}
           >
             <Ionicons name="checkmark-circle" size={16} color="white" />
-            <Text style={styles.actionButtonText}>Complete</Text>
+            <Text style={styles.actionButtonText}>{t('appointmentManagement.completeButton')}</Text>
           </TouchableOpacity>
         )}
 
@@ -286,7 +296,7 @@ const AppointmentManagement = () => {
             onPress={() => cancelAndRemoveAppointment(item._id)}
           >
             <Ionicons name="close" size={16} color="white" />
-            <Text style={styles.actionButtonText}>Cancel</Text>
+            <Text style={styles.actionButtonText}>{t('appointmentManagement.cancelButton')}</Text>
           </TouchableOpacity>
         )}
 
@@ -295,7 +305,7 @@ const AppointmentManagement = () => {
           onPress={() => deleteAppointmentPermanently(item._id)}
         >
           <Ionicons name="trash" size={16} color="white" />
-          <Text style={styles.actionButtonText}>Delete</Text>
+          <Text style={styles.actionButtonText}>{t('appointmentManagement.deleteButton')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -304,11 +314,11 @@ const AppointmentManagement = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Ionicons name="calendar-outline" size={64} color="#bdc3c7" />
-      <Text style={styles.emptyStateText}>No appointments found</Text>
+      <Text style={styles.emptyStateText}>{t('appointmentManagement.noAppointmentsFound')}</Text>
       <Text style={styles.emptyStateSubtext}>
         {activeFilter === 'all' 
-          ? 'Create your first appointment to get started'
-          : `No ${activeFilter} appointments`}
+          ? t('appointmentManagement.createFirstAppointment')
+          : t('appointmentManagement.noFilteredAppointments', { filter: activeFilter })}
       </Text>
     </View>
   );
@@ -317,25 +327,25 @@ const AppointmentManagement = () => {
   
   const statsCards = [
     {
-      title: 'Total',
+      title: t('appointmentManagement.statsTotal'),
       count: safeAppointments.length,
       color: '#3498db',
       icon: 'calendar'
     },
     {
-      title: 'Pending',
+      title: t('appointmentManagement.statsPending'),
       count: safeAppointments.filter(a => a.status === 'pending').length,
       color: '#f39c12',
       icon: 'time'
     },
     {
-      title: 'Confirmed',
+      title: t('appointmentManagement.statsConfirmed'),
       count: safeAppointments.filter(a => a.status === 'accepted' || a.status === 'confirmed').length,
       color: '#3498db',
       icon: 'checkmark-circle'
     },
     {
-      title: 'Completed',
+      title: t('appointmentManagement.statsCompleted'),
       count: safeAppointments.filter(a => a.status === 'completed').length,
       color: '#27ae60',
       icon: 'checkmark-done-circle'
@@ -354,7 +364,7 @@ const AppointmentManagement = () => {
         >
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Appointment Management</Text>
+        <Text style={styles.headerTitle}>{t('appointmentManagement.headerTitle')}</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => router.push('/addAppointment')}

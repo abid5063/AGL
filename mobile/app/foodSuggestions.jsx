@@ -15,7 +15,9 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
-const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
+const API_KEY = "AIzaSyCrYK2JHpleJxGT3TtneVT6hZHZY8KC1Vc";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 function DietTable({ tableData }) {
@@ -39,6 +41,15 @@ function DietTable({ tableData }) {
 }
 
 export default function FoodSuggestions() {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedAnimal, setSelectedAnimal] = useState(null);
@@ -48,7 +59,6 @@ export default function FoodSuggestions() {
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [showFoodVarietyModal, setShowFoodVarietyModal] = useState(false);
   const [selectedDietType, setSelectedDietType] = useState(null);
-  const router = useRouter();
 
   useEffect(() => {
     fetchAnimals();
@@ -69,7 +79,7 @@ export default function FoodSuggestions() {
       });
       setAnimals(response.data);
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch animals");
+      Alert.alert(t('foodSuggestions.error'), t('foodSuggestions.failedToFetchAnimals'));
     } finally {
       setLoading(false);
     }
@@ -83,24 +93,24 @@ export default function FoodSuggestions() {
 
     try {
       let prompt = '';
+      const languageInstruction = language === 'bn' ? 'Respond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.' : 'Respond in English language. All table headers and values must be in English.';
+      
       switch(dietType) {
         case 'dietChart':
-          prompt = `Create a daily diet chart for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
+          prompt = `Create a daily diet chart for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\n${languageInstruction}\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
           break;
         case 'weightGain':
-          prompt = `Create a weight gain diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nFormat as tables only:\n\n**DAILY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**SUPPLEMENTS TABLE:**\n| Supplement | Dosage | Frequency | Purpose |\n|------------|--------|-----------|---------|\n\n**WEEKLY TARGETS:**\n| Week | Target Weight Gain | Calorie Increase | Notes |\n|------|-------------------|------------------|-------|\n\nUse only table format, no other text.`;
+          prompt = `Create a weight gain diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\n${languageInstruction}\n\nFormat as tables only:\n\n**DAILY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**SUPPLEMENTS TABLE:**\n| Supplement | Dosage | Frequency | Purpose |\n|------------|--------|-----------|---------|\n\n**WEEKLY TARGETS:**\n| Week | Target Weight Gain | Calorie Increase | Notes |\n|------|-------------------|------------------|-------|\n\nUse only table format, no other text.`;
           break;
         case 'weightLoss':
-          prompt = `Create a weight loss diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nFormat as tables only:\n\n**DAILY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**LOW-CALORIE ALTERNATIVES:**\n| Regular Food | Alternative | Calories Saved | Notes |\n|--------------|-------------|----------------|-------|\n\n**WEEKLY TARGETS:**\n| Week | Target Weight Loss | Calorie Deficit | Notes |\n|------|-------------------|-----------------|-------|\n\nUse only table format, no other text.`;
+          prompt = `Create a weight loss diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\n${languageInstruction}\n\nFormat as tables only:\n\n**DAILY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**LOW-CALORIE ALTERNATIVES:**\n| Regular Food | Alternative | Calories Saved | Notes |\n|--------------|-------------|----------------|-------|\n\n**WEEKLY TARGETS:**\n| Week | Target Weight Loss | Calorie Deficit | Notes |\n|------|-------------------|-----------------|-------|\n\nUse only table format, no other text.`;
           break;
         case 'pregnancy':
-          prompt = `Create a pregnancy diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nFormat as tables only:\n\n**DAILY PREGNANCY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**ESSENTIAL NUTRIENTS:**\n| Nutrient | Food Sources | Daily Requirement | Importance |\n|----------|--------------|-------------------|------------|\n\n**SUPPLEMENTS:**\n| Supplement | Dosage | Frequency | Purpose |\n|------------|--------|-----------|---------|\n\n**FOODS TO AVOID:**\n| Food Item | Reason | Alternative |\n|-----------|--------|-------------|\n\nUse only table format, no other text.`;
+          prompt = `Create a pregnancy diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\n${languageInstruction}\n\nFormat as tables only:\n\n**DAILY PREGNANCY MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**ESSENTIAL NUTRIENTS:**\n| Nutrient | Food Sources | Daily Requirement | Importance |\n|----------|--------------|-------------------|------------|\n\n**SUPPLEMENTS:**\n| Supplement | Dosage | Frequency | Purpose |\n|------------|--------|-----------|---------|\n\n**FOODS TO AVOID:**\n| Food Item | Reason | Alternative |\n|-----------|--------|-------------|\n\nUse only table format, no other text.`;
           break;
-        case 'senior':
-          prompt = `Create a senior diet table for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nFormat as tables only:\n\n**DAILY SENIOR MEAL PLAN:**\n| Meal | Food Items | Portion | Calories | Protein | Fat | Carbs |\n|------|------------|---------|----------|---------|-----|-------|\n\n**JOINT HEALTH SUPPLEMENTS:**\n| Supplement | Dosage | Frequency | Benefits |\n|------------|--------|-----------|----------|\n\n**EASY-TO-DIGEST FOODS:**\n| Food Category | Examples | Benefits | Avoid |\n|---------------|----------|----------|-------|\n\n**FEEDING SCHEDULE:**\n| Time | Meal Type | Special Instructions |\n|------|-----------|---------------------|\n\nUse only table format, no other text.`;
-          break;
+        
         default:
-          prompt = `Create a comprehensive diet plan for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
+          prompt = `Create a comprehensive diet plan for ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}).\n\n${languageInstruction}\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
       }
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
@@ -112,7 +122,7 @@ export default function FoodSuggestions() {
         }),
       });
       const data = await response.json();
-      let aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+      let aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || t('foodSuggestions.noResponseError');
       try {
         let jsonString = aiText.trim();
         // Remove markdown code blocks if present
@@ -124,12 +134,12 @@ export default function FoodSuggestions() {
         const aiJson = JSON.parse(jsonString);
         setSuggestion(aiJson);
       } catch (e) {
-        setSuggestion('Failed to parse AI response. Try again.');
+        setSuggestion(t('foodSuggestions.tryAgainError'));
       } finally {
         setSuggestionLoading(false);
       }
     } catch (err) {
-      setSuggestion('An error occurred while getting food suggestions. Please check your connection and try again.');
+      setSuggestion(t('foodSuggestions.tryAgainError'));
     }
   };
 
@@ -151,7 +161,8 @@ export default function FoodSuggestions() {
 
     try {
       let prompt = '';
-      prompt = `Create a diet plan for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}) for ${selectedDietType} (${varietyType}).\n\nRespond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
+      const languageInstruction = language === 'bn' ? 'Respond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.' : 'Respond in English language. All table headers and values must be in English.';
+      prompt = `Create a diet plan for ${selectedAnimal.name} (${selectedAnimal.type}, ${selectedAnimal.breed}, ${selectedAnimal.age} years, ${selectedAnimal.gender}) for ${selectedDietType} (${varietyType}).\n\n${languageInstruction}\n\nReturn a JSON object with:\n- 'table': { 'headers': [...], 'rows': [[...], ...] }\n- 'rating': number (1-5, 5 is best)\n- 'summary': short summary string.\nNo extra text.`;
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -162,7 +173,7 @@ export default function FoodSuggestions() {
         }),
       });
       const data = await response.json();
-      let aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+      let aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || t('foodSuggestions.noResponseError');
       try {
         let jsonString = aiText.trim();
         // Remove markdown code blocks if present
@@ -174,12 +185,12 @@ export default function FoodSuggestions() {
         const aiJson = JSON.parse(jsonString);
         setSuggestion(aiJson);
       } catch (e) {
-        setSuggestion('Failed to parse AI response. Try again.');
+        setSuggestion(t('foodSuggestions.tryAgainError'));
       } finally {
         setSuggestionLoading(false);
       }
     } catch (err) {
-      setSuggestion('An error occurred while getting food variety suggestions. Please check your connection and try again.');
+      setSuggestion(t('foodSuggestions.tryAgainError'));
     }
   };
 
@@ -196,7 +207,7 @@ export default function FoodSuggestions() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4a89dc" />
-        <Text style={styles.loadingText}>Loading your animals...</Text>
+        <Text style={styles.loadingText}>{t('foodSuggestions.loadingAnimals')}</Text>
       </View>
     );
   }
@@ -207,21 +218,21 @@ export default function FoodSuggestions() {
         <TouchableOpacity onPress={handleBackPress}>
           <Ionicons name="arrow-back" size={28} color="#4a89dc" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Food Suggestions</Text>
+        <Text style={styles.headerTitle}>{t('foodSuggestions.headerTitle')}</Text>
         <View style={{ width: 28 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.description}>
-          Select an animal to get personalized food recommendations based on their breed, age, and health status.
+          {t('foodSuggestions.selectAnimal')}
         </Text>
 
         {animals.length === 0 ? (
           <View style={styles.noAnimalsContainer}>
             <Ionicons name="paw" size={64} color="#ccc" />
-            <Text style={styles.noAnimalsText}>No animals found</Text>
+            <Text style={styles.noAnimalsText}>{t('foodSuggestions.noAnimalsFound')}</Text>
             <Text style={styles.noAnimalsSubtext}>
-              Add animals to your profile to get food suggestions
+              {t('foodSuggestions.selectAnimal')}
             </Text>
           </View>
         ) : (
@@ -286,7 +297,7 @@ export default function FoodSuggestions() {
                 <View style={styles.loadingSuggestion}>
                   <ActivityIndicator size="large" color="#4a89dc" />
                   <Text style={styles.loadingSuggestionText}>
-                    Getting personalized food suggestions...
+                    {t('foodSuggestions.loadingSuggestion')}
                   </Text>
                 </View>
               ) : suggestion && suggestion.table ? (
@@ -314,7 +325,7 @@ export default function FoodSuggestions() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                Diet Options for {selectedAnimal?.name}
+                {t('foodSuggestions.dietOptions')} {selectedAnimal?.name}
               </Text>
               <TouchableOpacity 
                 onPress={() => setShowOptionsModal(false)}
@@ -333,8 +344,8 @@ export default function FoodSuggestions() {
                    }}
                  >
                    <Ionicons name="restaurant" size={24} color="#4a89dc" />
-                   <Text style={styles.optionButtonText}>Comprehensive Diet Plan</Text>
-                   <Text style={styles.optionButtonSubtext}>Complete nutrition guide with diet chart</Text>
+                   <Text style={styles.optionButtonText}>{t('foodSuggestions.comprehensive')}</Text>
+                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.comprehensiveSubtext')}</Text>
                  </TouchableOpacity>
 
                  <TouchableOpacity 
@@ -345,8 +356,8 @@ export default function FoodSuggestions() {
                    }}
                  >
                    <Ionicons name="grid" size={24} color="#27ae60" />
-                   <Text style={styles.optionButtonText}>Daily Diet Chart</Text>
-                   <Text style={styles.optionButtonSubtext}>Detailed meal table with calories</Text>
+                   <Text style={styles.optionButtonText}>{t('foodSuggestions.dietChart')}</Text>
+                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.dietChartSubtext')}</Text>
                  </TouchableOpacity>
 
                  <TouchableOpacity 
@@ -357,8 +368,8 @@ export default function FoodSuggestions() {
                    }}
                  >
                    <Ionicons name="trending-up" size={24} color="#f39c12" />
-                   <Text style={styles.optionButtonText}>Weight Gain Diet</Text>
-                   <Text style={styles.optionButtonSubtext}>High-calorie meal plan</Text>
+                   <Text style={styles.optionButtonText}>{t('foodSuggestions.weightGain')}</Text>
+                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.weightGainSubtext')}</Text>
                  </TouchableOpacity>
 
                  <TouchableOpacity 
@@ -369,8 +380,8 @@ export default function FoodSuggestions() {
                    }}
                  >
                    <Ionicons name="trending-down" size={24} color="#e74c3c" />
-                   <Text style={styles.optionButtonText}>Weight Loss Diet</Text>
-                   <Text style={styles.optionButtonSubtext}>Calorie-controlled meal plan</Text>
+                   <Text style={styles.optionButtonText}>{t('foodSuggestions.weightLoss')}</Text>
+                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.weightLossSubtext')}</Text>
                  </TouchableOpacity>
 
                  <TouchableOpacity 
@@ -381,21 +392,11 @@ export default function FoodSuggestions() {
                    }}
                  >
                    <Ionicons name="heart" size={24} color="#e91e63" />
-                   <Text style={styles.optionButtonText}>Pregnancy Diet</Text>
-                   <Text style={styles.optionButtonSubtext}>Special nutrition for pregnant animals</Text>
+                   <Text style={styles.optionButtonText}>{t('foodSuggestions.pregnancy')}</Text>
+                   <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.pregnancySubtext')}</Text>
                  </TouchableOpacity>
 
-                 <TouchableOpacity 
-                   style={styles.optionButton}
-                   onPress={() => {
-                     setShowOptionsModal(false);
-                     getFoodSuggestion(selectedAnimal, 'senior');
-                   }}
-                 >
-                   <Ionicons name="time" size={24} color="#9b59b6" />
-                   <Text style={styles.optionButtonText}>Senior Diet</Text>
-                   <Text style={styles.optionButtonSubtext}>Age-appropriate nutrition</Text>
-                 </TouchableOpacity>
+                
                </View>
           </View>
         </View>
@@ -412,7 +413,7 @@ export default function FoodSuggestions() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                Food Options for {selectedAnimal?.name}
+                {t('foodSuggestions.foodOptions')} {selectedAnimal?.name}
               </Text>
               <TouchableOpacity 
                 onPress={() => setShowFoodVarietyModal(false)}
@@ -430,8 +431,8 @@ export default function FoodSuggestions() {
                     onPress={() => getFoodVariety('vegetarian')}
                   >
                     <Ionicons name="leaf" size={24} color="#27ae60" />
-                    <Text style={styles.optionButtonText}>Vegetarian Diet</Text>
-                    <Text style={styles.optionButtonSubtext}>Plant-based nutrition plan</Text>
+                    <Text style={styles.optionButtonText}>{t('foodSuggestions.vegetarian')}</Text>
+                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.vegetarianSubtext')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
@@ -439,8 +440,8 @@ export default function FoodSuggestions() {
                     onPress={() => getFoodVariety('highProtein')}
                   >
                     <Ionicons name="fitness" size={24} color="#e74c3c" />
-                    <Text style={styles.optionButtonText}>High Protein Diet</Text>
-                    <Text style={styles.optionButtonSubtext}>Protein-rich meal plan</Text>
+                    <Text style={styles.optionButtonText}>{t('foodSuggestions.highProtein')}</Text>
+                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.highProteinSubtext')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
@@ -448,8 +449,8 @@ export default function FoodSuggestions() {
                     onPress={() => getFoodVariety('grainFree')}
                   >
                     <Ionicons name="close-circle" size={24} color="#f39c12" />
-                    <Text style={styles.optionButtonText}>Grain-Free Diet</Text>
-                    <Text style={styles.optionButtonSubtext}>No grains, natural foods</Text>
+                    <Text style={styles.optionButtonText}>{t('foodSuggestions.grainFree')}</Text>
+                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.grainFreeSubtext')}</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -461,8 +462,8 @@ export default function FoodSuggestions() {
                     onPress={() => getFoodVariety('highCalorie')}
                   >
                     <Ionicons name="flame" size={24} color="#e67e22" />
-                    <Text style={styles.optionButtonText}>High Calorie Plan</Text>
-                    <Text style={styles.optionButtonSubtext}>Maximum calorie intake</Text>
+                    <Text style={styles.optionButtonText}>{t('foodSuggestions.highCalorie')}</Text>
+                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.highCalorieSubtext')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
@@ -470,8 +471,8 @@ export default function FoodSuggestions() {
                     onPress={() => getFoodVariety('muscleBuilding')}
                   >
                     <Ionicons name="barbell" size={24} color="#8e44ad" />
-                    <Text style={styles.optionButtonText}>Muscle Building</Text>
-                    <Text style={styles.optionButtonSubtext}>Protein-focused growth</Text>
+                    <Text style={styles.optionButtonText}>{t('foodSuggestions.muscleBuilding')}</Text>
+                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.muscleBuildingSubtext')}</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -483,8 +484,8 @@ export default function FoodSuggestions() {
                     onPress={() => getFoodVariety('lowCarb')}
                   >
                     <Ionicons name="remove-circle" size={24} color="#e74c3c" />
-                    <Text style={styles.optionButtonText}>Low Carb Diet</Text>
-                    <Text style={styles.optionButtonSubtext}>Reduced carbohydrate intake</Text>
+                    <Text style={styles.optionButtonText}>{t('foodSuggestions.lowCarb')}</Text>
+                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.lowCarbSubtext')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
@@ -492,8 +493,8 @@ export default function FoodSuggestions() {
                     onPress={() => getFoodVariety('intermittent')}
                   >
                     <Ionicons name="time" size={24} color="#3498db" />
-                    <Text style={styles.optionButtonText}>Intermittent Fasting</Text>
-                    <Text style={styles.optionButtonSubtext}>Time-restricted eating</Text>
+                    <Text style={styles.optionButtonText}>{t('foodSuggestions.intermittent')}</Text>
+                    <Text style={styles.optionButtonSubtext}>{t('foodSuggestions.intermittentSubtext')}</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -680,7 +681,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   optionButtonText: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#333',
     marginLeft: 12,
@@ -689,7 +690,7 @@ const styles = StyleSheet.create({
   optionButtonSubtext: {
     fontSize: 12,
     color: '#666',
-    marginLeft: 12,
+    marginLeft: 10,
     marginTop: 2,
   },
 }); 

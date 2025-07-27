@@ -17,11 +17,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import { API_BASE_URL } from "../utils/apiConfig"; // Adjust the import path as needed
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 const { width } = Dimensions.get('window');
 
 export default function VetProfile() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [vetData, setVetData] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -122,12 +132,12 @@ export default function VetProfile() {
 
   const handleLogout = async () => {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to log out?',
+      t('vetProfile.signOut'),
+      t('vetProfile.signOutMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('vetProfile.cancel'), style: 'cancel' },
         {
-          text: 'Log Out',
+          text: t('vetProfile.logOut'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -151,10 +161,10 @@ export default function VetProfile() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchDashboardData(); // Refresh data
-      Alert.alert("Success", `Appointment ${action} successfully`);
+      Alert.alert(t('vetProfile.success'), t('vetProfile.appointmentActionSuccess', { action }));
     } catch (error) {
       console.error("Error updating appointment:", error);
-      Alert.alert("Error", "Failed to update appointment");
+      Alert.alert(t('vetProfile.error'), t('vetProfile.failedToUpdateAppointment'));
     }
   };
 
@@ -172,7 +182,7 @@ export default function VetProfile() {
       setShowMessages(true);
     } catch (error) {
       console.error("Error fetching conversation:", error);
-      Alert.alert("Error", "Failed to load conversation");
+      Alert.alert(t('vetProfile.error'), t('vetProfile.failedToLoadConversation'));
     }
   };
 
@@ -204,7 +214,7 @@ export default function VetProfile() {
       
     } catch (error) {
       console.error("Error sending message:", error);
-      Alert.alert("Error", "Failed to send message");
+      Alert.alert(t('vetProfile.error'), t('vetProfile.failedToSendMessage'));
     }
   };
 
@@ -213,7 +223,7 @@ export default function VetProfile() {
       title: "Appointments",
       subtitle: "Manage appointments",
       icon: "calendar",
-      color: "#3498db",
+      color: "#044c7cff",
       count: appointments.filter(a => a.status === 'pending').length,
       onPress: () => router.push('/appointmentManagement'),
       testID: "appointments-card"
@@ -222,7 +232,7 @@ export default function VetProfile() {
       title: "Messages",
       subtitle: "Chat with farmers",
       icon: "chatbubbles",
-      color: "#27ae60",
+      color: "#026029ff",
       count: conversations.filter(c => c.unreadCount > 0).length,
       onPress: () => router.push('/vetMessaging'),
       testID: "messages-card"
@@ -231,7 +241,7 @@ export default function VetProfile() {
       title: "Emergency Cases",
       subtitle: "Urgent consultations",
       icon: "medical",
-      color: "#e74c3c",
+      color: "#821105ff",
       count: appointments.filter(a => a.priority === 'emergency').length,
       onPress: () => Alert.alert("Emergency", "Emergency cases feature coming soon"),
       testID: "emergency-card"
@@ -240,7 +250,7 @@ export default function VetProfile() {
       title: "Edit Profile",
       subtitle: "Update your details",
       icon: "person",
-      color: "#9b59b6",
+      color: "#577344ff",
       onPress: () => router.push({
         pathname: '/vetEditProfile',
         params: { vet: JSON.stringify(vetData) }
@@ -338,10 +348,10 @@ export default function VetProfile() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return '#f39c12';
-      case 'accepted': return '#27ae60';
-      case 'rejected': return '#e74c3c';
-      case 'completed': return '#95a5a6';
+      case 'pending': return '#a76906ff';
+      case 'accepted': return '#0c6702ff';
+      case 'rejected': return '#8a1103ff';
+      case 'completed': return '#7b989aff';
       default: return '#34495e';
     }
   };
@@ -349,7 +359,7 @@ export default function VetProfile() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading your profile...</Text>
+        <Text style={styles.loadingText}>{t('vetProfile.loadingProfile')}</Text>
       </View>
     );
   }
@@ -358,13 +368,13 @@ export default function VetProfile() {
     return (
       <View style={styles.errorContainer}>
         <Ionicons name="person-circle-outline" size={100} color="#bdc3c7" />
-        <Text style={styles.errorText}>No profile data found</Text>
+        <Text style={styles.errorText}>{t('vetProfile.noProfileData')}</Text>
         <TouchableOpacity
           style={styles.errorButton}
           onPress={() => router.replace('/')}
           testID="go-to-login-button"
         >
-          <Text style={styles.errorButtonText}>Go to login</Text>
+          <Text style={styles.errorButtonText}>{t('vetProfile.goToLogin')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -381,10 +391,10 @@ export default function VetProfile() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.greeting}>Good day, Dr.</Text>
+            <Text style={styles.greeting}>{t('vetProfile.goodDay')}</Text>
             <Text style={styles.vetName}>{vetData.name}</Text>
             <Text style={styles.specialty}>{vetData.specialty}</Text>
-            <Text style={styles.licenseNumber}>License: {vetData.licenseNumber}</Text>
+                          <Text style={styles.licenseNumber}>{t('vetProfile.license')} {vetData.licenseNumber}</Text>
           </View>
           <TouchableOpacity 
             style={styles.logoutButton}
@@ -400,22 +410,22 @@ export default function VetProfile() {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>{appointments.length}</Text>
-          <Text style={styles.statLabel}>Total Appointments</Text>
+                      <Text style={styles.statLabel}>{t('vetProfile.totalAppointments')}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>{conversations.length}</Text>
-          <Text style={styles.statLabel}>Conversations</Text>
+                      <Text style={styles.statLabel}>{t('vetProfile.conversations')}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
             {appointments.filter(a => a.status === 'completed').length}
           </Text>
-          <Text style={styles.statLabel}>Completed</Text>
+                      <Text style={styles.statLabel}>{t('vetProfile.completed')}</Text>
         </View>
       </View>
 
       {/* Feature Cards */}
-      <Text style={styles.sectionTitle}>Dashboard</Text>
+              <Text style={styles.sectionTitle}>{t('vetProfile.dashboard')}</Text>
       <View style={styles.featureGrid}>
         {featureCards.map((card, index) => (
           <TouchableOpacity
@@ -446,7 +456,7 @@ export default function VetProfile() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Appointments</Text>
+            <Text style={styles.modalTitle}>{t('vetProfile.appointments')}</Text>
             <TouchableOpacity
               onPress={() => setShowAppointments(false)}
               testID="close-appointments-modal"
@@ -547,9 +557,9 @@ export default function VetProfile() {
               ) : (
                 <View style={styles.emptyConversations}>
                   <Ionicons name="chatbubbles-outline" size={64} color="#bdc3c7" />
-                  <Text style={styles.emptyConversationsTitle}>No Conversations</Text>
-                  <Text style={styles.emptyConversationsText}>
-                    Your farmer consultations will appear here
+                                <Text style={styles.emptyConversationsTitle}>{t('vetProfile.noConversations')}</Text>
+              <Text style={styles.emptyConversationsText}>
+                    {t('vetProfile.farmerConsultationsWillAppear')}
                   </Text>
                 </View>
               )}

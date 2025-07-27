@@ -1,24 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
-const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
+const API_KEY = "AIzaSyCrYK2JHpleJxGT3TtneVT6hZHZY8KC1Vc";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 const GEMINI_VISION_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 export default function DiseaseDetection() {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [symptoms, setSymptoms] = useState('');
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission required', 'We need camera roll permissions to upload images');
+      Alert.alert(t('symptomChecker.permissionRequired'), t('symptomChecker.cameraRollPermission'));
       return;
     }
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -35,16 +45,25 @@ export default function DiseaseDetection() {
 
   const handleAnalyze = async () => {
     if (!symptoms.trim() && !image) {
-      setResult({ error: "Please enter symptoms and/or select a photo." });
+      setResult({ error: t('symptomChecker.enterSymptomsOrPhoto') });
       return;
     }
     setLoading(true);
     setResult(null);
     try {
+      const languageInstruction = language === 'bn' ? 'Respond ONLY in Bangla (Bengali) language. All text must be in Bangla.' : 'Respond in English language. All text must be in English.';
+      
       const parts = [];
+      let promptText = '';
+      
       if (symptoms.trim()) {
-        parts.push({ text: `Symptoms: ${symptoms}` });
+        promptText = `Symptoms: ${symptoms}\n\n${languageInstruction}\n\nAnalyze the symptoms and provide:\n- Possible diseases or conditions\n- Recommended actions\n- When to consult a veterinarian\n\nFormat your response with bullet points (•) and avoid using bold text. Keep it clear and concise.`;
+      } else {
+        promptText = `${languageInstruction}\n\nAnalyze the image and provide:\n- Possible diseases or conditions\n- Recommended actions\n- When to consult a veterinarian\n\nFormat your response with bullet points (•) and avoid using bold text. Keep it clear and concise.`;
       }
+      
+      parts.push({ text: promptText });
+      
       if (image) {
         parts.push({
           inlineData: {
@@ -53,6 +72,7 @@ export default function DiseaseDetection() {
           }
         });
       }
+      
       const response = await fetch(GEMINI_VISION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,15 +81,29 @@ export default function DiseaseDetection() {
       const data = await response.json();
       const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (aiText) {
-        setResult({ text: aiText });
+        // Format the response to ensure proper bullet points
+        const formattedText = formatResponse(aiText);
+        setResult({ text: formattedText });
       } else {
-        setResult({ error: 'Failed to get a valid response from the AI. Please try again.' });
+        setResult({ error: t('symptomChecker.failedToGetResponse') });
       }
     } catch (err) {
-      setResult({ error: 'An error occurred while contacting the AI service. Please check your connection and try again.' });
+      setResult({ error: t('symptomChecker.aiServiceError') });
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatResponse = (text) => {
+    // Replace various bullet point formats with consistent bullet points
+    return text
+      .replace(/\*\s/g, '• ') // Replace * with •
+      .replace(/-\s/g, '• ') // Replace - with •
+      .replace(/\d+\.\s/g, '• ') // Replace numbered lists with •
+      .replace(/\*\*/g, '') // Remove bold markers
+      .replace(/__/g, '') // Remove underline markers
+      .replace(/#{1,6}\s/g, '') // Remove markdown headers
+      .trim();
   };
 
   return (
@@ -79,22 +113,22 @@ export default function DiseaseDetection() {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="#4a89dc" />
+          <Ionicons name="arrow-back" size={28} color="#073f8aff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Disease Detection</Text>
+        <Text style={styles.headerTitle}>{t('symptomChecker.headerTitle')}</Text>
         <TouchableOpacity 
           style={styles.proButton}
           onPress={() => router.push('/pro_mode')}
           testID="pro-button"
         >
-          <Text style={styles.proButtonText}>Go Pro</Text>
+          <Text style={styles.proButtonText}>{t('symptomChecker.goPro')}</Text>
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.label}>Describe the animal's symptoms (optional):</Text>
+        <Text style={styles.label}>{t('symptomChecker.describeSymptoms')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="e.g., coughing, loss of appetite, fever..."
+          placeholder={t('symptomChecker.symptomsPlaceholder')}
           value={symptoms}
           onChangeText={setSymptoms}
           multiline
@@ -102,7 +136,7 @@ export default function DiseaseDetection() {
           testID="symptoms-input"
         />
         <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage} disabled={loading} testID="image-picker-button">
-          <Text style={styles.imagePickerText}>{image ? "Change Photo" : "Select Photo (optional)"}</Text>
+          <Text style={styles.imagePickerText}>{image ? t('symptomChecker.changePhoto') : t('symptomChecker.selectPhoto')}</Text>
         </TouchableOpacity>
         {image && (
           <Image source={{ uri: image.uri }} style={styles.previewImage} />
@@ -116,12 +150,12 @@ export default function DiseaseDetection() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Analyze</Text>
+            <Text style={styles.buttonText}>{t('symptomChecker.analyze')}</Text>
           )}
         </TouchableOpacity>
         {result && (
           <View style={styles.resultContainer} testID="result-container">
-            <Text style={styles.resultTitle}>Analysis Result</Text>
+            <Text style={styles.resultTitle}>{t('symptomChecker.analysisResult')}</Text>
             {result.text ? (
               <Text style={styles.resultText} testID="result-text">{result.text}</Text>
             ) : (
@@ -154,7 +188,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   proButton: {
-    backgroundColor: '#27ae60',
+    backgroundColor: '#025926ff',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
@@ -186,14 +220,14 @@ const styles = StyleSheet.create({
   },
   imagePickerButton: {
     borderWidth: 1,
-    borderColor: '#4a89dc',
+    borderColor: '#094390ff',
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
     alignItems: 'center',
   },
   imagePickerText: {
-    color: '#4a89dc',
+    color: '#08428fff',
     fontWeight: 'bold',
   },
   previewImage: {
@@ -203,7 +237,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   button: {
-    backgroundColor: '#27ae60',
+    backgroundColor: '#0f5e30ff',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
@@ -239,7 +273,7 @@ const styles = StyleSheet.create({
     color: '#34495e',
   },
   errorText: {
-    color: '#e74c3c',
+    color: '#801206ff',
     fontWeight: 'bold',
   }
 }); 

@@ -5,11 +5,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import { API_BASE_URL } from '../utils/apiConfig';
 import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export default function AnimalDetails() {
   const params = useLocalSearchParams();
   const animal = params.animal ? JSON.parse(params.animal) : null;
-  const { t } = useLanguage();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  React.useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);

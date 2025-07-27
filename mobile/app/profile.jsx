@@ -388,7 +388,7 @@ export default function Profile() {
               style={styles.profileImage}
             />
             <View style={styles.editIndicator}>
-              <Ionicons name="pencil" size={12} color="#fff" />
+              <Ionicons name="pencil" size={12} color="#f6E6bb" />
             </View>
           </TouchableOpacity>
         </View>
@@ -397,7 +397,7 @@ export default function Profile() {
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
-              <Ionicons name="paw" size={24} color="#4a89dc" />
+              <Ionicons name="paw" size={24} color="#124438" />
             </View>
             <Text style={styles.statNumber}>{animals.length}</Text>
             <Text style={styles.statLabel}>{t('profile.animals')}</Text>
@@ -411,7 +411,7 @@ export default function Profile() {
           </View>
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
-              <Ionicons name="shield-checkmark" size={24} color="#e67e22" />
+              <Ionicons name="shield-checkmark" size={24} color="#0db727ff" />
             </View>
             <Text style={styles.statNumber}>{t('profile.active')}</Text>
             <Text style={styles.statLabel}>{t('profile.status')}</Text>
@@ -430,7 +430,7 @@ export default function Profile() {
               testID="ai-chatbot-button"
             >
               <View style={styles.featureIconContainer}>
-                <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
+                <Ionicons name="chatbubble-ellipses" size={28} color="#f1f6f5ff" />
               </View>
               <Text style={styles.featureTitle}>{t('profile.aiAssistant')}</Text>
               <Text style={styles.featureSubtitle}>{t('profile.getInstantHelp')}</Text>
@@ -1126,28 +1126,29 @@ const styles = StyleSheet.create({
     minHeight: 110,
   },
   primaryCard: {
-    backgroundColor: "#4a89dc",
+    backgroundColor: "#5c7d3eff",
   },
   secondaryCard: {
-    backgroundColor: "#e67e22",
+    backgroundColor: "#2e544cff",
   },
+ 
   accentCard: {
-    backgroundColor: "#9b59b6",
+    backgroundColor: "#477c59ff",
   },
   warningCard: {
-    backgroundColor: "#f39c12",
+    backgroundColor: "#7790a7ff",
   },
   infoCard: {
-    backgroundColor: "#3498db",
+    backgroundColor: "#2e6977fe",
   },
   successCard: {
-    backgroundColor: "#27ae60",
+    backgroundColor: "#195d4fff",
   },
   featureIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(241, 248, 245, 0.35)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
@@ -1175,7 +1176,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   addAnimalButton: {
-    backgroundColor: "#4a89dc",
+    backgroundColor: "#0b5034ff",
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -1297,7 +1298,7 @@ const styles = StyleSheet.create({
     color: "#2c3e50",
   },
   logoutButton: {
-    backgroundColor: "#e74c3c",
+    backgroundColor: "#431c18ff",
     marginHorizontal: 20,
     marginBottom: 20,
     borderRadius: 12,

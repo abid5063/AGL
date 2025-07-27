@@ -16,10 +16,20 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export default function EditVaccine() {
   const router = useRouter();
   const { vaccineId } = useLocalSearchParams();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -64,7 +74,7 @@ export default function EditVaccine() {
       });
     } catch (error) {
       console.error('Error fetching data:', error);
-      Alert.alert('Error', 'Failed to load vaccine details');
+      Alert.alert(t('editVaccine.error'), t('editVaccine.failedToLoad'));
       router.back();
     } finally {
       setLoading(false);
@@ -91,21 +101,21 @@ export default function EditVaccine() {
 
   const validateForm = () => {
     if (!formData.vaccine_name.trim()) {
-      Alert.alert('Validation Error', 'Please enter vaccine name');
+      Alert.alert(t('editVaccine.validationError'), t('editVaccine.enterVaccineName'));
       return false;
     }
     if (!formData.animal_id) {
-      Alert.alert('Validation Error', 'Please select an animal');
+      Alert.alert(t('editVaccine.validationError'), t('editVaccine.selectAnimal'));
       return false;
     }
     // Validate vaccine_date
     if (!(formData.vaccine_date instanceof Date) || isNaN(formData.vaccine_date)) {
-      Alert.alert('Validation Error', 'Please select a valid vaccine date');
+      Alert.alert(t('editVaccine.validationError'), t('editVaccine.selectValidVaccineDate'));
       return false;
     }
     // Validate next_due_date if provided
     if (formData.next_due_date && (!(formData.next_due_date instanceof Date) || isNaN(formData.next_due_date))) {
-      Alert.alert('Validation Error', 'Please select a valid next due date');
+      Alert.alert(t('editVaccine.validationError'), t('editVaccine.selectValidNextDueDate'));
       return false;
     }
     return true;
@@ -139,7 +149,7 @@ export default function EditVaccine() {
       router.replace('/vaccineManagement');
     } catch (error) {
       console.error('Error updating vaccine:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update vaccine record');
+      Alert.alert(t('editVaccine.error'), error.response?.data?.message || t('editVaccine.failedToUpdate'));
     } finally {
       setSaving(false);
     }
@@ -149,7 +159,7 @@ export default function EditVaccine() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4a89dc" />
-        <Text style={styles.loadingText}>Loading vaccine details...</Text>
+        <Text style={styles.loadingText}>{t('editVaccine.loadingVaccineDetails')}</Text>
       </View>
     );
   }
@@ -164,17 +174,17 @@ export default function EditVaccine() {
         <View style={styles.logoContainer}>
           <Ionicons name="medkit" size={28} color="#3498db" />
         </View>
-        <Text style={styles.headerTitle}>Edit Vaccine</Text>
+        <Text style={styles.headerTitle}>{t('editVaccine.headerTitle')}</Text>
         <View style={{ width: 28 }} />
       </View>
 
       <ScrollView style={styles.content}>
         {/* Vaccine Name */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Vaccine Name *</Text>
+          <Text style={styles.label}>{t('editVaccine.vaccineName')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter vaccine name"
+            placeholder={t('editVaccine.vaccineNamePlaceholder')}
             value={formData.vaccine_name}
             onChangeText={(value) => handleInputChange('vaccine_name', value)}
           />
@@ -182,7 +192,7 @@ export default function EditVaccine() {
 
         {/* Animal Selection */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Select Animal *</Text>
+          <Text style={styles.label}>{t('editVaccine.selectAnimal')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.animalSelector}>
             {animals.map((animal) => (
               <TouchableOpacity
@@ -212,7 +222,7 @@ export default function EditVaccine() {
 
         {/* Vaccine Date */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Vaccine Date *</Text>
+          <Text style={styles.label}>{t('editVaccine.vaccineDate')}</Text>
           <TouchableOpacity
             style={styles.dateButton}
             onPress={() => setShowVaccineDatePicker(true)}
@@ -224,12 +234,12 @@ export default function EditVaccine() {
 
         {/* Next Due Date */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Next Due Date (Optional)</Text>
+          <Text style={styles.label}>{t('editVaccine.nextDueDate')}</Text>
           <TouchableOpacity
             style={styles.dateButton}
             onPress={() => setShowNextDueDatePicker(true)}
           >
-            <Text style={styles.dateText}>{formData.next_due_date ? formatDate(formData.next_due_date) : 'Select next due date'}</Text>
+            <Text style={styles.dateText}>{formData.next_due_date ? formatDate(formData.next_due_date) : t('editVaccine.selectNextDueDate')}</Text>
             <Ionicons name="calendar" size={20} color="#3498db" style={{ marginLeft: 8 }} />
           </TouchableOpacity>
           {formData.next_due_date && (
@@ -237,17 +247,17 @@ export default function EditVaccine() {
               style={styles.clearButton}
               onPress={() => handleInputChange('next_due_date', '')}
             >
-              <Text style={styles.clearButtonText}>Clear Date</Text>
+              <Text style={styles.clearButtonText}>{t('editVaccine.clearDate')}</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* Notes */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Notes (Optional)</Text>
+          <Text style={styles.label}>{t('editVaccine.notes')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Enter any additional notes..."
+            placeholder={t('editVaccine.notesPlaceholder')}
             value={formData.notes}
             onChangeText={(value) => handleInputChange('notes', value)}
             multiline
@@ -265,7 +275,7 @@ export default function EditVaccine() {
           {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.submitButtonText}>Update Vaccine Record</Text>
+            <Text style={styles.submitButtonText}>{t('editVaccine.updateVaccineRecord')}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>

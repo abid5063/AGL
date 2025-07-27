@@ -3,22 +3,24 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Activi
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
-const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
+const API_KEY = "AIzaSyCrYK2JHpleJxGT3TtneVT6hZHZY8KC1Vc";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 // Component for displaying veterinary locations in a table format
-const VeterinaryTable = ({ data }) => {
+const VeterinaryTable = ({ data, t }) => {
   if (!data || !Array.isArray(data)) return null;
 
   return (
     <View style={styles.tableContainer}>
-      <Text style={styles.tableTitle}>নিকটস্থ পশু চিকিৎসা কেন্দ্রসমূহ</Text>
-      <Text style={styles.tableSubtitle}>দূরত্ব অনুযায়ী সাজানো (নিকটবর্তী প্রথমে)</Text>
+      <Text style={styles.tableTitle}>{t('vetLocation.nearbyClinics')}</Text>
+      <Text style={styles.tableSubtitle}>{t('vetLocation.sortedByDistance')}</Text>
       <View style={styles.tableHeader}>
-        <Text style={[styles.tableHeaderCell, { flex: 2 }]}>নাম</Text>
-        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>দূরত্ব</Text>
-        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>রেটিং</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 2 }]}>{t('vetLocation.name')}</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{t('vetLocation.distance')}</Text>
+        <Text style={[styles.tableHeaderCell, { flex: 1 }]}>{t('vetLocation.rating')}</Text>
       </View>
       {data.map((clinic, index) => {
         const distance = parseFloat(clinic.distance.replace(/[^\d.]/g, ''));
@@ -36,7 +38,7 @@ const VeterinaryTable = ({ data }) => {
                 <Text style={styles.clinicName}>{clinic.name}</Text>
                 {isNearest && (
                   <View style={styles.nearestBadge}>
-                    <Text style={styles.nearestBadgeText}>নিকটতম</Text>
+                    <Text style={styles.nearestBadgeText}>{t('vetLocation.nearest')}</Text>
                   </View>
                 )}
               </View>
@@ -52,7 +54,7 @@ const VeterinaryTable = ({ data }) => {
                 {clinic.distance}
               </Text>
               {isNearby && (
-                <Text style={styles.nearbyText}>কাছাকাছি</Text>
+                <Text style={styles.nearbyText}>{t('vetLocation.nearby')}</Text>
               )}
             </View>
             <Text style={[styles.tableCell, { flex: 1, textAlign: 'center' }]}>
@@ -66,15 +68,15 @@ const VeterinaryTable = ({ data }) => {
 };
 
 // Component for location input form
-const LocationForm = ({ locationData, setLocationData, onSearch, loading }) => {
+const LocationForm = ({ locationData, setLocationData, onSearch, loading, t }) => {
   return (
     <View style={styles.formContainer}>
-      <Text style={styles.formTitle}>Enter Your Location Details</Text>
-      <Text style={styles.formSubtitle}>Please provide your specific location to find nearby veterinary clinics</Text>
+      <Text style={styles.formTitle}>{t('vetLocation.enterLocationDetails')}</Text>
+      <Text style={styles.formSubtitle}>{t('vetLocation.provideLocation')}</Text>
       
       <TextInput
         style={styles.input}
-        placeholder="Village/Area Name"
+        placeholder={t('vetLocation.villagePlaceholder')}
         value={locationData.village}
         onChangeText={(text) => setLocationData(prev => ({ ...prev, village: text }))}
         editable={!loading}
@@ -82,7 +84,7 @@ const LocationForm = ({ locationData, setLocationData, onSearch, loading }) => {
       
       <TextInput
         style={styles.input}
-        placeholder="Thana/Upazila"
+        placeholder={t('vetLocation.thanaPlaceholder')}
         value={locationData.thana}
         onChangeText={(text) => setLocationData(prev => ({ ...prev, thana: text }))}
         editable={!loading}
@@ -90,7 +92,7 @@ const LocationForm = ({ locationData, setLocationData, onSearch, loading }) => {
       
       <TextInput
         style={styles.input}
-        placeholder="District"
+        placeholder={t('vetLocation.districtPlaceholder')}
         value={locationData.district}
         onChangeText={(text) => setLocationData(prev => ({ ...prev, district: text }))}
         editable={!loading}
@@ -99,57 +101,44 @@ const LocationForm = ({ locationData, setLocationData, onSearch, loading }) => {
       <TouchableOpacity
         style={[styles.searchButton, loading && styles.searchButtonDisabled]}
         onPress={onSearch}
-        disabled={loading || !locationData.village || !locationData.thana || !locationData.district}
+        disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color="#fff" size="small" />
+          <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Ionicons name="search" size={20} color="#fff" />
+          <Text style={styles.searchButtonText}>{t('vetLocation.searchClinics')}</Text>
         )}
-        <Text style={styles.searchButtonText}>
-          {loading ? 'Searching...' : 'Search Veterinary Clinics'}
-        </Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 export default function VetLocation() {
-  const [veterinaryData, setVeterinaryData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [locationData, setLocationData] = useState({
     village: '',
     thana: '',
     district: ''
   });
-  const router = useRouter();
+  const [clinics, setClinics] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  // Load user's default location if available
   useEffect(() => {
     const loadDefaultLocation = async () => {
       try {
-        const storedData = await AsyncStorage.getItem('userData');
-        if (storedData) {
-          const userData = JSON.parse(storedData);
-          if (userData.location) {
-            // Try to parse location if it contains multiple parts
-            const locationParts = userData.location.split(',').map(part => part.trim());
-            if (locationParts.length >= 3) {
-              setLocationData({
-                village: locationParts[0] || '',
-                thana: locationParts[1] || '',
-                district: locationParts[2] || ''
-              });
-            } else if (locationParts.length === 1) {
-              // If only one part, assume it's district
-              setLocationData({
-                village: '',
-                thana: '',
-                district: locationParts[0] || ''
-              });
-            }
-          }
+        const storedLocation = await AsyncStorage.getItem('userLocation');
+        if (storedLocation) {
+          const parsedLocation = JSON.parse(storedLocation);
+          setLocationData(parsedLocation);
         }
       } catch (error) {
         console.error('Error loading default location:', error);
@@ -159,140 +148,93 @@ export default function VetLocation() {
     loadDefaultLocation();
   }, []);
 
-  // Function to sort veterinary clinics by distance
   const sortByDistance = (clinics) => {
     return clinics.sort((a, b) => {
-      // Extract numeric distance values
       const distanceA = parseFloat(a.distance.replace(/[^\d.]/g, ''));
       const distanceB = parseFloat(b.distance.replace(/[^\d.]/g, ''));
-      
-      // Handle cases where distance might be in different units or formats
-      if (isNaN(distanceA) && isNaN(distanceB)) return 0;
-      if (isNaN(distanceA)) return 1;
-      if (isNaN(distanceB)) return -1;
-      
       return distanceA - distanceB;
     });
   };
 
   const fetchVeterinaryLocations = async () => {
     if (!locationData.village || !locationData.thana || !locationData.district) {
-      Alert.alert("Missing Information", "Please fill in all location fields.");
+      Alert.alert(t('vetLocation.error'), 'Please fill in all location fields');
       return;
     }
 
     setLoading(true);
     setHasSearched(true);
-    
+
     try {
-      const fullLocation = `${locationData.village}, ${locationData.thana}, ${locationData.district}`;
+      const languageInstruction = language === 'bn' ? 'Respond ONLY in Bangla (Bengali) language. All clinic names, addresses, and details must be in Bangla.' : 'Respond in English language. All clinic names, addresses, and details must be in English.';
       
-      const prompt = `
-You are a veterinary assistant AI. Generate a list of nearby veterinary clinics and hospitals.
-
-The user is located at: ${fullLocation}
-
-IMPORTANT: Respond ONLY in Bangla (Bengali) language. All table headers and values must be in Bangla.
-
-IMPORTANT: Respond ONLY with a valid JSON object in the following format:
-{
-  "type": "veterinary_locations",
-  "message": "Here are the nearest veterinary clinics near ${fullLocation}:",
-  "data": [
-    {
-      "name": "Clinic Name",
-      "address": "Full address in or near ${locationData.district} district",
-      "phone": "Phone number",
-      "distance": "Distance from ${locationData.village} (e.g., '2.5 km')",
-      "rating": "Rating out of 5 (e.g., '4.2')"
-    }
-  ]
-}
-
-Generate 5-7 realistic veterinary clinics that would be accessible from ${fullLocation}. Include a mix of:
-- Large animal veterinary clinics (for livestock, cattle, horses)
-- Small animal veterinary clinics
-- Emergency veterinary hospitals
-- Specialized livestock veterinary services
-- Government veterinary hospitals
-- Private veterinary clinics
-
-IMPORTANT: Sort the clinics by distance from nearest to farthest. Start with clinics within 1-5 km, then 5-15 km, then 15-30 km.
-Make sure the addresses are realistic for ${locationData.district} district and surrounding areas.
-The distances should be realistic for the rural/urban setting of ${locationData.thana}.
-Make sure the JSON is properly formatted and valid. Include realistic addresses and phone numbers.
-`;
+      const prompt = `Find veterinary clinics near ${locationData.village}, ${locationData.thana}, ${locationData.district} in Bangladesh.\n\n${languageInstruction}\n\nReturn ONLY a JSON array of veterinary clinics with the following structure:\n[\n  {\n    "name": "Clinic Name",\n    "address": "Full Address",\n    "phone": "Phone Number",\n    "distance": "X.X km",\n    "rating": "X.X"\n  }\n]\n\nInclude at least 5-8 clinics with realistic names, addresses, and phone numbers. Distances should be between 0.5 to 15 km. Ratings should be between 3.0 to 5.0.`;
 
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
+          contents: [{
+            parts: [{ text: prompt }]
+          }]
         }),
       });
-      
+
       const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
-      
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || t('vetLocation.noClinicsFound');
+
       try {
-        // Handle the case where response is wrapped in markdown code blocks
-        let jsonString = aiText.trim();
-        
-        // Remove markdown code blocks if present
-        if (jsonString.startsWith('```json')) {
-          jsonString = jsonString.replace(/^```json\n/, '').replace(/\n```$/, '');
-        } else if (jsonString.startsWith('```')) {
-          jsonString = jsonString.replace(/^```\n/, '').replace(/\n```$/, '');
-        }
-        
-        const jsonResponse = JSON.parse(jsonString);
-        if (jsonResponse.type === 'veterinary_locations') {
-          // Sort the data by distance
-          const sortedData = sortByDistance(jsonResponse.data);
-          setVeterinaryData({
-            ...jsonResponse,
-            data: sortedData
-          });
+        // Try to extract JSON from the response
+        const jsonMatch = aiText.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          const parsedClinics = JSON.parse(jsonMatch[0]);
+          const sortedClinics = sortByDistance(parsedClinics);
+          setClinics(sortedClinics);
         } else {
-          throw new Error('Invalid response format');
+          throw new Error('No valid JSON found');
         }
       } catch (parseError) {
-        console.error('Parse error:', parseError);
-        console.error('Response text:', aiText);
-        throw new Error('Failed to parse response');
+        console.error('Error parsing AI response:', parseError);
+        Alert.alert(t('vetLocation.error'), t('vetLocation.failedToSearch'));
+        setClinics([]);
       }
-    } catch (err) {
-      Alert.alert("Error", "Failed to fetch veterinary locations. Please try again.");
+
+      // Save location data
+      try {
+        await AsyncStorage.setItem('userLocation', JSON.stringify(locationData));
+      } catch (error) {
+        console.error('Error saving location:', error);
+      }
+
+    } catch (error) {
+      console.error('Error fetching veterinary locations:', error);
+      Alert.alert(t('vetLocation.error'), t('vetLocation.failedToSearch'));
+      setClinics([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleNewSearch = () => {
-    setVeterinaryData(null);
     setHasSearched(false);
+    setClinics([]);
   };
 
   const handleBackPress = () => {
-    // Try to go back, if that fails, navigate to profile
     try {
       router.back();
     } catch (error) {
-      // If back navigation fails, go to profile
-      router.push('/profile');
+      router.replace('/');
     }
   };
 
   const handleCallClinic = (phone) => {
     Alert.alert(
-      "Call Clinic",
-      `Would you like to call ${phone}?`,
+      t('vetLocation.callClinic'),
+      `Call ${phone}?`,
       [
-        { text: "Cancel", style: "cancel" },
-        { text: "Call", onPress: () => {
-          // In a real app, you would use Linking to make the call
-          Alert.alert("Call", `Calling ${phone}...`);
-        }}
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Call', onPress: () => console.log('Calling:', phone) }
       ]
     );
   };
@@ -301,69 +243,39 @@ Make sure the JSON is properly formatted and valid. Include realistic addresses 
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBackPress}>
-          <Ionicons name="arrow-back" size={28} color="#4a89dc" />
+          <Ionicons name="arrow-back" size={24} color="#4a89dc" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Veterinary Locations</Text>
-        {hasSearched && (
-          <TouchableOpacity onPress={handleNewSearch}>
-            <Ionicons name="refresh" size={24} color="#4a89dc" />
-          </TouchableOpacity>
-        )}
+        <Text style={styles.headerTitle}>{t('vetLocation.headerTitle')}</Text>
+        <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content}>
         {!hasSearched ? (
           <LocationForm
             locationData={locationData}
             setLocationData={setLocationData}
             onSearch={fetchVeterinaryLocations}
             loading={loading}
+            t={t}
           />
         ) : (
-          <View>
-            {loading && (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#4a89dc" />
-                <Text style={styles.loadingText}>Finding veterinary clinics...</Text>
-                <Text style={styles.locationText}>
-                  Searching near: {locationData.village}, {locationData.thana}, {locationData.district}
-                </Text>
-              </View>
-            )}
+          <View style={styles.resultsContainer}>
+            <View style={styles.resultsHeader}>
+              <Text style={styles.resultsTitle}>{t('vetLocation.nearbyClinics')}</Text>
+              <TouchableOpacity style={styles.newSearchButton} onPress={handleNewSearch}>
+                <Ionicons name="refresh" size={20} color="#4a89dc" />
+                <Text style={styles.newSearchButtonText}>{t('vetLocation.newSearch')}</Text>
+              </TouchableOpacity>
+            </View>
 
-            {veterinaryData && !loading && (
-              <View>
-                <View style={styles.locationContainer}>
-                  <Ionicons name="location" size={20} color="#4a89dc" />
-                  <Text style={styles.locationText}>
-                    Results for: {locationData.village}, {locationData.thana}, {locationData.district}
-                  </Text>
-                </View>
-
-                <Text style={styles.welcomeText}>{veterinaryData.message}</Text>
-                <VeterinaryTable data={veterinaryData.data} />
-                
-                <View style={styles.infoContainer}>
-                  <Text style={styles.infoTitle}>Quick Actions</Text>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={() => router.push('/aiChatbot')}
-                  >
-                    <Ionicons name="chatbubble" size={20} color="#4a89dc" />
-                    <Text style={styles.actionButtonText}>Ask AI Assistant</Text>
-                  </TouchableOpacity>
-                  
-                 
-                </View>
-              </View>
-            )}
-
-            {!veterinaryData && !loading && (
-              <View style={styles.errorContainer}>
+            {clinics.length > 0 ? (
+              <VeterinaryTable data={clinics} t={t} />
+            ) : (
+              <View style={styles.noResultsContainer}>
                 <Ionicons name="location-outline" size={64} color="#ccc" />
-                <Text style={styles.errorText}>Unable to load veterinary locations</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={fetchVeterinaryLocations}>
-                  <Text style={styles.retryButtonText}>Try Again</Text>
+                <Text style={styles.noResultsText}>{t('vetLocation.noClinicsFound')}</Text>
+                <TouchableOpacity style={styles.tryAgainButton} onPress={handleNewSearch}>
+                  <Text style={styles.tryAgainButtonText}>{t('vetLocation.newSearch')}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -502,7 +414,7 @@ const styles = StyleSheet.create({
   tableTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4a89dc',
+    color: '#032451ff',
     marginBottom: 4,
     textAlign: 'center',
   },
@@ -535,7 +447,7 @@ const styles = StyleSheet.create({
   nearestRow: {
     backgroundColor: '#e8f5e8',
     borderLeftWidth: 4,
-    borderLeftColor: '#27ae60',
+    borderLeftColor: '#095b2bff',
   },
   nearbyRow: {
     backgroundColor: '#f8f9fa',
@@ -556,7 +468,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nearestBadge: {
-    backgroundColor: '#27ae60',
+    backgroundColor: '#04652cff',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -574,7 +486,7 @@ const styles = StyleSheet.create({
   },
   clinicPhone: {
     fontSize: 12,
-    color: '#4a89dc',
+    color: '#04459aff',
     marginTop: 2,
   },
   distanceText: {
@@ -583,11 +495,11 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   nearestDistance: {
-    color: '#27ae60',
+    color: '#045c29ff',
     fontWeight: 'bold',
   },
   nearbyDistance: {
-    color: '#4a89dc',
+    color: '#053471ff',
     fontWeight: '500',
   },
   nearbyText: {
@@ -641,12 +553,72 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#4a89dc',
+    backgroundColor: '#023372ff',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
   retryButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  resultsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  resultsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  resultsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#024211ff',
+  },
+  newSearchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  newSearchButtonText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#04326dff',
+    fontWeight: '500',
+  },
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  tryAgainButton: {
+    backgroundColor: '#4a89dc',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  tryAgainButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,

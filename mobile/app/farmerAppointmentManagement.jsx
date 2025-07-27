@@ -5,8 +5,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { API_BASE_URL } from '../utils/apiConfig';
 import axios from 'axios';
 import { router } from 'expo-router';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export default function FarmerAppointmentManagement() {
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +35,7 @@ export default function FarmerAppointmentManagement() {
       // If response has appointments array, use it
       setAppointments(Array.isArray(data.appointments) ? data.appointments : data);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load appointments.');
+      Alert.alert(t('farmerAppointmentManagement.error'), t('farmerAppointmentManagement.failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -33,12 +43,12 @@ export default function FarmerAppointmentManagement() {
 
   const handleDelete = async (appointmentId) => {
     Alert.alert(
-      'Delete Appointment',
-      'Are you sure you want to delete this appointment?',
+      t('farmerAppointmentManagement.deleteAppointment'),
+      t('farmerAppointmentManagement.deleteAppointmentMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('farmerAppointmentManagement.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('farmerAppointmentManagement.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -48,7 +58,7 @@ export default function FarmerAppointmentManagement() {
               });
               setAppointments(appointments.filter(a => a._id !== appointmentId));
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete appointment.');
+              Alert.alert(t('farmerAppointmentManagement.error'), t('farmerAppointmentManagement.failedToDelete'));
             }
           }
         }
@@ -59,14 +69,14 @@ export default function FarmerAppointmentManagement() {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.info}>
-        <Text style={styles.title}>{item.animalName || item.animalId?.name || 'Animal'}</Text>
-        <Text style={styles.detail}>Vet: {item.vetId?.name || 'N/A'}</Text>
-        <Text style={styles.detail}>Date: {item.scheduledDate?.slice(0, 10)}</Text>
-        <Text style={styles.detail}>Time: {item.scheduledTime}</Text>
-        <Text style={styles.detail}>Status: {item.status}</Text>
+        <Text style={styles.title}>{item.animalName || item.animalId?.name || t('farmerAppointmentManagement.animal')}</Text>
+        <Text style={styles.detail}>{t('farmerAppointmentManagement.vet')} {item.vetId?.name || 'N/A'}</Text>
+        <Text style={styles.detail}>{t('farmerAppointmentManagement.date')} {item.scheduledDate?.slice(0, 10)}</Text>
+        <Text style={styles.detail}>{t('farmerAppointmentManagement.time')} {item.scheduledTime}</Text>
+        <Text style={styles.detail}>{t('farmerAppointmentManagement.status')} {item.status}</Text>
       </View>
       <TouchableOpacity onPress={() => handleDelete(item._id)} style={styles.deleteButton}>
-        <Ionicons name="trash" size={22} color="#e74c3c" />
+        <Ionicons name="trash" size={22} color="#7c1004ff" />
       </TouchableOpacity>
     </View>
   );
@@ -74,20 +84,20 @@ export default function FarmerAppointmentManagement() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3498db" />
-        <Text>Loading appointments...</Text>
+        <ActivityIndicator size="large" color="#084c79ff" />
+        <Text>{t('farmerAppointmentManagement.loadingAppointments')}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>My Appointments</Text>
+      <Text style={styles.header}>{t('farmerAppointmentManagement.header')}</Text>
       <FlatList
         data={appointments}
         keyExtractor={item => item._id}
         renderItem={renderItem}
-        ListEmptyComponent={<Text style={styles.emptyText}>No appointments found.</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>{t('farmerAppointmentManagement.noAppointmentsFound')}</Text>}
         contentContainerStyle={appointments.length === 0 && { flex: 1, justifyContent: 'center', alignItems: 'center' }}
       />
     </View>

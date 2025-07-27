@@ -17,10 +17,21 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
+
 const { width } = Dimensions.get('window');
 
 export default function FarmerMessaging() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [conversations, setConversations] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
@@ -79,7 +90,7 @@ export default function FarmerMessaging() {
       setSearchResults(response.data.vets || []);
     } catch (error) {
       console.error("Error searching vets:", error);
-      Alert.alert("Error", "Failed to search veterinarians");
+      Alert.alert(t('farmerMessaging.error'), t('farmerMessaging.failedToSearch'));
     }
   };
 
@@ -126,7 +137,7 @@ export default function FarmerMessaging() {
       
       if (!participantId) {
         console.error("No participant ID found in conversation:", conversation);
-        Alert.alert("Error", "Invalid conversation data");
+        Alert.alert(t('farmerMessaging.error'), t('farmerMessaging.invalidConversationData'));
         return;
       }
       
@@ -139,7 +150,7 @@ export default function FarmerMessaging() {
       setShowChat(true);
     } catch (error) {
       console.error("Error fetching conversation:", error);
-      Alert.alert("Error", "Failed to load conversation");
+      Alert.alert(t('farmerMessaging.error'), t('farmerMessaging.failedToLoadConversation'));
     }
   };
 
@@ -167,7 +178,7 @@ export default function FarmerMessaging() {
       
       if (!participantId) {
         console.error("No participant ID found in conversation:", selectedConversation);
-        Alert.alert("Error", "Invalid conversation data");
+        Alert.alert(t('farmerMessaging.error'), t('farmerMessaging.invalidConversationData'));
         return;
       }
       
@@ -197,7 +208,7 @@ export default function FarmerMessaging() {
       // Remove the temporary message on error
       setMessages(prev => prev.filter(msg => msg._id !== tempMessage._id));
       setNewMessage(messageText); // Restore the message text
-      Alert.alert("Error", "Failed to send message");
+      Alert.alert(t('farmerMessaging.error'), t('farmerMessaging.failedToSendMessage'));
     }
   };
 
@@ -216,7 +227,7 @@ export default function FarmerMessaging() {
     if (diffDays === 0) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } else if (diffDays === 1) {
-      return 'Yesterday';
+      return t('farmerMessaging.yesterday');
     } else if (diffDays < 7) {
       return date.toLocaleDateString([], { weekday: 'short' });
     } else {
@@ -251,11 +262,11 @@ export default function FarmerMessaging() {
         </View>
         
         <Text style={styles.participantSpecialty} numberOfLines={1}>
-          {item.participant.specialty || "Veterinarian"}
+          {item.participant.specialty || t('farmerMessaging.veterinarian')}
         </Text>
         
         <Text style={styles.lastMessage} numberOfLines={2}>
-          {item.lastMessage?.content || "No messages yet"}
+          {item.lastMessage?.content || t('farmerMessaging.noMessagesYet')}
         </Text>
       </View>
       
@@ -289,7 +300,7 @@ export default function FarmerMessaging() {
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={12} color="#f39c12" />
           <Text style={styles.ratingText}>
-            {item.rating ? `${item.rating}/5` : 'New'} 
+            {item.rating ? `${item.rating}/5` : t('farmerMessaging.new')} 
             {item.totalReviews ? ` (${item.totalReviews})` : ''}
           </Text>
         </View>
@@ -327,7 +338,7 @@ export default function FarmerMessaging() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading messages...</Text>
+        <Text>{t('farmerMessaging.loadingMessages')}</Text>
       </View>
     );
   }
@@ -339,7 +350,7 @@ export default function FarmerMessaging() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#2c3e50" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <Text style={styles.headerTitle}>{t('farmerMessaging.headerTitle')}</Text>
         <TouchableOpacity onPress={() => {
           setShowSearch(true);
           setSearchQuery(''); // Clear search query
@@ -362,9 +373,9 @@ export default function FarmerMessaging() {
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Ionicons name="chatbubbles-outline" size={64} color="#bdc3c7" />
-              <Text style={styles.emptyTitle}>No conversations yet</Text>
+              <Text style={styles.emptyTitle}>{t('farmerMessaging.noConversationsYet')}</Text>
               <Text style={styles.emptySubtitle}>
-                Tap the search icon to find veterinarians and start chatting
+                {t('farmerMessaging.tapSearchToFind')}
               </Text>
             </View>
           }
@@ -428,7 +439,7 @@ export default function FarmerMessaging() {
               style={styles.messageInput}
               value={newMessage}
               onChangeText={setNewMessage}
-              placeholder="Type a message..."
+              placeholder={t('farmerMessaging.typeMessage')}
               multiline
               maxLength={500}
             />
@@ -450,7 +461,7 @@ export default function FarmerMessaging() {
             <TouchableOpacity onPress={() => setShowSearch(false)}>
               <Ionicons name="close" size={24} color="#2c3e50" />
             </TouchableOpacity>
-            <Text style={styles.searchTitle}>Find Veterinarians</Text>
+            <Text style={styles.searchTitle}>{t('farmerMessaging.findVeterinarians')}</Text>
             <View style={{ width: 24 }} />
           </View>
 
@@ -463,7 +474,7 @@ export default function FarmerMessaging() {
                 setSearchQuery(text);
                 searchVets(text);
               }}
-              placeholder="Search by name, specialty, location..."
+              placeholder={t('farmerMessaging.searchPlaceholder')}
             />
           </View>
 
@@ -476,7 +487,7 @@ export default function FarmerMessaging() {
               <View style={styles.emptySearch}>
                 <Ionicons name="search-outline" size={48} color="#bdc3c7" />
                 <Text style={styles.emptySearchText}>
-                  {searchQuery ? "No veterinarians found" : "No veterinarians available"}
+                  {searchQuery ? t('farmerMessaging.noVetsFound') : t('farmerMessaging.noVetsAvailable')}
                 </Text>
               </View>
             }

@@ -1,12 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
+
 export default function EditProfile() {
   const params = useLocalSearchParams();
   const farmer = params.farmer ? JSON.parse(params.farmer) : null;
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   const [formData, setFormData] = useState({
     name: farmer?.name || "",
@@ -26,17 +36,17 @@ export default function EditProfile() {
       !formData.name.trim() ||
       !formData.email.trim()
     ) {
-      Alert.alert("Validation", "Please fill all required fields.");
+      Alert.alert(t('editProfile.validation'), t('editProfile.fillRequiredFields'));
       return;
     }
     Alert.alert(
-      "Save Changes",
-      "Are you sure you want to save these changes to your profile?",
+      t('editProfile.saveChangesTitle'),
+      t('editProfile.saveChangesMessage'),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('editProfile.cancel'), style: 'cancel' },
         {
-          text: "Save",
-          style: "default",
+          text: t('editProfile.save'),
+          style: 'default',
           onPress: async () => {
             try {
               setLoading(true);
@@ -51,13 +61,13 @@ export default function EditProfile() {
                   }
                 }
               );
-              Alert.alert("Success", "Profile updated successfully");
+              Alert.alert(t('editProfile.success'), t('editProfile.profileUpdated'));
               router.replace({
                 pathname: '/profile',
                 params: { farmer: JSON.stringify({ ...farmer, ...formData }) }
               });
             } catch (error) {
-              Alert.alert("Error", error.response?.data?.message || "Failed to update profile");
+              Alert.alert(t('editProfile.error'), error.response?.data?.message || t('editProfile.failedToUpdate'));
             } finally {
               setLoading(false);
             }
@@ -69,13 +79,13 @@ export default function EditProfile() {
 
   const handleDeleteProfile = async () => {
     Alert.alert(
-      "Delete Profile",
-      "Are you sure you want to delete your profile? This action cannot be undone.",
+      t('editProfile.deleteProfileTitle'),
+      t('editProfile.deleteProfileMessage'),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('editProfile.cancel'), style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: t('editProfile.delete'),
+          style: 'destructive',
           onPress: async () => {
             try {
               setLoading(true);
@@ -90,10 +100,10 @@ export default function EditProfile() {
                 }
               );
               await AsyncStorage.multiRemove(['authToken', 'userData']);
-              Alert.alert("Deleted", "Your profile has been deleted.");
+              Alert.alert(t('editProfile.deleted'), t('editProfile.profileDeleted'));
               router.replace('/');
             } catch (error) {
-              Alert.alert("Error", error.response?.data?.message || "Failed to delete profile");
+              Alert.alert(t('editProfile.error'), error.response?.data?.message || t('editProfile.failedToDelete'));
             } finally {
               setLoading(false);
             }
@@ -106,9 +116,9 @@ export default function EditProfile() {
   if (!farmer) {
     return (
       <View style={styles.container}>
-        <Text>No farmer data found.</Text>
+        <Text>{t('editProfile.noFarmerData')}</Text>
         <TouchableOpacity onPress={() => router.replace('/')} testID="go-to-login">
-          <Text style={styles.linkText}>Go to login</Text>
+          <Text style={styles.linkText}>{t('editProfile.goToLogin')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -116,10 +126,10 @@ export default function EditProfile() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Profile</Text>
+      <Text style={styles.title}>{t('editProfile.title')}</Text>
       <TextInput
         style={styles.input}
-        placeholder="Name"
+        placeholder={t('editProfile.namePlaceholder')}
         placeholderTextColor="#333"
         value={formData.name}
         onChangeText={text => handleInputChange('name', text)}
@@ -127,7 +137,7 @@ export default function EditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder={t('editProfile.emailPlaceholder')}
         placeholderTextColor="#333"
         value={formData.email}
         onChangeText={text => handleInputChange('email', text)}
@@ -137,7 +147,7 @@ export default function EditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Phone Number"
+        placeholder={t('editProfile.phonePlaceholder')}
         placeholderTextColor="#333"
         value={formData.phoneNo}
         onChangeText={text => handleInputChange('phoneNo', text)}
@@ -146,7 +156,7 @@ export default function EditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Location"
+        placeholder={t('editProfile.locationPlaceholder')}
         placeholderTextColor="#333"
         value={formData.location}
         onChangeText={text => handleInputChange('location', text)}
@@ -154,7 +164,7 @@ export default function EditProfile() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Profile Image URL"
+        placeholder={t('editProfile.imageUrlPlaceholder')}
         placeholderTextColor="#333"
         value={formData.profileImage}
         onChangeText={text => handleInputChange('profileImage', text)}
@@ -166,10 +176,10 @@ export default function EditProfile() {
       ) : (
         <>
           <TouchableOpacity style={styles.saveButton} onPress={handleEditProfile} testID="profile-save-button">
-            <Text style={styles.saveButtonText}>Save Changes</Text>
+            <Text style={styles.saveButtonText}>{t('editProfile.saveChanges')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile} testID="profile-delete-button">
-            <Text style={styles.deleteButtonText}>Delete Profile</Text>
+            <Text style={styles.deleteButtonText}>{t('editProfile.deleteProfile')}</Text>
           </TouchableOpacity>
         </>
       )}

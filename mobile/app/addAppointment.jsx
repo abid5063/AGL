@@ -19,6 +19,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const AddAppointment = () => {
   const params = useLocalSearchParams();
@@ -27,6 +29,14 @@ const AddAppointment = () => {
   const preSelectedFarmerName = params.farmerName;
   const preSelectedVetId = params.vetId;
   const preSelectedVetName = params.vetName;
+  
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  React.useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
   
   const [formData, setFormData] = useState({
     animalId: '',
@@ -101,16 +111,16 @@ const AddAppointment = () => {
     const newErrors = {};
     if (isFromChat) {
       if (!selectedAnimal) {
-        newErrors.animalId = 'Please select an animal';
+        newErrors.animalId = t('addAppointment.selectAnimalError');
       }
     } else {
       if (!formData.animalName.trim()) {
-        newErrors.animalName = 'Please enter the animal name';
+        newErrors.animalName = t('addAppointment.enterAnimalNameError');
       }
     }
 
     if (!formData.reason.trim()) {
-      newErrors.reason = 'Please provide a reason for the appointment';
+      newErrors.reason = t('addAppointment.provideReasonError');
     }
 
     // Check if date is in the past
@@ -120,7 +130,7 @@ const AddAppointment = () => {
     appointmentDate.setHours(0, 0, 0, 0);
     
     if (appointmentDate < today) {
-      newErrors.date = 'Appointment date cannot be in the past';
+      newErrors.date = t('addAppointment.appointmentDatePastError');
     }
 
     setErrors(newErrors);
@@ -129,7 +139,7 @@ const AddAppointment = () => {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      Alert.alert('Validation Error', 'Please fix the errors and try again.');
+      Alert.alert(t('addAppointment.validationError'), t('addAppointment.fixErrorsAndTryAgain'));
       return;
     }
 
@@ -178,7 +188,7 @@ appointmentData = {
 
     } catch (error) {
       console.error('Error creating appointment:', error);
-      Alert.alert('Error', 'Failed to create appointment. Please try again.');
+      Alert.alert(t('addAppointment.error'), t('addAppointment.failedToCreateAppointment'));
     }
   };
 
@@ -263,7 +273,7 @@ appointmentData = {
         >
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add New Appointment</Text>
+        <Text style={styles.headerTitle}>{t('addAppointment.headerTitle')}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -273,7 +283,7 @@ appointmentData = {
           {/* Vet Selection - Hidden when coming from chat */}
           {!isFromChat && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Select Veterinarian *</Text>
+              <Text style={styles.label}>{t('addAppointment.selectVeterinarian')}</Text>
               <TouchableOpacity
                 style={[styles.selectButton, errors.vet && styles.inputError]}
                 onPress={() => setShowFarmerModal(true)}
@@ -282,7 +292,7 @@ appointmentData = {
                   styles.selectButtonText,
                   !vetName && styles.placeholderText
                 ]}>
-                  {vetName || 'Choose a veterinarian'}
+                  {vetName || t('addAppointment.chooseVeterinarian')}
                 </Text>
                 <Ionicons name="chevron-down" size={20} color="#7f8c8d" />
               </TouchableOpacity>
@@ -292,7 +302,7 @@ appointmentData = {
           {/* Show selected vet when coming from chat */}
           {isFromChat && vetName && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Veterinarian</Text>
+              <Text style={styles.label}>{t('addAppointment.veterinarian')}</Text>
               <View style={styles.selectedVetContainer}>
                 <Ionicons name="person" size={20} color="#3498db" />
                 <Text style={styles.selectedVetText}>{vetName}</Text>
@@ -302,7 +312,7 @@ appointmentData = {
           {/* Animal Selection for Farmer (from chat) */}
           {isFromChat && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Select Animal *</Text>
+              <Text style={styles.label}>{t('addAppointment.selectAnimal')}</Text>
               <FlatList
                 data={animals}
                 horizontal
@@ -326,7 +336,7 @@ appointmentData = {
           {/* Animal Name Input for Vet (not from chat) */}
           {!isFromChat && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Animal Name *</Text>
+              <Text style={styles.label}>{t('addAppointment.animalName')}</Text>
               <TextInput
                 style={[styles.textInput, styles.singleLineInput, errors.animalName && styles.inputError]}
                 value={formData.animalName}
@@ -336,7 +346,7 @@ appointmentData = {
                     setErrors(prev => ({ ...prev, animalName: null }));
                   }
                 }}
-                placeholder="Enter the animal's name (e.g., Bella, Max, Cow #123)"
+                placeholder={t('addAppointment.animalNamePlaceholder')}
               />
               {errors.animalName && <Text style={styles.errorText}>{errors.animalName}</Text>}
             </View>
@@ -344,7 +354,7 @@ appointmentData = {
 
           {/* Date Selection */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Appointment Date *</Text>
+            <Text style={styles.label}>{t('addAppointment.appointmentDate')}</Text>
             <TouchableOpacity
               style={[styles.selectButton, errors.date && styles.inputError]}
               onPress={() => setShowDatePicker(true)}
@@ -359,7 +369,7 @@ appointmentData = {
 
           {/* Time Selection */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Appointment Time *</Text>
+            <Text style={styles.label}>{t('addAppointment.appointmentTime')}</Text>
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => setShowTimePicker(true)}
@@ -373,7 +383,7 @@ appointmentData = {
 
           {/* Reason */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Reason for Appointment *</Text>
+            <Text style={styles.label}>{t('addAppointment.reasonForAppointment')}</Text>
             <TextInput
               style={[styles.textInput, errors.reason && styles.inputError]}
               value={formData.reason}
@@ -383,7 +393,7 @@ appointmentData = {
                   setErrors(prev => ({ ...prev, reason: null }));
                 }
               }}
-              placeholder="e.g., Regular checkup, vaccination, illness..."
+              placeholder={t('addAppointment.reasonPlaceholder')}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
@@ -393,12 +403,12 @@ appointmentData = {
 
           {/* Notes */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Additional Notes</Text>
+            <Text style={styles.label}>{t('addAppointment.additionalNotes')}</Text>
             <TextInput
               style={[styles.textInput, styles.notesInput]}
               value={formData.notes}
               onChangeText={(text) => setFormData(prev => ({ ...prev, notes: text }))}
-              placeholder="Any additional information or special instructions..."
+              placeholder={t('addAppointment.notesPlaceholder')}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
@@ -408,7 +418,7 @@ appointmentData = {
           {/* Submit Button */}
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Ionicons name="calendar" size={20} color="white" style={styles.submitButtonIcon} />
-            <Text style={styles.submitButtonText}>Create Appointment</Text>
+            <Text style={styles.submitButtonText}>{t('addAppointment.createAppointment')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -449,9 +459,9 @@ appointmentData = {
                   setSearchQuery('');
                 }}
               >
-                <Text style={styles.modalCancelText}>Cancel</Text>
+                <Text style={styles.modalCancelText}>{t('animalDetails.cancel')}</Text>
               </TouchableOpacity>
-              <Text style={styles.modalTitle}>Select Veterinarian</Text>
+              <Text style={styles.modalTitle}>{t('addAppointment.selectVeterinarianTitle')}</Text>
               <View style={styles.placeholder} />
             </View>
             
@@ -459,7 +469,7 @@ appointmentData = {
               <Ionicons name="search" size={20} color="#7f8c8d" style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search veterinarians..."
+                placeholder={t('addAppointment.searchVeterinarians')}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />

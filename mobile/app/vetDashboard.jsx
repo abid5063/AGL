@@ -15,10 +15,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import axios from "axios";
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 const { width } = Dimensions.get('window');
 
 export default function VetDashboard() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [vetData, setVetData] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -71,12 +81,12 @@ export default function VetDashboard() {
 
   const handleLogout = async () => {
     Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
+      t('vetDashboard.logout'),
+      t('vetDashboard.logoutMessage'),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('vetDashboard.cancel'), style: "cancel" },
         {
-          text: "Logout",
+          text: t('vetDashboard.logout'),
           style: "destructive",
           onPress: async () => {
             try {
@@ -115,7 +125,7 @@ export default function VetDashboard() {
       title: "Appointments",
       subtitle: "Manage your appointments",
       icon: "calendar",
-      color: "#3498db",
+      color: "#05609dff",
       count: appointments.filter(a => a.status === 'pending').length,
       onPress: () => setShowAppointments(true),
       testID: "appointments-card"
@@ -124,7 +134,7 @@ export default function VetDashboard() {
       title: "Messages",
       subtitle: "Chat with farmers",
       icon: "chatbubbles",
-      color: "#27ae60",
+      color: "#037934ff",
       count: messages.filter(m => !m.read).length,
       onPress: () => setShowMessages(true),
       testID: "messages-card"
@@ -133,7 +143,7 @@ export default function VetDashboard() {
       title: "Emergency Cases",
       subtitle: "Urgent consultations",
       icon: "medical",
-      color: "#e74c3c",
+      color: "#6c0d03ff",
       count: appointments.filter(a => a.priority === 'emergency').length,
       onPress: () => Alert.alert("Emergency", "Emergency cases feature coming soon"),
       testID: "emergency-card"
@@ -142,7 +152,7 @@ export default function VetDashboard() {
       title: "Profile",
       subtitle: "Manage your profile",
       icon: "person",
-      color: "#9b59b6",
+      color: "#6e9a60ff",
       onPress: () => Alert.alert("Profile", "Profile management coming soon"),
       testID: "profile-card"
     }
@@ -210,8 +220,8 @@ export default function VetDashboard() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.greeting}>Good day, Dr.</Text>
-            <Text style={styles.vetName}>{vetData?.name || 'Veterinarian'}</Text>
+            <Text style={styles.greeting}>{t('vetDashboard.goodDay')}</Text>
+            <Text style={styles.vetName}>{vetData?.name || t('vetDashboard.veterinarian')}</Text>
             <Text style={styles.specialty}>{vetData?.specialty}</Text>
           </View>
           <TouchableOpacity 
@@ -228,11 +238,11 @@ export default function VetDashboard() {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>{appointments.length}</Text>
-          <Text style={styles.statLabel}>Total Appointments</Text>
+          <Text style={styles.statLabel}>{t('vetDashboard.totalAppointments')}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>{messages.length}</Text>
-          <Text style={styles.statLabel}>Messages</Text>
+          <Text style={styles.statLabel}>{t('vetDashboard.messages')}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>

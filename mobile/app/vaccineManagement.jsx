@@ -14,10 +14,20 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 // const API_BASE_URL = "http://localhost:3000/api";
 
 export default function VaccineManagement() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [vaccines, setVaccines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,7 +54,7 @@ export default function VaccineManagement() {
       setVaccines(response.data);
     } catch (error) {
       console.error('Error fetching vaccines:', error);
-      Alert.alert('Error', 'Failed to fetch vaccine records');
+      Alert.alert(t('vaccineManagement.error'), t('vaccineManagement.failedToFetchVaccines'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -58,12 +68,12 @@ export default function VaccineManagement() {
 
   const handleDeleteVaccine = async (vaccineId) => {
     Alert.alert(
-      'Delete Vaccine Record',
-      'Are you sure you want to delete this vaccine record?',
+      t('vaccineManagement.deleteVaccineRecord'),
+      t('vaccineManagement.deleteVaccineMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('vaccineManagement.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('vaccineManagement.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -76,7 +86,7 @@ export default function VaccineManagement() {
               fetchVaccines(); // Refresh the list immediately
             } catch (error) {
               console.error('Error deleting vaccine:', error);
-              Alert.alert('Error', 'Failed to delete vaccine record');
+              Alert.alert(t('vaccineManagement.error'), t('vaccineManagement.failedToDeleteVaccine'));
             }
           }
         }
@@ -111,7 +121,7 @@ export default function VaccineManagement() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4a89dc" />
-        <Text style={styles.loadingText}>Loading vaccine records...</Text>
+        <Text style={styles.loadingText}>{t('vaccineManagement.loadingVaccines')}</Text>
       </View>
     );
   }
@@ -123,7 +133,7 @@ export default function VaccineManagement() {
         <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.push('/profile')}>
           <Ionicons name="arrow-back" size={28} color="#4a89dc" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Vaccine Management</Text>
+        <Text style={styles.headerTitle}>{t('vaccineManagement.headerTitle')}</Text>
         <TouchableOpacity 
           onPress={() => router.push('/addVaccine')}
           style={styles.addButton}
@@ -141,12 +151,12 @@ export default function VaccineManagement() {
         {vaccines.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="medical" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>No vaccine records found</Text>
+            <Text style={styles.emptyText}>{t('vaccineManagement.noVaccineRecords')}</Text>
             <TouchableOpacity 
               style={styles.addFirstButton}
               onPress={() => router.push('/addVaccine')}
             >
-              <Text style={styles.addFirstButtonText}>Add First Vaccine</Text>
+              <Text style={styles.addFirstButtonText}>{t('vaccineManagement.addFirstVaccine')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -176,13 +186,13 @@ export default function VaccineManagement() {
               <View style={styles.vaccineDetails}>
                 <View style={styles.detailRow}>
                   <Ionicons name="paw" size={16} color="#666" />
-                  <Text style={styles.detailText}>Animal: {vaccine.animal_name}</Text>
+                  <Text style={styles.detailText}>{t('vaccineManagement.animal')} {vaccine.animal_name}</Text>
                 </View>
                 
                 <View style={styles.detailRow}>
                   <Ionicons name="calendar" size={16} color="#666" />
                   <Text style={styles.detailText}>
-                    Vaccinated: {formatDate(vaccine.vaccine_date)}
+                    {t('vaccineManagement.vaccinated')} {formatDate(vaccine.vaccine_date)}
                   </Text>
                 </View>
                 
@@ -194,9 +204,9 @@ export default function VaccineManagement() {
                       isOverdue(vaccine.next_due_date) && styles.overdueText,
                       isDueSoon(vaccine.next_due_date) && styles.dueSoonText
                     ]}>
-                      Next Due: {formatDate(vaccine.next_due_date)}
-                      {isOverdue(vaccine.next_due_date) && ' (Overdue)'}
-                      {isDueSoon(vaccine.next_due_date) && ' (Due Soon)'}
+                      {t('vaccineManagement.nextDue')} {formatDate(vaccine.next_due_date)}
+                      {isOverdue(vaccine.next_due_date) && ` (${t('vaccineManagement.overdue')})`}
+                      {isDueSoon(vaccine.next_due_date) && ` (${t('vaccineManagement.dueSoon')})`}
                     </Text>
                   </View>
                 )}

@@ -1,18 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
-const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
+const API_KEY = "AIzaSyCrYK2JHpleJxGT3TtneVT6hZHZY8KC1Vc";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 export default function AIChatbot() {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [messages, setMessages] = useState([
-    { from: 'bot', text: 'Hello! I am your AI assistant. How can I help you today?' }
+    { from: 'bot', text: t('aiChatbot.welcomeMessage'), isFormatted: false }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+
+  // Update welcome message when language changes
+  useEffect(() => {
+    setMessages(prev => {
+      if (prev.length > 0 && prev[0].from === 'bot') {
+        const newMessages = [...prev];
+        newMessages[0] = { from: 'bot', text: t('aiChatbot.welcomeMessage'), isFormatted: false };
+        return newMessages;
+      }
+      return prev;
+    });
+  }, [language, t]);
+
+  // Function to parse and format JSON response
+  const formatResponse = (jsonText) => {
+    try {
+      // Try to extract JSON from the response (in case AI includes extra text)
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        return { text: jsonText, isFormatted: false };
+      }
+
+      const jsonData = JSON.parse(jsonMatch[0]);
+      
+      if (jsonData.response) {
+        let formattedText = '';
+        
+        // Handle different response formats
+        if (Array.isArray(jsonData.response)) {
+          // If response is an array, format as bullet points
+          formattedText = jsonData.response.map(item => `• ${item}`).join('\n');
+        } else if (typeof jsonData.response === 'string') {
+          // If response is a string, check if it contains bullet points
+          if (jsonData.response.includes('•') || jsonData.response.includes('-')) {
+            formattedText = jsonData.response;
+          } else {
+            // Split by sentences and add bullet points
+            const sentences = jsonData.response.split(/[.!?]+/).filter(s => s.trim());
+            formattedText = sentences.map(sentence => `• ${sentence.trim()}`).join('\n');
+          }
+        } else if (typeof jsonData.response === 'object') {
+          // If response is an object, format key-value pairs
+          formattedText = Object.entries(jsonData.response)
+            .map(([key, value]) => `• ${key}: ${value}`)
+            .join('\n');
+        }
+        
+        return { text: formattedText, isFormatted: true };
+      }
+      
+      return { text: jsonText, isFormatted: false };
+    } catch (error) {
+      console.log('JSON parsing failed, returning raw text:', error);
+      return { text: jsonText, isFormatted: false };
+    }
+  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -21,11 +87,16 @@ export default function AIChatbot() {
     setInput('');
     setLoading(true);
     try {
+      // Choose prompt based on language with JSON format instruction
+      const basePrompt = language === 'bn' ? t('aiChatbot.bengaliPrompt') : t('aiChatbot.englishPrompt');
+      
       const prompt = `
-You are a helpful, knowledgeable veterinary assistant AI. You specialize in providing advice and information about cattle, livestock, and other farm animals. 
-When a user asks a question, respond in a friendly, clear, and practical way. 
-If the question is about animal health, symptoms, diseases, nutrition, vaccination, or farm management, give specific, actionable advice. 
-If the question is outside your expertise, politely suggest consulting a local veterinarian.
+${basePrompt}
+
+IMPORTANT: Please respond in the following JSON format:
+{
+  "response": "Your detailed response here. If you have multiple points, separate them with bullet points (•) or provide them as an array."
+}
 
 User: ${userMessage.text}
 AI:
@@ -38,12 +109,63 @@ AI:
         }),
       });
       const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
-      setMessages(prev => [...prev, { from: 'bot', text: aiText }]);
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || t('aiChatbot.noResponseError');
+      
+      // Format the response
+      const formattedResponse = formatResponse(aiText);
+      
+      setMessages(prev => [...prev, { 
+        from: 'bot', 
+        text: formattedResponse.text, 
+        isFormatted: formattedResponse.isFormatted 
+      }]);
     } catch (_err) {
-      setMessages(prev => [...prev, { from: 'bot', text: 'Sorry, I could not get a response. Please try again.' }]);
+      setMessages(prev => [...prev, { 
+        from: 'bot', 
+        text: t('aiChatbot.tryAgainError'), 
+        isFormatted: false 
+      }]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const renderMessage = (msg, idx) => {
+    if (msg.isFormatted) {
+      // Split the formatted text by newlines and render each line
+      const lines = msg.text.split('\n').filter(line => line.trim());
+      
+      return (
+        <View
+          key={idx}
+          style={[
+            styles.message,
+            msg.from === 'user' ? styles.userMessage : styles.botMessage
+          ]}
+        >
+          {lines.map((line, lineIdx) => (
+            <Text key={lineIdx} style={[
+              styles.messageText,
+              line.startsWith('•') && styles.bulletPoint
+            ]}>
+              {line}
+            </Text>
+          ))}
+        </View>
+      );
+    } else {
+      // Regular message rendering
+      return (
+        <View
+          key={idx}
+          style={[
+            styles.message,
+            msg.from === 'user' ? styles.userMessage : styles.botMessage
+          ]}
+        >
+          <Text style={styles.messageText}>{msg.text}</Text>
+        </View>
+      );
     }
   };
 
@@ -56,29 +178,19 @@ AI:
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#4a89dc" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>AI Chatbot</Text>
+        <Text style={styles.headerTitle}>{t('aiChatbot.headerTitle')}</Text>
       </View>
       <ScrollView
         style={styles.chatContainer}
         contentContainerStyle={{ padding: 16 }}
         ref={ref => { if (ref) ref.scrollToEnd({ animated: true }); }}
       >
-        {messages.map((msg, idx) => (
-          <View
-            key={idx}
-            style={[
-              styles.message,
-              msg.from === 'user' ? styles.userMessage : styles.botMessage
-            ]}
-          >
-            <Text style={styles.messageText}>{msg.text}</Text>
-          </View>
-        ))}
+        {messages.map((msg, idx) => renderMessage(msg, idx))}
       </ScrollView>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Type your message..."
+          placeholder={t('aiChatbot.inputPlaceholder')}
           value={input}
           onChangeText={setInput}
           editable={!loading}
@@ -135,6 +247,11 @@ const styles = StyleSheet.create({
   messageText: {
     color: '#222',
     fontSize: 16,
+    lineHeight: 22,
+  },
+  bulletPoint: {
+    marginBottom: 4,
+    paddingLeft: 8,
   },
   inputContainer: {
     flexDirection: 'row',

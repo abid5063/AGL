@@ -16,10 +16,21 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
-const API_KEY = "AIzaSyCrmZacTK1h8DaMculKalsaPY57LWWUsbw";
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
+const API_KEY = "AIzaSyCrYK2JHpleJxGT3TtneVT6hZHZY8KC1Vc";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 export default function MarketAnalysis() {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedAnimal, setSelectedAnimal] = useState(null);
@@ -38,7 +49,6 @@ export default function MarketAnalysis() {
     location: ''
   });
   const [analysisError, setAnalysisError] = useState(null);
-  const router = useRouter();
 
   useEffect(() => {
     fetchAnimals();
@@ -59,7 +69,7 @@ export default function MarketAnalysis() {
       });
       setAnimals(response.data);
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch animals");
+      Alert.alert(t('marketAnalysis.error'), t('marketAnalysis.failedToFetchAnimals'));
     } finally {
       setLoading(false);
     }
@@ -73,7 +83,9 @@ export default function MarketAnalysis() {
     setAnalysisError(null);
 
     try {
-      const prompt = `Create a market analysis for selling ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\nRespond ONLY in Bangla (Bengali) language.\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"currentMarketPrice\": [\n    {\"factor\": \"string\", \"value\": \"string\", \"priceImpact\": \"number\"}\n  ],\n  \"sellingLocations\": [\n    {\"marketName\": \"string\", \"distance\": \"string\", \"bestPrice\": \"number\", \"peakTime\": \"string\"}\n  ],\n  \"marketTrends\": [\n    {\"trend\": \"string\", \"currentStatus\": \"string\", \"priceDirection\": \"string\", \"duration\": \"string\"}\n  ],\n  \"oneYearPrediction\": [\n    {\"metric\": \"string\", \"current\": \"number\", \"predicted\": \"number\", \"growth\": \"string\"}\n  ],\n  \"sellingRecommendations\": [\n    {\"factor\": \"string\", \"recommendation\": \"string\", \"reason\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
+      const languageInstruction = language === 'bn' ? 'Respond ONLY in Bangla (Bengali) language. All market data, prices, and analysis must be in Bangla.' : 'Respond in English language. All market data, prices, and analysis must be in English.';
+      
+      const prompt = `Create a market analysis for selling ${animal.name} (${animal.type}, ${animal.breed}, ${animal.age} years, ${animal.gender}):\n\n${languageInstruction}\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"currentMarketPrice\": [\n    {\"factor\": \"string\", \"value\": \"string\", \"priceImpact\": \"number\"}\n  ],\n  \"sellingLocations\": [\n    {\"marketName\": \"string\", \"distance\": \"string\", \"bestPrice\": \"number\", \"peakTime\": \"string\"}\n  ],\n  \"marketTrends\": [\n    {\"trend\": \"string\", \"currentStatus\": \"string\", \"priceDirection\": \"string\", \"duration\": \"string\"}\n  ],\n  \"oneYearPrediction\": [\n    {\"metric\": \"string\", \"current\": \"number\", \"predicted\": \"number\", \"growth\": \"string\"}\n  ],\n  \"sellingRecommendations\": [\n    {\"factor\": \"string\", \"recommendation\": \"string\", \"reason\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
 
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
@@ -86,7 +98,7 @@ export default function MarketAnalysis() {
       });
 
       const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || t('marketAnalysis.noResponseError');
       let parsed;
       let jsonString = aiText.trim();
       // Remove markdown code blocks if present
@@ -101,11 +113,11 @@ export default function MarketAnalysis() {
       } catch (e) {
         console.error('Parse error:', e);
         console.error('Response text:', aiText);
-        setAnalysisError('Failed to parse AI response.\n' + e.message + '\nRaw response:\n' + aiText);
+        setAnalysisError(t('marketAnalysis.tryAgainError'));
         setAnalysis(null);
       }
     } catch (err) {
-      setAnalysisError('An error occurred while getting market analysis. Please check your connection and try again.\n' + err.message);
+      setAnalysisError(t('marketAnalysis.tryAgainError'));
       setAnalysis(null);
     } finally {
       setAnalysisLoading(false);
@@ -114,7 +126,7 @@ export default function MarketAnalysis() {
 
   const getBuyAnalysis = async () => {
     if (!buyFormData.breed || !buyFormData.animalType || !buyFormData.gender || !buyFormData.weight || !buyFormData.age) {
-      Alert.alert("Validation", "Please fill all required fields.");
+      Alert.alert(t('marketAnalysis.error'), t('marketAnalysis.selectAnimal'));
       return;
     }
 
@@ -124,7 +136,9 @@ export default function MarketAnalysis() {
     setAnalysisError(null);
 
     try {
-      const prompt = `Create a market analysis for buying ${buyFormData.animalType} (${buyFormData.breed}, ${buyFormData.age} years, ${buyFormData.gender}, ${buyFormData.weight}kg):\n\nRespond ONLY in Bangla (Bengali) language.\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"marketPriceRange\": [\n    {\"quality\": \"string\", \"priceRange\": \"string\", \"availability\": \"string\", \"bestTime\": \"string\"}\n  ],\n  \"topBuyingOptions\": [\n    {\"rank\": \"number\", \"breed\": \"string\", \"age\": \"string\", \"weight\": \"string\", \"price\": \"number\", \"location\": \"string\", \"rating\": \"string\"}\n  ],\n  \"priceComparison\": [\n    {\"market\": \"string\", \"averagePrice\": \"number\", \"quality\": \"string\", \"distance\": \"string\", \"recommendation\": \"string\"}\n  ],\n  \"buyingTips\": [\n    {\"factor\": \"string\", \"tip\": \"string\", \"impact\": \"string\"}\n  ],\n  \"marketForecast\": [\n    {\"timePeriod\": \"string\", \"priceTrend\": \"string\", \"supply\": \"string\", \"demand\": \"string\", \"recommendation\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
+      const languageInstruction = language === 'bn' ? 'Respond ONLY in Bangla (Bengali) language. All market data, prices, and analysis must be in Bangla.' : 'Respond in English language. All market data, prices, and analysis must be in English.';
+      
+      const prompt = `Create a market analysis for buying ${buyFormData.animalType} (${buyFormData.breed}, ${buyFormData.age} years, ${buyFormData.gender}, ${buyFormData.weight}kg):\n\n${languageInstruction}\n\nRespond ONLY with a JSON object with the following structure, no extra text or explanation.\n{\n  \"marketPriceRange\": [\n    {\"quality\": \"string\", \"priceRange\": \"string\", \"availability\": \"string\", \"bestTime\": \"string\"}\n  ],\n  \"topBuyingOptions\": [\n    {\"rank\": \"number\", \"breed\": \"string\", \"age\": \"string\", \"weight\": \"string\", \"price\": \"number\", \"location\": \"string\", \"rating\": \"string\"}\n  ],\n  \"priceComparison\": [\n    {\"market\": \"string\", \"averagePrice\": \"number\", \"quality\": \"string\", \"distance\": \"string\", \"recommendation\": \"string\"}\n  ],\n  \"buyingTips\": [\n    {\"factor\": \"string\", \"tip\": \"string\", \"impact\": \"string\"}\n  ],\n  \"marketForecast\": [\n    {\"timePeriod\": \"string\", \"priceTrend\": \"string\", \"supply\": \"string\", \"demand\": \"string\", \"recommendation\": \"string\"}\n  ]\n}\nAll prices must be in Bangladeshi Taka (BDT).`;
 
       const response = await fetch(GEMINI_URL, {
         method: 'POST',
@@ -137,7 +151,7 @@ export default function MarketAnalysis() {
       });
 
       const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || t('marketAnalysis.noResponseError');
       let parsed;
       let jsonString = aiText.trim();
       // Remove markdown code blocks if present
@@ -152,11 +166,11 @@ export default function MarketAnalysis() {
       } catch (e) {
         console.error('Parse error:', e);
         console.error('Response text:', aiText);
-        setAnalysisError('Failed to parse AI response.\n' + e.message + '\nRaw response:\n' + aiText);
+        setAnalysisError(t('marketAnalysis.tryAgainError'));
         setAnalysis(null);
       }
     } catch (err) {
-      setAnalysisError('An error occurred while getting market analysis. Please check your connection and try again.\n' + err.message);
+      setAnalysisError(t('marketAnalysis.tryAgainError'));
       setAnalysis(null);
     } finally {
       setAnalysisLoading(false);
@@ -192,7 +206,7 @@ export default function MarketAnalysis() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4a89dc" />
-        <Text style={styles.loadingText}>Loading market analysis...</Text>
+        <Text style={styles.loadingText}>{t('marketAnalysis.loadingAnimals')}</Text>
       </View>
     );
   }
@@ -203,13 +217,13 @@ export default function MarketAnalysis() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={28} color="#4a89dc" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Market Analysis</Text>
+        <Text style={styles.headerTitle}>{t('marketAnalysis.headerTitle')}</Text>
         <View style={{ width: 28 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.description}>
-          Analyze market prices, trends, and predictions for buying or selling animals.
+          {t('marketAnalysis.selectAnimal')}
         </Text>
 
         <View style={styles.mainButtons}>
@@ -218,8 +232,8 @@ export default function MarketAnalysis() {
             onPress={() => setShowMainOptions(true)}
           >
             <Ionicons name="trending-up" size={32} color="#27ae60" />
-            <Text style={styles.mainButtonText}>Market Analysis</Text>
-            <Text style={styles.mainButtonSubtext}>Get market insights and predictions</Text>
+            <Text style={styles.mainButtonText}>{t('marketAnalysis.headerTitle')}</Text>
+            <Text style={styles.mainButtonSubtext}>{t('marketAnalysis.selectAnimal')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -234,7 +248,7 @@ export default function MarketAnalysis() {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Market Analysis Options</Text>
+              <Text style={styles.modalTitle}>{t('marketAnalysis.mainOptions')}</Text>
               <TouchableOpacity
                 onPress={() => setShowMainOptions(false)}
                 style={styles.closeButton}
@@ -252,8 +266,8 @@ export default function MarketAnalysis() {
                 }}
               >
                 <Ionicons name="cash" size={24} color="#27ae60" />
-                <Text style={styles.optionButtonText}>Sell Analysis</Text>
-                <Text style={styles.optionButtonSubtext}>Analyze your animals for selling</Text>
+                <Text style={styles.optionButtonText}>{t('marketAnalysis.sellAnalysis')}</Text>
+                <Text style={styles.optionButtonSubtext}>{t('marketAnalysis.selectAnimal')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -264,8 +278,8 @@ export default function MarketAnalysis() {
                 }}
               >
                 <Ionicons name="cart" size={24} color="#e74c3c" />
-                <Text style={styles.optionButtonText}>Buy Analysis</Text>
-                <Text style={styles.optionButtonSubtext}>Find best buying options</Text>
+                <Text style={styles.optionButtonText}>{t('marketAnalysis.buyAnalysis')}</Text>
+                <Text style={styles.optionButtonSubtext}>{t('marketAnalysis.selectAnimal')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -282,7 +296,7 @@ export default function MarketAnalysis() {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Animal to Sell</Text>
+              <Text style={styles.modalTitle}>{t('marketAnalysis.selectAnimalToSell')}</Text>
               <TouchableOpacity
                 onPress={() => setShowSellOptions(false)}
                 style={styles.closeButton}
@@ -293,7 +307,7 @@ export default function MarketAnalysis() {
 
             <ScrollView style={styles.animalsList}>
               {animals.length === 0 ? (
-                <Text style={styles.noAnimalsText}>No animals found to sell</Text>
+                <Text style={styles.noAnimalsText}>{t('marketAnalysis.noAnimalsToSell')}</Text>
               ) : (
                 animals.map((animal) => (
                   <TouchableOpacity
@@ -344,7 +358,7 @@ export default function MarketAnalysis() {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Buy Analysis</Text>
+              <Text style={styles.modalTitle}>{t('marketAnalysis.buyAnalysis')}</Text>
               <TouchableOpacity
                 onPress={() => setShowBuyOptions(false)}
                 style={styles.closeButton}
@@ -356,28 +370,28 @@ export default function MarketAnalysis() {
             <ScrollView style={styles.formContainer}>
               <TextInput
                 style={styles.input}
-                placeholder="Animal Type (e.g., Cow, Chicken)"
+                placeholder={t('marketAnalysis.animalTypePlaceholder')}
                 value={buyFormData.animalType}
                 onChangeText={(text) => handleInputChange('animalType', text)}
               />
 
               <TextInput
                 style={styles.input}
-                placeholder="Breed"
+                placeholder={t('marketAnalysis.breedPlaceholder')}
                 value={buyFormData.breed}
                 onChangeText={(text) => handleInputChange('breed', text)}
               />
 
               <TextInput
                 style={styles.input}
-                placeholder="Gender"
+                placeholder={t('marketAnalysis.genderPlaceholder')}
                 value={buyFormData.gender}
                 onChangeText={(text) => handleInputChange('gender', text)}
               />
 
               <TextInput
                 style={styles.input}
-                placeholder="Weight (kg)"
+                placeholder={t('marketAnalysis.weightPlaceholder')}
                 value={buyFormData.weight}
                 onChangeText={(text) => handleInputChange('weight', text)}
                 keyboardType="numeric"
@@ -385,7 +399,7 @@ export default function MarketAnalysis() {
 
               <TextInput
                 style={styles.input}
-                placeholder="Age (years)"
+                placeholder={t('marketAnalysis.agePlaceholder')}
                 value={buyFormData.age}
                 onChangeText={(text) => handleInputChange('age', text)}
                 keyboardType="numeric"
@@ -393,7 +407,7 @@ export default function MarketAnalysis() {
 
               <TextInput
                 style={styles.input}
-                placeholder="Location (optional)"
+                placeholder={t('marketAnalysis.locationPlaceholder')}
                 value={buyFormData.location}
                 onChangeText={(text) => handleInputChange('location', text)}
               />
@@ -405,7 +419,7 @@ export default function MarketAnalysis() {
                   getBuyAnalysis();
                 }}
               >
-                <Text style={styles.analyzeButtonText}>Analyze Market</Text>
+                <Text style={styles.analyzeButtonText}>{t('marketAnalysis.analyze')}</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -423,7 +437,7 @@ export default function MarketAnalysis() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                Market Analysis {selectedAnimal ? `for ${selectedAnimal.name}` : ''}
+                {t('marketAnalysis.headerTitle')} {selectedAnimal ? `${t('marketAnalysis.for')} ${selectedAnimal.name}` : ''}
               </Text>
               <TouchableOpacity
                 onPress={() => setShowAnalysisModal(false)}

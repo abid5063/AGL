@@ -1,11 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
-import { Text, View, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from "react-native";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useFocusEffect } from "expo-router";
 import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
+import { useLanguage } from '../utils/LanguageContext';
+import { useTranslation } from 'react-i18next';
 export default function VetAuthScreen() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const { t, i18n } = useTranslation();
+
+  // Update i18n language when language changes
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
@@ -64,37 +74,37 @@ export default function VetAuthScreen() {
 
       // Validation
       if (!email || !password) {
-        Alert.alert("Error", "Email and password are required");
+        Alert.alert(t('vetAuth.error'), t('vetAuth.emailPasswordRequired'));
         return;
       }
 
       if (!isLogin) {
         if (!name) {
-          Alert.alert("Error", "Name is required");
+          Alert.alert(t('vetAuth.error'), t('vetAuth.nameRequired'));
           return;
         }
         if (!specialty) {
-          Alert.alert("Error", "Specialty is required");
+          Alert.alert(t('vetAuth.error'), t('vetAuth.specialtyRequired'));
           return;
         }
         if (!licenseNumber) {
-          Alert.alert("Error", "License number is required");
+          Alert.alert(t('vetAuth.error'), t('vetAuth.licenseNumberRequired'));
           return;
         }
         if (!phoneNo) {
-          Alert.alert("Error", "Phone number is required");
+          Alert.alert(t('vetAuth.error'), t('vetAuth.phoneNumberRequired'));
           return;
         }
         if (!location) {
-          Alert.alert("Error", "Location is required");
+          Alert.alert(t('vetAuth.error'), t('vetAuth.locationRequired'));
           return;
         }
         if (password.length < 6) {
-          Alert.alert("Error", "Password should be at least 6 characters");
+          Alert.alert(t('vetAuth.error'), t('vetAuth.passwordLength'));
           return;
         }
         if (name.length < 3) {
-          Alert.alert("Error", "Name should be at least 3 characters");
+          Alert.alert(t('vetAuth.error'), t('vetAuth.nameLength'));
           return;
         }
       }
@@ -115,8 +125,8 @@ export default function VetAuthScreen() {
       console.error("Auth error:", error.response?.data || error.message);
       const errorMessage = error.response?.data?.message || 
                          error.message || 
-                         "Something went wrong";
-      Alert.alert("Error", errorMessage);
+                         t('vetAuth.somethingWentWrong');
+      Alert.alert(t('vetAuth.error'), errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -124,13 +134,22 @@ export default function VetAuthScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Veterinarian {isLogin ? "Login" : "Registration"}</Text>
+      <View style={styles.logoSection}>
+        <View style={styles.logoContainer}>
+          <Image 
+            source={require('../assets/images/vet.avif')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+      <Text style={styles.title}>{t('vetAuth.title', { mode: isLogin ? t('vetAuth.login') : t('vetAuth.registration') })}</Text>
       
       {!isLogin && (
         <>
           <TextInput
             style={styles.input}
-            placeholder="Full Name"
+            placeholder={t('vetAuth.fullNamePlaceholder')}
             placeholderTextColor="#333"
             value={formData.name}
             onChangeText={(text) => handleChange("name", text)}
@@ -140,7 +159,7 @@ export default function VetAuthScreen() {
           
           <TextInput
             style={styles.input}
-            placeholder="Specialty (e.g., Large Animal, Small Animal)"
+            placeholder={t('vetAuth.specialtyPlaceholder')}
             placeholderTextColor="#333"
             value={formData.specialty}
             onChangeText={(text) => handleChange("specialty", text)}
@@ -149,7 +168,7 @@ export default function VetAuthScreen() {
           
           <TextInput
             style={styles.input}
-            placeholder="License Number"
+            placeholder={t('vetAuth.licenseNumberPlaceholder')}
             placeholderTextColor="#333"
             value={formData.licenseNumber}
             onChangeText={(text) => handleChange("licenseNumber", text)}
@@ -158,7 +177,7 @@ export default function VetAuthScreen() {
           
           <TextInput
             style={styles.input}
-            placeholder="Phone Number"
+            placeholder={t('vetAuth.phoneNumberPlaceholder')}
             placeholderTextColor="#333"
             value={formData.phoneNo}
             onChangeText={(text) => handleChange("phoneNo", text)}
@@ -168,7 +187,7 @@ export default function VetAuthScreen() {
           
           <TextInput
             style={styles.input}
-            placeholder="Location/Clinic Address"
+            placeholder={t('vetAuth.locationPlaceholder')}
             placeholderTextColor="#333"
             value={formData.location}
             onChangeText={(text) => handleChange("location", text)}
@@ -179,7 +198,7 @@ export default function VetAuthScreen() {
       
       <TextInput
         style={styles.input}
-        placeholder="Email Address"
+        placeholder={t('vetAuth.emailPlaceholder')}
         placeholderTextColor="#333"
         keyboardType="email-address"
         autoCapitalize="none"
@@ -190,7 +209,7 @@ export default function VetAuthScreen() {
       
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder={t('vetAuth.passwordPlaceholder')}
         placeholderTextColor="#333"
         secureTextEntry
         value={formData.password}
@@ -205,7 +224,7 @@ export default function VetAuthScreen() {
         testID="vet-submit-button"
       >
         <Text style={styles.buttonText}>
-          {isLoading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
+          {isLoading ? t('vetAuth.pleaseWait') : isLogin ? t('vetAuth.signIn') : t('vetAuth.signUp')}
         </Text>
       </TouchableOpacity>
       
@@ -216,8 +235,8 @@ export default function VetAuthScreen() {
       >
         <Text style={styles.switchText}>
           {isLogin
-            ? "Need an account? Sign up"
-            : "Already have an account? Sign in"}
+            ? t('vetAuth.needAccount')
+            : t('vetAuth.haveAccount')}
         </Text>
       </TouchableOpacity>
 
@@ -226,7 +245,7 @@ export default function VetAuthScreen() {
         onPress={() => router.back()}
         testID="back-to-welcome-button"
       >
-        <Text style={styles.backText}>Back to Welcome</Text>
+        <Text style={styles.backText}>{t('vetAuth.backToWelcome')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -235,9 +254,30 @@ export default function VetAuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     padding: 20,
     backgroundColor: "#ffffff",
+  },
+  logoSection: {
+    flex: 0.4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 40,
+    paddingBottom: 20,
+    margintop: 40,
+    marginBottom: 20,
+  },
+  logoContainer: {
+    width: '70%',
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    width: '80%',
+    height: '80%',
+    borderRadius: 10,
   },
   title: {
     fontSize: 24,
