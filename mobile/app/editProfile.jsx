@@ -120,6 +120,7 @@ export default function EditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Name"
+        placeholderTextColor="#333"
         value={formData.name}
         onChangeText={text => handleInputChange('name', text)}
         testID="profile-name-input"
@@ -127,6 +128,7 @@ export default function EditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#333"
         value={formData.email}
         onChangeText={text => handleInputChange('email', text)}
         keyboardType="email-address"
@@ -136,6 +138,7 @@ export default function EditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
+        placeholderTextColor="#333"
         value={formData.phoneNo}
         onChangeText={text => handleInputChange('phoneNo', text)}
         keyboardType="phone-pad"
@@ -144,6 +147,7 @@ export default function EditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Location"
+        placeholderTextColor="#333"
         value={formData.location}
         onChangeText={text => handleInputChange('location', text)}
         testID="profile-location-input"
@@ -151,6 +155,7 @@ export default function EditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Profile Image URL"
+        placeholderTextColor="#333"
         value={formData.profileImage}
         onChangeText={text => handleInputChange('profileImage', text)}
         testID="profile-image-input"

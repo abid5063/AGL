@@ -74,8 +74,38 @@ export default function VetEditProfile() {
   };
 
   const handleDeleteProfile = async () => {
-    // Alert confirmation for delete is already present and correct.
-    // No changes needed here.
+    Alert.alert(
+      "Delete Profile",
+      "Are you sure you want to delete your profile? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              const token = await AsyncStorage.getItem('authToken');
+              await axios.delete(
+                `${API_BASE_URL}/api/vets/delete/${vet._id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  }
+                }
+              );
+              await AsyncStorage.multiRemove(['authToken', 'userData']);
+              Alert.alert("Deleted", "Your profile has been deleted.");
+              router.replace('/');
+            } catch (error) {
+              Alert.alert("Error", error.response?.data?.message || "Failed to delete profile");
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   if (!vet) {
@@ -95,6 +125,7 @@ export default function VetEditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Name *"
+        placeholderTextColor="#333"
         value={formData.name}
         onChangeText={text => handleInputChange('name', text)}
         testID="vet-name-input"
@@ -102,6 +133,7 @@ export default function VetEditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Email *"
+        placeholderTextColor="#333"
         value={formData.email}
         onChangeText={text => handleInputChange('email', text)}
         keyboardType="email-address"
@@ -111,6 +143,7 @@ export default function VetEditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
+        placeholderTextColor="#333"
         value={formData.phoneNo}
         onChangeText={text => handleInputChange('phoneNo', text)}
         keyboardType="phone-pad"
@@ -119,6 +152,7 @@ export default function VetEditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Location"
+        placeholderTextColor="#333"
         value={formData.location}
         onChangeText={text => handleInputChange('location', text)}
         testID="vet-location-input"
@@ -126,6 +160,7 @@ export default function VetEditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Specialty *"
+        placeholderTextColor="#333"
         value={formData.specialty}
         onChangeText={text => handleInputChange('specialty', text)}
         testID="vet-specialty-input"
@@ -133,6 +168,7 @@ export default function VetEditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Years of Experience"
+        placeholderTextColor="#333"
         value={formData.experience}
         onChangeText={text => handleInputChange('experience', text)}
         keyboardType="numeric"
@@ -141,6 +177,7 @@ export default function VetEditProfile() {
       <TextInput
         style={styles.input}
         placeholder="Profile Image URL"
+        placeholderTextColor="#333"
         value={formData.profileImage}
         onChangeText={text => handleInputChange('profileImage', text)}
         testID="vet-image-input"

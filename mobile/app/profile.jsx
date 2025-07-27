@@ -643,6 +643,7 @@ export default function Profile() {
               <TextInput
                 style={styles.input}
                 placeholder="Name"
+                placeholderTextColor="#333"
                 value={formData.name}
                 onChangeText={(text) => handleInputChange('name', text)}
                 testID="animal-name-input"
@@ -651,6 +652,7 @@ export default function Profile() {
               <TextInput
                 style={styles.input}
                 placeholder="Type (e.g., Cow, Chicken)"
+                placeholderTextColor="#333"
                 value={formData.type}
                 onChangeText={(text) => handleInputChange('type', text)}
                 testID="animal-type-input"
@@ -659,6 +661,7 @@ export default function Profile() {
               <TextInput
                 style={styles.input}
                 placeholder="Breed"
+                placeholderTextColor="#333"
                 value={formData.breed}
                 onChangeText={(text) => handleInputChange('breed', text)}
                 testID="animal-breed-input"
@@ -667,6 +670,7 @@ export default function Profile() {
               <TextInput
                 style={styles.input}
                 placeholder="Age"
+                placeholderTextColor="#333"
                 value={formData.age}
                 onChangeText={(text) => handleInputChange('age', text)}
                 keyboardType="numeric"
@@ -676,6 +680,7 @@ export default function Profile() {
               <TextInput
                 style={styles.input}
                 placeholder="Gender"
+                placeholderTextColor="#333"
                 value={formData.gender}
                 onChangeText={(text) => handleInputChange('gender', text)}
                 testID="animal-gender-input"
@@ -684,6 +689,7 @@ export default function Profile() {
               <TextInput
                 style={[styles.input, { height: 80 }]}
                 placeholder="Details (optional)"
+                placeholderTextColor="#333"
                 value={formData.details}
                 onChangeText={(text) => handleInputChange('details', text)}
                 multiline
@@ -1330,13 +1336,14 @@ const styles = StyleSheet.create({
     color: '#2c3e50',
   },
   input: {
+    backgroundColor: '#fff',
+    color: '#333',
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
     fontSize: 16,
-    backgroundColor: "#f8f9fa",
+    marginBottom: 16,
   },
   modalButtons: {
     flexDirection: 'row',

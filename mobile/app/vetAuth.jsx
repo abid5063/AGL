@@ -131,6 +131,7 @@ export default function VetAuthScreen() {
           <TextInput
             style={styles.input}
             placeholder="Full Name"
+            placeholderTextColor="#333"
             value={formData.name}
             onChangeText={(text) => handleChange("name", text)}
             autoCapitalize="words"
@@ -140,6 +141,7 @@ export default function VetAuthScreen() {
           <TextInput
             style={styles.input}
             placeholder="Specialty (e.g., Large Animal, Small Animal)"
+            placeholderTextColor="#333"
             value={formData.specialty}
             onChangeText={(text) => handleChange("specialty", text)}
             testID="vet-specialty-input"
@@ -148,6 +150,7 @@ export default function VetAuthScreen() {
           <TextInput
             style={styles.input}
             placeholder="License Number"
+            placeholderTextColor="#333"
             value={formData.licenseNumber}
             onChangeText={(text) => handleChange("licenseNumber", text)}
             testID="vet-license-input"
@@ -156,6 +159,7 @@ export default function VetAuthScreen() {
           <TextInput
             style={styles.input}
             placeholder="Phone Number"
+            placeholderTextColor="#333"
             value={formData.phoneNo}
             onChangeText={(text) => handleChange("phoneNo", text)}
             keyboardType="phone-pad"
@@ -165,6 +169,7 @@ export default function VetAuthScreen() {
           <TextInput
             style={styles.input}
             placeholder="Location/Clinic Address"
+            placeholderTextColor="#333"
             value={formData.location}
             onChangeText={(text) => handleChange("location", text)}
             testID="vet-location-input"
@@ -175,6 +180,7 @@ export default function VetAuthScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email Address"
+        placeholderTextColor="#333"
         keyboardType="email-address"
         autoCapitalize="none"
         value={formData.email}
@@ -185,6 +191,7 @@ export default function VetAuthScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="#333"
         secureTextEntry
         value={formData.password}
         onChangeText={(text) => handleChange("password", text)}
@@ -240,14 +247,14 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   input: {
-    height: 50,
+    backgroundColor: '#fff',
+    color: '#333',
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    backgroundColor: "#fff",
+    padding: 12,
     fontSize: 16,
+    marginBottom: 15,
   },
   button: {
     height: 50,

@@ -106,6 +106,7 @@ export default function FarmerAuthScreen() {
         <TextInput
           style={styles.input}
           placeholder="Full Name"
+          placeholderTextColor="#333"
           value={formData.name}
           onChangeText={(text) => handleChange("name", text)}
           autoCapitalize="words"
@@ -116,6 +117,7 @@ export default function FarmerAuthScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email Address"
+        placeholderTextColor="#333"
         keyboardType="email-address"
         autoCapitalize="none"
         value={formData.email}
@@ -126,6 +128,7 @@ export default function FarmerAuthScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="#333"
         secureTextEntry
         value={formData.password}
         onChangeText={(text) => handleChange("password", text)}
