@@ -49,7 +49,11 @@ AGL is a cross-platform livestock management application designed for farmers an
      cd backend
      npm install
      ```
-
+   - Frontend (Web):
+     ```sh
+     cd ../frontend
+     npm install
+     ```
    - Mobile:
      ```sh
      cd ../mobile
@@ -61,7 +65,11 @@ AGL is a cross-platform livestock management application designed for farmers an
   ```sh
   cd backend
   npm start
-
+  ```
+- **Frontend (Web):**
+  ```sh
+  cd frontend
+  npm start
   ```
 - **Mobile (Expo):**
   ```sh

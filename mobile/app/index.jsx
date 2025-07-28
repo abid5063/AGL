@@ -1,210 +1,329 @@
-import { useState, useEffect, useCallback } from "react";
-import { Text, View, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter, useFocusEffect } from "expo-router";
+import { Text, View, TouchableOpacity, StyleSheet, Image, SafeAreaView, StatusBar, Linking } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from "react";
 
-export default function AuthScreen() {
+const translations = {
+  en: {
+    tagline: "Having trouble with livestock management?",
+    subTagline1: "Ride with us",
+    subTagline2: "Learn How to use this app.",
+    farmer: "I'm a Farmer",
+    vet: "I'm a Veterinarian",
+    // ...add more as needed
+  },
+  bn: {
+    tagline: "গবাদি পশু ব্যবস্থাপনায় সমস্যা হচ্ছে?",
+    subTagline1: "আমাদের সাথে থাকুন",
+    subTagline2: "এই অ্যাপটি কীভাবে ব্যবহার করবেন শিখুন।",
+    farmer: "আমি একজন কৃষক",
+    vet: "আমি একজন পশু চিকিৎসক",
+    // ...add more as needed
+  }
+};
+
+export default function WelcomeScreen() {
   const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [lang, setLang] = useState('en');
+  const t = translations[lang];
 
-  //  const API_BASE_URL = "http://localhost:3000/api/auth";
- const API_BASE_URL = "http://localhost:3000/api/auth";
-
-  // Reset form when screen is focused (e.g., after logout)
-  useFocusEffect(
-    useCallback(() => {
-      setIsLogin(true);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-      });
-      setIsLoading(false);
-    }, [])
-  );
-
-  const handleChange = (name, value) => {
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  const handleFarmerAuth = () => {
+    router.push('/farmerAuth');
   };
 
-  const storeAuthData = async (token, farmer) => {
-    try {
-      await AsyncStorage.multiSet([
-        ['authToken', token],
-        ['userData', JSON.stringify(farmer)]
-      ]);
-    } catch (error) {
-      console.error("Error storing auth data:", error);
-      throw error;
-    }
+  const handleVetAuth = () => {
+    router.push('/vetAuth');
   };
 
-  const handleSubmit = async () => {
-    try {
-      setIsLoading(true);
-      const { name, email, password } = formData;
-
-      // Validation
-      if (!email || !password) {
-        Alert.alert("Error", "Email and password are required");
-        return;
-      }
-
-      if (!isLogin) {
-        if (!name) {
-          Alert.alert("Error", "Name is required");
-          return;
-        }
-        if (password.length < 6) {
-          Alert.alert("Error", "Password should be at least 6 characters");
-          return;
-        }
-        if (name.length < 3) {
-          Alert.alert("Error", "Name should be at least 3 characters");
-          return;
-        }
-      }
-
-      const endpoint = isLogin ? "/login" : "/register";
-      const response = await axios.post(`${API_BASE_URL}${endpoint}`, formData);
-
-      const { token, farmer } = response.data;
-      await storeAuthData(token, farmer);
-      
-      // Navigate to profile page with farmer data
-      router.push({
-        pathname: "/profile",
-        params: { farmer: JSON.stringify(farmer) }
-      });
-
-    } catch (error) {
-      console.error("Auth error:", error.response?.data || error.message);
-      const errorMessage = error.response?.data?.message || 
-                         error.message || 
-                         "Something went wrong";
-      Alert.alert("Error", errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleLearnMore = () => {
+    // You can replace this URL with your actual tutorial video link
+    Linking.openURL('https://www.youtube.com/watch?v=your-tutorial-video-id');
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{isLogin ? "Login" : "Create Account"}</Text>
+    <SafeAreaView style={styles.container}> 
+      <StatusBar barStyle="light-content" backgroundColor="#0d3b16" />
       
-      {!isLogin && (
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          value={formData.name}
-          onChangeText={(text) => handleChange("name", text)}
-          autoCapitalize="words"
-          testID="auth-name-input"
-        />
-      )}
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Email Address"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={formData.email}
-        onChangeText={(text) => handleChange("email", text)}
-        testID="auth-email-input"
+      {/* Green Gradient Background */}
+      <LinearGradient
+        colors={['#02290aff', '#80c25aff', '#46c426ff', '#b0dd96ff']}
+        style={styles.gradientBackground}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={formData.password}
-        onChangeText={(text) => handleChange("password", text)}
-        testID="auth-password-input"
-      />
-      
+
+      {/* Language Toggle Button */}
       <TouchableOpacity
-        style={[styles.button, isLoading && styles.buttonDisabled]}
-        onPress={handleSubmit}
-        disabled={isLoading}
-        testID="auth-submit-button"
+        style={styles.langButton}
+        onPress={() => setLang(lang === 'en' ? 'bn' : 'en')}
       >
-        <Text style={styles.buttonText}>
-          {isLoading ? "Please wait..." : isLogin ? "Sign In" : "Sign Up"}
-        </Text>
+        <Text style={styles.langButtonText}>{lang === 'en' ? 'BN' : 'EN'}</Text>
       </TouchableOpacity>
+
+      {/* Main Content */}
+      <View style={styles.content}>
+        {/* Logo Section - Blended with background */}
+        <View style={styles.logoSection}>
+          <View style={styles.logoContainer}>
+            <Image 
+              source={require('../assets/images/logo.jpeg')}
+              style={styles.logo}
+              resizeMode="cover"
+            />
+            {/* Logo blend overlay */}
+            <LinearGradient
+              colors={['rgba(202, 239, 138, 0.97)', 'rgba(4, 106, 35, 0.61)', 'rgba(45, 122, 74, 0.1)', 'transparent']}
+              style={styles.logoBlendOverlay}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            />
+            {/* Additional blend layers for seamless integration */}
+            <View style={styles.logoBlendLayer1} />
+            <View style={styles.logoBlendLayer2} />
+          </View>
+        </View>
+
+        {/* Tagline Section - More farmer-focused messaging */}
+        <View style={styles.taglineSection}>
+          <Text style={styles.tagline}>{t.tagline}</Text>
+          <Text style={styles.subTagline}>{t.subTagline1}</Text>
+          <TouchableOpacity 
+            style={styles.learnMoreButton}
+            onPress={handleLearnMore}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="logo-youtube" size={20} color="#023402ff" />
+            <Text style={styles.learnMoreText}>{t.subTagline2}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Button Section - Enhanced for better UX */}
+        <View style={styles.buttonSection}>
+          <TouchableOpacity
+            style={styles.optionButton}
+            onPress={handleFarmerAuth}
+            testID="farmer-option-button"
+            activeOpacity={0.8}
+          >
+            <Ionicons name="leaf" size={28} color='#032301ff' />
+            <Text style={styles.buttonText}>{t.farmer}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.optionButton}
+            onPress={handleVetAuth}
+            testID="vet-option-button"
+            activeOpacity={0.8}
+          >
+            <Ionicons name="medical" size={28} color='#032001ff'/>
+            <Text style={styles.buttonText}>{t.vet}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Bottom gradient overlay */}
+      <LinearGradient
+        colors={['transparent','rgba(166, 206, 119, 1)',  'rgba(3, 61, 6, 0.96)']}
+        style={styles.grassOverlay}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
       
-      <TouchableOpacity 
-        style={styles.switchButton}
-        onPress={() => setIsLogin(!isLogin)}
-        testID="auth-toggle-mode-button"
-      >
-        <Text style={styles.switchText}>
-          {isLogin
-            ? "Need an account? Sign up"
-            : "Already have an account? Sign in"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: "#ffffff",
   },
-  title: {
+  gradientBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'space-between',
+    zIndex: 1,
+  },
+  logoSection: {
+    flex: 0.9, //don't change
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: 12,
+    marginTop: 2,
+  },
+  logoContainer: {
+    width: '120%',
+    aspectRatio: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 2,
+    position: 'relative',
+  },
+  logo: {
+    width: '100%',
+    height: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 8,
+    opacity: 0.95,
+    borderRadius: 8,
+  },
+  logoBlendOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 20,
+    borderRadius: 10,
+  },
+  logoBlendLayer1: {
+    position: 'absolute',
+    top: '10%',
+    left: '10%',
+    right: '10%',
+    bottom: '10%',
+    backgroundColor: 'rgba(13, 59, 22, 0.1)',
+    borderRadius: 15,
+  },
+  logoBlendLayer2: {
+    position: 'absolute',
+    top: '20%',
+    left: '20%',
+    right: '20%',
+    bottom: '20%',
+    backgroundColor: 'rgba(26, 90, 45, 0.05)',
+    borderRadius: 10,
+  },
+  appTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#0d3b16',
+    textAlign: 'center',
+    letterSpacing: 1,
+  },
+  appSubtitle: {
+    fontSize: 14,
+    color: '#2d5a2d',
+    textAlign: 'center',
+    fontWeight: '600',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
+  taglineSection: {
+    alignItems: 'center',
+    paddingVertical: 2,
+    gap:6,
+  },
+  tagline: {
     fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-    color: "#333",
+    fontWeight: '700',
+    color: '#2f7112ff',
+    textAlign: 'center',
+    marginBottom: 5,
+    lineHeight: 26,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
-  input: {
-    height: 50,
+  subTagline: {
+    fontSize: 20,
+    color: '#2f7112ff',
+    textAlign: 'center',
+    fontWeight: '400',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+    paddingBottom: 6,
+    marginBottom: 2,
+  },
+  learnMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(3, 43, 15, 0.1)',
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    backgroundColor: "#fff",
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    gap: 8,
+  },
+  learnMoreText: {
     fontSize: 16,
+    color:'#204a0eff',
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
-  button: {
-    height: 50,
-    borderRadius: 8,
-    backgroundColor: "#4a89dc",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
+  buttonSection: {
+    paddingBottom: 40,
+    gap: 18,
   },
-  buttonDisabled: {
-    backgroundColor: "#cccccc",
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(94, 163, 85, 0.15)',
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    gap: 15,
+    minHeight: 50,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
+    color: '#164204ff',
+    fontSize: 20,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
-  switchButton: {
-    marginTop: 20,
-    padding: 10,
+  grassBackground: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 150,
+    zIndex: 0,
   },
-  switchText: {
-    color: "#4a89dc",
-    textAlign: "center",
+  grassImage: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.6,
+  },
+  grassOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '100%',
+  },
+  langButton: {
+    position: 'absolute',
+    top: 18,
+    right: 18,
+    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+  },
+  langButtonText: {
+    color: '#032001ff',
+    fontWeight: 'bold',
     fontSize: 16,
   },
 });

@@ -16,7 +16,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "INTERNET"
+      ],
+      "package": "com.hasanabid.mobile"
     },
     "web": {
       "bundler": "metro",
@@ -40,10 +44,24 @@
           "icon": "./assets/images/notification-icon.png",
           "color": "#ffffff"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "77af59bd-3111-4e88-9379-10314f3ef8eb"
+      }
     }
   }
 }

@@ -3,17 +3,19 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityInd
 import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
-import { API_BASE_URL } from '../utils/apiConfig'; // Adjust the import path as needed
-export default function EditProfile() {
+import { API_BASE_URL } from "../utils/apiConfig";
+export default function VetEditProfile() {
   const params = useLocalSearchParams();
-  const farmer = params.farmer ? JSON.parse(params.farmer) : null;
+  const vet = params.vet ? JSON.parse(params.vet) : null;
 
   const [formData, setFormData] = useState({
-    name: farmer?.name || "",
-    email: farmer?.email || "",
-    phoneNo: farmer?.phoneNo || "",
-    location: farmer?.location || "",
-    profileImage: farmer?.profileImage || "",
+    name: vet?.name || "",
+    email: vet?.email || "",
+    phoneNo: vet?.phoneNo || "",
+    location: vet?.location || "",
+    specialty: vet?.specialty || "",
+    experience: vet?.experience || "",
+    profileImage: vet?.profileImage || "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -24,9 +26,10 @@ export default function EditProfile() {
   const handleEditProfile = async () => {
     if (
       !formData.name.trim() ||
-      !formData.email.trim()
+      !formData.email.trim() ||
+      !formData.specialty.trim()
     ) {
-      Alert.alert("Validation", "Please fill all required fields.");
+      Alert.alert("Validation", "Please fill all required fields (Name, Email, Specialty).");
       return;
     }
     Alert.alert(
@@ -42,7 +45,7 @@ export default function EditProfile() {
               setLoading(true);
               const token = await AsyncStorage.getItem('authToken');
               await axios.put(
-                `${API_BASE_URL}/api/auth/edit/${farmer._id}`,
+                `${API_BASE_URL}/api/vets/edit/${vet._id}`,
                 formData,
                 {
                   headers: {
@@ -51,10 +54,13 @@ export default function EditProfile() {
                   }
                 }
               );
+              // Update the stored user data
+              const updatedVetData = { ...vet, ...formData };
+              await AsyncStorage.setItem('userData', JSON.stringify(updatedVetData));
               Alert.alert("Success", "Profile updated successfully");
               router.replace({
-                pathname: '/profile',
-                params: { farmer: JSON.stringify({ ...farmer, ...formData }) }
+                pathname: '/vetProfile',
+                params: { vet: JSON.stringify(updatedVetData) }
               });
             } catch (error) {
               Alert.alert("Error", error.response?.data?.message || "Failed to update profile");
@@ -80,9 +86,8 @@ export default function EditProfile() {
             try {
               setLoading(true);
               const token = await AsyncStorage.getItem('authToken');
-              console.log(token);
               await axios.delete(
-                `${API_BASE_URL}/api/auth/delete/${farmer._id}`,
+                `${API_BASE_URL}/api/vets/delete/${vet._id}`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`
@@ -103,10 +108,10 @@ export default function EditProfile() {
     );
   };
 
-  if (!farmer) {
+  if (!vet) {
     return (
       <View style={styles.container}>
-        <Text>No farmer data found.</Text>
+        <Text>No vet data found.</Text>
         <TouchableOpacity onPress={() => router.replace('/')} testID="go-to-login">
           <Text style={styles.linkText}>Go to login</Text>
         </TouchableOpacity>
@@ -116,24 +121,24 @@ export default function EditProfile() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Profile</Text>
+      <Text style={styles.title}>Edit Vet Profile</Text>
       <TextInput
         style={styles.input}
-        placeholder="Name"
+        placeholder="Name *"
         placeholderTextColor="#333"
         value={formData.name}
         onChangeText={text => handleInputChange('name', text)}
-        testID="profile-name-input"
+        testID="vet-name-input"
       />
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Email *"
         placeholderTextColor="#333"
         value={formData.email}
         onChangeText={text => handleInputChange('email', text)}
         keyboardType="email-address"
         autoCapitalize="none"
-        testID="profile-email-input"
+        testID="vet-email-input"
       />
       <TextInput
         style={styles.input}
@@ -142,7 +147,7 @@ export default function EditProfile() {
         value={formData.phoneNo}
         onChangeText={text => handleInputChange('phoneNo', text)}
         keyboardType="phone-pad"
-        testID="profile-phone-input"
+        testID="vet-phone-input"
       />
       <TextInput
         style={styles.input}
@@ -150,7 +155,24 @@ export default function EditProfile() {
         placeholderTextColor="#333"
         value={formData.location}
         onChangeText={text => handleInputChange('location', text)}
-        testID="profile-location-input"
+        testID="vet-location-input"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Specialty *"
+        placeholderTextColor="#333"
+        value={formData.specialty}
+        onChangeText={text => handleInputChange('specialty', text)}
+        testID="vet-specialty-input"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Years of Experience"
+        placeholderTextColor="#333"
+        value={formData.experience}
+        onChangeText={text => handleInputChange('experience', text)}
+        keyboardType="numeric"
+        testID="vet-experience-input"
       />
       <TextInput
         style={styles.input}
@@ -158,17 +180,17 @@ export default function EditProfile() {
         placeholderTextColor="#333"
         value={formData.profileImage}
         onChangeText={text => handleInputChange('profileImage', text)}
-        testID="profile-image-input"
+        testID="vet-image-input"
       />
 
       {loading ? (
-        <ActivityIndicator size="large" color="#4a89dc" style={{ marginVertical: 20 }} testID="profile-loading-indicator" />
+        <ActivityIndicator size="large" color="#4a89dc" style={{ marginVertical: 20 }} testID="vet-loading-indicator" />
       ) : (
         <>
-          <TouchableOpacity style={styles.saveButton} onPress={handleEditProfile} testID="profile-save-button">
+          <TouchableOpacity style={styles.saveButton} onPress={handleEditProfile} testID="vet-save-button">
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile} testID="profile-delete-button">
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteProfile} testID="vet-delete-button">
             <Text style={styles.deleteButtonText}>Delete Profile</Text>
           </TouchableOpacity>
         </>

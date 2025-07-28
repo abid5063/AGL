@@ -63,7 +63,7 @@ export default function ProMode() {
       console.log('Sending symptoms data:', JSON.stringify(symptomsData, null, 2));
 
       const response = await axios.post(
-        'http://104.214.178.145:80/predict',
+        'http://48.210.203.70:80/predict',
         symptomsData,
         {
           headers: {

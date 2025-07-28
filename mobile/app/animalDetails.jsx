@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, Tex
 import { useLocalSearchParams, router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
-
+import { API_BASE_URL } from '../utils/apiConfig';
 export default function AnimalDetails() {
   const params = useLocalSearchParams();
   const animal = params.animal ? JSON.parse(params.animal) : null;
@@ -36,8 +36,9 @@ export default function AnimalDetails() {
     }
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('authToken');      const response = await axios.put(
-        `http://localhost:3000/api/animals/${animal._id}`,
+      const token = await AsyncStorage.getItem('authToken');      
+      const response = await axios.put(
+        `${API_BASE_URL}/api/animals/${animal._id}`,
         {
           ...formData,
           age: Number(formData.age),
@@ -81,8 +82,9 @@ export default function AnimalDetails() {
 const actuallyDeleteAnimal = async () => {
   try {
     setLoading(true);
-    const token = await AsyncStorage.getItem('authToken');    await axios.delete(
-      `http://localhost:3000/api/animals/${animal._id}`,
+    const token = await AsyncStorage.getItem('authToken');    
+    await axios.delete(
+      `${API_BASE_URL}/api/animals/${animal._id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -137,7 +139,7 @@ const actuallyDeleteAnimal = async () => {
           <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)} testID="animal-edit-button">
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteButton} onPress={actuallyDeleteAnimal} testID="animal-delete-button">
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAnimal} testID="animal-delete-button">
             <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
         </View>
